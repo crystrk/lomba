@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { edit, scores } from '@/routes/admin/competitions';
 import draw from '@/routes/admin/competitions/draw';
+import participants from '@/routes/admin/competitions/participants';
 
 defineOptions({
     layout: AppLayout,
@@ -108,7 +109,10 @@ const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'sec
             </div>
         </div>
 
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-3">
+            <Link :href="participants.index(competition.id).url">
+                <Button variant="outline">Peserta</Button>
+            </Link>
             <Link :href="draw.show(competition.id).url">
                 <Button variant="outline">Atur Undian</Button>
             </Link>

@@ -11,7 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { create, edit } from '@/routes/admin/competitions';
+import { create, edit, show as competitionShow } from '@/routes/admin/competitions';
 
 defineOptions({
     layout: AppLayout,
@@ -80,7 +80,11 @@ const statusVariant = {
                 </TableHeader>
                 <TableBody>
                     <TableRow v-for="c in competitions" :key="c.id">
-                        <TableCell class="font-medium">{{ c.name }}</TableCell>
+                        <TableCell class="font-medium">
+                            <Link :href="competitionShow(c.id).url" class="hover:underline">
+                                {{ c.name }}
+                            </Link>
+                        </TableCell>
                         <TableCell>{{
                             labelFormat[
                                 c.format as keyof typeof labelFormat
@@ -106,12 +110,11 @@ const statusVariant = {
                         <TableCell>{{ c.ends_at ?? '-' }}</TableCell>
                         <TableCell>
                             <div class="flex gap-2">
-                                <Link
-                                    :href="edit(c.id).url"
-                                >
-                                    <Button variant="outline" size="sm"
-                                        >Edit</Button
-                                    >
+                                <Link :href="competitionShow(c.id).url">
+                                    <Button variant="outline" size="sm">Detail</Button>
+                                </Link>
+                                <Link :href="edit(c.id).url">
+                                    <Button variant="outline" size="sm">Edit</Button>
                                 </Link>
                             </div>
                         </TableCell>
