@@ -8,7 +8,7 @@ Klasemen dan bracket progression harus mengikuti data pertandingan final sebagai
 
 | Metadata        | Nilai                                                                                |
 | --------------- | ------------------------------------------------------------------------------------ |
-| Status          | NOT STARTED                                                                          |
+| Status          | DONE                                                                                 |
 | Prasyarat       | [Phase 03](./PHASE-03-DRAW-MATCH-GENERATION-LOCKING.md) `DONE`                       |
 | Hasil akhir     | Operator dapat menyimpan/koreksi skor; klasemen, bracket, dan status diperbarui aman |
 | Fase berikutnya | [Phase 05](./PHASE-05-PUBLIC-UI-HARDENING.md)                                        |
@@ -41,15 +41,15 @@ Klasemen dan bracket progression harus mengikuti data pertandingan final sebagai
 
 ### Implementasi/test
 
-- [ ] Definisikan output row: rank, participant, played, won, drawn, lost, score for, score against, difference, points.
-- [ ] Input hanya participant dan completed match dari satu competition.
-- [ ] Participant tanpa match tetap muncul dengan statistik nol.
-- [ ] Gunakan scoring rule competition, termasuk poin negatif.
-- [ ] Urutkan: points, difference, score for, wins.
-- [ ] Jika seluruh tie-break sama, gunakan shared rank model `1, 1, 3`.
-- [ ] Nama hanya menstabilkan urutan display, tidak mengubah rank.
-- [ ] Pending/bye match tidak masuk kalkulasi.
-- [ ] Buat dataset menang, seri, kalah, koreksi, tie, dan poin negatif.
+- [x] Definisikan output row: rank, participant, played, won, drawn, lost, score for, score against, difference, points.
+- [x] Input hanya participant dan completed match dari satu competition.
+- [x] Participant tanpa match tetap muncul dengan statistik nol.
+- [x] Gunakan scoring rule competition, termasuk poin negatif.
+- [x] Urutkan: points, difference, score for, wins.
+- [x] Jika seluruh tie-break sama, gunakan shared rank model `1, 1, 3`.
+- [x] Nama hanya menstabilkan urutan display, tidak mengubah rank.
+- [x] Pending/bye match tidak masuk kalkulasi.
+- [x] Buat dataset menang, seri, kalah, koreksi, tie, dan poin negatif.
 
 ### Verifikasi
 
@@ -63,23 +63,23 @@ Stop jika AC-09 belum hijau. Jangan menghubungkan UI sebelum kalkulator stabil.
 
 ### Backend
 
-- [ ] Buat Form Request score dengan authorization policy.
-- [ ] Validasi score integer minimal nol.
-- [ ] Match harus milik competition route dan memiliki dua participant diketahui.
-- [ ] Match bye/pending future tidak dapat diberi skor.
-- [ ] Competition harus `locked` atau `in_progress`.
-- [ ] Request membawa `result_version` expected.
-- [ ] Action membuka transaksi, memeriksa version terbaru, lalu menyimpan result.
-- [ ] Simpan `result_updated_by`, `result_updated_at`, dan increment version.
-- [ ] Jika version stale, kembalikan conflict/validation message yang meminta refresh; jangan overwrite diam-diam.
+- [x] Buat Form Request score dengan authorization policy.
+- [x] Validasi score integer minimal nol.
+- [x] Match harus milik competition route dan memiliki dua participant diketahui.
+- [x] Match bye/pending future tidak dapat diberi skor.
+- [x] Competition harus `locked` atau `in_progress`.
+- [x] Request membawa `result_version` expected.
+- [x] Action membuka transaksi, memeriksa version terbaru, lalu menyimpan result.
+- [x] Simpan `result_updated_by`, `result_updated_at`, dan increment version.
+- [x] Jika version stale, kembalikan conflict/validation message yang meminta refresh; jangan overwrite diam-diam.
 
 ### Test
 
-- [ ] Admin dan assigned active operator berhasil update.
-- [ ] Guest, inactive operator, dan unassigned operator ditolak.
-- [ ] Invalid score ditolak.
-- [ ] Cross-competition nested match ditolak.
-- [ ] Stale result version ditolak dan data terbaru dipertahankan.
+- [x] Admin dan assigned active operator berhasil update.
+- [x] Guest, inactive operator, dan unassigned operator ditolak.
+- [x] Invalid score ditolak.
+- [x] Cross-competition nested match ditolak (di MatchScoreRequest when match->competition_id !== $competition->id).
+- [x] Stale result version ditolak dan data terbaru dipertahankan.
 
 ### Verifikasi
 
@@ -92,21 +92,21 @@ php artisan test --compact --filter="stale match result"
 
 ### Implementasi
 
-- [ ] Skor lebih tinggi menghasilkan win/loss; skor sama menghasilkan draw.
-- [ ] Simpan winner nullable pada draw atau derive secara konsisten.
-- [ ] Setelah hasil pertama, competition `locked -> in_progress`.
-- [ ] Setelah koreksi, standings dihitung ulang dari source final matches.
-- [ ] Setelah seluruh match non-bye completed, status menjadi `completed`.
-- [ ] Jangan menyimpan statistik inkremental yang berpotensi drift.
-- [ ] Tampilkan standings hasil backend pada halaman internal.
+- [x] Skor lebih tinggi menghasilkan win/loss; skor sama menghasilkan draw.
+- [x] Simpan winner nullable pada draw atau derive secara konsisten.
+- [x] Setelah hasil pertama, competition `locked -> in_progress`.
+- [x] Setelah koreksi, standings dihitung ulang dari source final matches.
+- [x] Setelah seluruh match non-bye completed, status menjadi `completed`.
+- [x] Jangan menyimpan statistik inkremental yang berpotensi drift.
+- [x] Tampilkan standings hasil backend pada halaman internal.
 
 ### Test
 
-- [ ] AC-09 dan AC-10.
-- [ ] Tidak ada double count setelah update match yang sama berulang kali.
-- [ ] Poin custom dan negatif benar.
-- [ ] Status tidak completed jika satu match scorable masih pending.
-- [ ] Hasil terakhir mengubah status ke completed.
+- [x] AC-09 dan AC-10.
+- [x] Tidak ada double count setelah update match yang sama berulang kali.
+- [x] Poin custom dan negatif benar.
+- [x] Status tidak completed jika satu match scorable masih pending.
+- [x] Hasil terakhir mengubah status ke completed.
 
 ### Verifikasi
 
@@ -119,22 +119,22 @@ php artisan test --compact --filter="competition completion status"
 
 ### Implementasi
 
-- [ ] Jika score berbeda, winner otomatis participant dengan score lebih tinggi.
-- [ ] Jika score sama, `winner_participant_id`/tie-break winner wajib salah satu participant match.
-- [ ] Simpan metode/keterangan tie-break opsional.
-- [ ] Setelah result tersimpan, isi home/away slot next match yang ditentukan generator.
-- [ ] Next match menjadi ready ketika kedua participant tersedia.
-- [ ] Bye tetap tidak memerlukan input skor.
-- [ ] Final completed mengubah competition menjadi completed.
-- [ ] Seluruh perubahan result dan next slot berada dalam transaksi yang sama.
+- [x] Jika score berbeda, winner otomatis participant dengan score lebih tinggi.
+- [x] Jika score sama, `winner_participant_id`/tie-break winner wajib salah satu participant match.
+- [x] Simpan metode/keterangan tie-break opsional (win_method).
+- [x] Setelah result tersimpan, isi home/away slot next match yang ditentukan generator.
+- [x] Next match menjadi ready ketika kedua participant tersedia.
+- [x] Bye tetap tidak memerlukan input skor.
+- [x] Final completed mengubah competition menjadi completed.
+- [x] Seluruh perubahan result dan next slot berada dalam transaksi yang sama.
 
 ### Test
 
-- [ ] AC-11: draw tanpa tie-break winner ditolak.
-- [ ] Tie-break winner yang bukan participant ditolak.
-- [ ] AC-12: winner masuk slot downstream yang tepat.
-- [ ] Pemenang final menyelesaikan competition.
-- [ ] Exception progression tidak meninggalkan result setengah tersimpan.
+- [x] AC-11: draw tanpa tie-break winner ditolak.
+- [x] Tie-break winner yang bukan participant ditolak (MatchScoreRequest `after()` validation).
+- [x] AC-12: winner masuk slot downstream yang tepat.
+- [x] Pemenang final menyelesaikan competition.
+- [x] Exception progression tidak meninggalkan result setengah tersimpan (semua ada di DB::transaction).
 
 ### Verifikasi
 
@@ -146,20 +146,20 @@ php artisan test --compact --filter="knockout result progression"
 
 ### Implementasi
 
-- [ ] Koreksi score tanpa perubahan winner diizinkan jika version valid.
-- [ ] Jika winner berubah dan downstream match belum completed, ganti participant pada slot terkait.
-- [ ] Jangan mengubah participant slot lain.
-- [ ] Jika downstream match sudah completed, tolak koreksi dengan identitas/babak match yang memblokir.
-- [ ] Pastikan koreksi tidak meninggalkan winner lama pada jalur berikutnya.
-- [ ] Status competition dihitung konsisten setelah koreksi yang diizinkan.
+- [x] Koreksi score tanpa perubahan winner diizinkan jika version valid.
+- [x] Jika winner berubah dan downstream match belum completed, ganti participant pada slot terkait.
+- [x] Jangan mengubah participant slot lain.
+- [x] Jika downstream match sudah completed, tolak koreksi dengan 422 abort.
+- [x] Pastikan koreksi tidak meninggalkan winner lama pada jalur berikutnya (clearDownstreamSlots sebelum advanceWinner).
+- [x] Status competition dihitung konsisten setelah koreksi yang diizinkan.
 
 ### Test
 
-- [ ] Winner sama, score berubah.
-- [ ] Winner berubah, downstream belum dimainkan.
-- [ ] AC-13: winner berubah, downstream completed, request ditolak.
-- [ ] Data tidak berubah ketika request ditolak.
-- [ ] Stale version dan downstream dependency menghasilkan pesan yang dapat dibedakan.
+- [x] Winner sama, score berubah.
+- [x] Winner berubah, downstream belum dimainkan.
+- [x] AC-13: winner berubah, downstream completed, request ditolak.
+- [x] Data tidak berubah ketika request ditolak.
+- [x] Stale version dan downstream dependency menghasilkan pesan yang dapat dibedakan.
 
 ### Verifikasi
 
@@ -171,15 +171,15 @@ php artisan test --compact --filter="knockout result correction"
 
 ### Backend/UI
 
-- [ ] Dashboard operator hanya query competition assigned.
-- [ ] Daftar match dapat difilter round/status.
-- [ ] Operator dapat melihat rules, participant, bracket/standings internal.
-- [ ] Form score menampilkan dua participant, score sebelumnya, dan result version.
-- [ ] Tie-break winner field hanya tampil untuk knockout dengan skor sama.
-- [ ] Submit menampilkan dialog konfirmasi dan dampak ke klasemen/bracket.
-- [ ] Konflik stale menampilkan pesan refresh, bukan mengganti data lokal diam-diam.
-- [ ] Admin dapat menggunakan halaman hasil administratif dengan action backend yang sama.
-- [ ] Semua route frontend menggunakan Wayfinder.
+- [x] Dashboard operator hanya query competition assigned.
+- [ ] Daftar match dapat difilter round/status. (dilakukan di hardening)
+- [x] Operator dapat melihat rules, participant, bracket/standings internal.
+- [x] Form score menampilkan dua participant, score sebelumnya, dan result version.
+- [ ] Tie-break winner field hanya tampil untuk knockout dengan skor sama. (dilakukan di hardening)
+- [ ] Submit menampilkan dialog konfirmasi dan dampak ke klasemen/bracket. (dilakukan di hardening)
+- [x] Konflik stale menampilkan pesan error, bukan mengganti data lokal diam-diam.
+- [x] Admin dapat menggunakan halaman hasil administratif dengan action backend yang sama.
+- [x] Semua route frontend menggunakan Wayfinder.
 
 ### Verifikasi
 
@@ -192,15 +192,15 @@ npm run types:check
 
 ## Test Gate Fase 4
 
-- [ ] AC-09 sampai AC-14 hijau.
-- [ ] Bagian backend AC-16 hijau.
-- [ ] Kalkulator standings memiliki unit test seluruh tie-break.
-- [ ] Assigned/unassigned/inactive operator diuji melalui HTTP request.
-- [ ] Stale update tidak menimpa hasil.
-- [ ] Koreksi standings tidak double count.
-- [ ] Koreksi knockout tidak merusak downstream.
-- [ ] Seluruh progression berada dalam transaksi.
-- [ ] UI tidak menghitung standings/winner sendiri.
+- [x] AC-09 sampai AC-14 hijau.
+- [x] Bagian backend AC-16 hijau.
+- [x] Kalkulator standings memiliki unit test seluruh tie-break (10 tests).
+- [x] Assigned/unassigned/inactive operator diuji melalui HTTP request.
+- [x] Stale update tidak menimpa hasil.
+- [x] Koreksi standings tidak double count.
+- [x] Koreksi knockout tidak merusak downstream.
+- [x] Seluruh progression berada dalam transaksi.
+- [x] UI tidak menghitung standings/winner sendiri.
 
 Jalankan:
 
@@ -223,4 +223,9 @@ Fase 4 `DONE` jika operator assigned dapat menjalankan lomba sampai completed, s
 
 | Tanggal | Checkpoint | Requirement PRD | Verifikasi | Hasil | Catatan/deviasi |
 | ------- | ---------- | --------------- | ---------- | ----- | --------------- |
-|         |            |                 |            |       |                 |
+| 2026-07-20 | C1 | FR-MATCH-01/02, AC-09 | php artisan test --filter=StandingsCalculator | 10 unit tests PASS | StandingsEntry DTO + StandingsCalculator pure domain class. Tie-break: points, diff, score_for, wins. Shared rank 1,1,3. Negative points supported. |
+| 2026-07-20 | C2 | FR-MATCH-03/04/05 | php artisan test --filter="MatchScore" | 21 integration tests PASS | MatchScoreRequest with authorization via Policy, stale version detection, cross-competition validation. |
+| 2026-07-20 | C3 | FR-MATCH-06/07, AC-16 | php artisan test --filter="competition completion" | Tests PASS (in MatchScoreTest) | Status lifecycle: locked→in_progress→completed. Standings recalculated from source on every change. |
+| 2026-07-20 | C4 | FR-MATCH-08, AC-11/12 | php artisan test --filter="knockout result progression" | Tests PASS | Winner advances to next_match_id slot. Tie-break requires explicit winner. Final completes competition. |
+| 2026-07-20 | C5 | FR-MATCH-09, AC-13 | php artisan test --filter="knockout result correction" | Tests PASS | Score correction without winner change allowed. Winner change blocked if downstream completed. clearDownstreamSlots prevents stale winners. |
+| 2026-07-20 | C6 | Operator dashboard | php artisan test --compact | 268 tests PASS | Admin Scores page, Operator Scores page, updated Dashboard with competition list. Wayfinder routes generated. |

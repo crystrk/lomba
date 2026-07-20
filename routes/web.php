@@ -5,8 +5,11 @@ use App\Http\Controllers\Admin\CompetitionDrawController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OperatorController;
 use App\Http\Controllers\Admin\ParticipantController;
+use App\Http\Controllers\Admin\ScoreController as AdminScoreController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MatchScoreController;
 use App\Http\Controllers\Operator\DashboardController as OperatorDashboardController;
+use App\Http\Controllers\Operator\ScoreController as OperatorScoreController;
 use App\Http\Middleware\CheckUserIsActive;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +43,9 @@ Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(functio
         Route::post('competitions/{competition}/shuffle', [CompetitionDrawController::class, 'shuffle'])->name('competitions.shuffle');
         Route::post('competitions/{competition}/lock', [CompetitionDrawController::class, 'lock'])->name('competitions.lock');
 
+        Route::get('competitions/{competition}/scores', [AdminScoreController::class, 'index'])->name('competitions.scores');
+        Route::post('competitions/{competition}/matches/{match}/score', [MatchScoreController::class, 'update'])->name('matches.score.update');
+
         Route::get('operators', [OperatorController::class, 'index'])->name('operators.index');
         Route::get('operators/create', [OperatorController::class, 'create'])->name('operators.create');
         Route::post('operators', [OperatorController::class, 'store'])->name('operators.store');
@@ -50,6 +56,8 @@ Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(functio
 
     Route::prefix('operator')->name('operator.')->middleware('can:operator-access')->group(function () {
         Route::get('dashboard', [OperatorDashboardController::class, 'index'])->name('dashboard');
+        Route::get('competitions/{competition}/scores', [OperatorScoreController::class, 'index'])->name('competitions.scores');
+        Route::post('competitions/{competition}/matches/{match}/score', [MatchScoreController::class, 'update'])->name('matches.score.update');
     });
 });
 

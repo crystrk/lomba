@@ -97,5 +97,14 @@ const labelStatus: Record<string, string> = {
                 <p class="font-medium">{{ competition.ends_at }}</p>
             </div>
         </div>
+
+        <div class="flex gap-3">
+            <Link :href="`/admin/competitions/${competition.id}/draw`">
+                <Button variant="outline">Atur Undian</Button>
+            </Link>
+            <Link :href="`/admin/competitions/${competition.id}/scores`">
+                <Button variant="outline">Kelola Skor</Button>
+            </Link>
+        </div>
     </div>
 </template>
