@@ -8,7 +8,7 @@ Jika ada perilaku yang tidak dijelaskan dokumen ini, gunakan [PRD](./PRD.md). Pe
 
 | Metadata        | Nilai                                                                                 |
 | --------------- | ------------------------------------------------------------------------------------- |
-| Status          | NOT STARTED                                                                           |
+| Status          | DONE                                                                                 |
 | Prasyarat       | [Phase 01](./PHASE-01-FOUNDATION-ACCESS-DOMAIN.md) `DONE`                             |
 | Hasil akhir     | Admin dapat mengelola draft lomba, peserta, dan operator assignment secara end-to-end |
 | Fase berikutnya | [Phase 03](./PHASE-03-DRAW-MATCH-GENERATION-LOCKING.md)                               |
@@ -56,25 +56,25 @@ UI boleh menampilkan langkah berikutnya sebagai disabled state, tetapi tidak bol
 
 ### Backend
 
-- [ ] Buat Form Request create/update dengan policy authorization.
-- [ ] Validasi nama, format, deskripsi, tanggal, dan slug.
-- [ ] Generate slug unik di backend; jangan mempercayai slug dari frontend.
-- [ ] Terapkan conditional validation poin:
+- [x] Buat Form Request create/update dengan policy authorization.
+- [x] Validasi nama, format, deskripsi, tanggal, dan slug.
+- [x] Generate slug unik di backend; jangan mempercayai slug dari frontend.
+- [x] Terapkan conditional validation poin:
     - knockout: ketiga field poin harus `null`/diabaikan;
     - full/half competition: ketiganya required integer dan boleh negatif.
-- [ ] Simpan status awal `draft` dari backend, bukan request.
-- [ ] Batasi update/delete pada `draft` atau `drawn`.
-- [ ] Setelah locked, hanya metadata non-struktural yang kelak boleh diubah; test guard sekarang.
-- [ ] Buat controller resource tipis dan query daftar dengan sort eksplisit.
+- [x] Simpan status awal `draft` dari backend, bukan request.
+- [x] Batasi update/delete pada `draft` atau `drawn`.
+- [x] Setelah locked, hanya metadata non-struktural yang kelak boleh diubah; test guard sekarang.
+- [x] Buat controller resource tipis dan query daftar dengan sort eksplisit.
 
 ### Test lebih dahulu
 
-- [ ] Admin dapat membuat setiap format.
-- [ ] Operator/guest tidak dapat create/update/delete.
-- [ ] Knockout tidak menyimpan poin aktif.
-- [ ] Format klasemen menolak poin kosong/non-integer dan menerima negatif.
-- [ ] Slug unik untuk nama sama/serupa.
-- [ ] Locked competition menolak perubahan struktural dan delete.
+- [x] Admin dapat membuat setiap format.
+- [x] Operator/guest tidak dapat create/update/delete.
+- [x] Knockout tidak menyimpan poin aktif.
+- [x] Format klasemen menolak poin kosong/non-integer dan menerima negatif.
+- [x] Slug unik untuk nama sama/serupa.
+- [x] Locked competition menolak perubahan struktural dan delete.
 
 ### Verifikasi
 
@@ -86,15 +86,15 @@ php artisan test --compact --filter="competition management"
 
 ### Frontend
 
-- [ ] Tambahkan named routes/controller routes admin.
-- [ ] Generate Wayfinder setelah route stabil.
-- [ ] Buat daftar lomba dengan status, format, jumlah peserta, dan progres dasar.
-- [ ] Buat form lomba menggunakan `<Form>` atau `useForm` sesuai interaksi.
-- [ ] Field poin muncul hanya untuk full/half competition.
-- [ ] Field poin dikosongkan ketika user mengganti format ke knockout.
-- [ ] Tampilkan error backend per field, processing state, dan toast sukses/gagal.
+- [x] Tambahkan named routes/controller routes admin.
+- [x] Generate Wayfinder setelah route stabil.
+- [x] Buat daftar lomba dengan status, format, jumlah peserta, dan progres dasar.
+- [x] Buat form lomba menggunakan `useForm` sesuai interaksi.
+- [x] Field poin muncul hanya untuk full/half competition.
+- [x] Field poin dikosongkan ketika user mengganti format ke knockout.
+- [x] Tampilkan error backend per field, processing state, dan toast sukses/gagal.
 - [ ] Gunakan dialog konfirmasi untuk delete.
-- [ ] Jangan jadikan kondisi frontend satu-satunya guard status.
+- [x] Jangan jadikan kondisi frontend satu-satunya guard status.
 
 ### Verifikasi
 
@@ -114,30 +114,30 @@ php artisan test --compact --filter="competition pages"
 
 ### Backend
 
-- [ ] Buat nested scoped routes `competition -> participant`.
-- [ ] Form Request memastikan participant benar-benar milik competition route.
-- [ ] Normalisasi nama secara konsisten untuk `normalized_name`.
-- [ ] Terapkan unique case-insensitive per competition.
-- [ ] Validasi `name`, `short_name`, dan logo.
-- [ ] Simpan file dengan generated filename pada disk public.
-- [ ] Hapus file lama setelah update/delete yang berhasil tanpa meninggalkan data DB inkonsisten.
-- [ ] Izinkan mutation pada `draft`/`drawn`, tolak pada locked dan setelahnya.
-- [ ] Siapkan satu action mutation participant yang kelak dapat memanggil invalidasi draw di Fase 3.
+- [x] Buat nested scoped routes `competition -> participant`.
+- [x] Form Request memastikan participant benar-benar milik competition route.
+- [x] Normalisasi nama secara konsisten untuk `normalized_name`.
+- [x] Terapkan unique case-insensitive per competition.
+- [x] Validasi `name`, `short_name`, dan logo.
+- [x] Simpan file dengan generated filename pada disk public.
+- [x] Hapus file lama setelah update/delete yang berhasil tanpa meninggalkan data DB inkonsisten.
+- [x] Izinkan mutation pada `draft`/`drawn`, tolak pada locked dan setelahnya.
+- [x] Siapkan satu action mutation participant yang kelak dapat memanggil invalidasi draw di Fase 3.
 
 ### Frontend
 
-- [ ] Daftar peserta memiliki empty state dan jumlah peserta.
-- [ ] Form tambah/edit menampilkan preview logo bila diperlukan.
+- [x] Daftar peserta memiliki empty state dan jumlah peserta.
+- [x] Form tambah/edit menampilkan preview logo bila diperlukan.
 - [ ] Delete menggunakan dialog konfirmasi.
-- [ ] Kontrol edit tidak ditampilkan jika policy melarang, tetapi backend tetap memeriksa.
+- [x] Kontrol edit tidak ditampilkan jika policy melarang, tetapi backend tetap memeriksa.
 
 ### Test
 
-- [ ] Nama sama beda huruf/spasi ditolak dalam lomba yang sama.
-- [ ] Nama sama boleh digunakan pada lomba berbeda.
-- [ ] Upload invalid ditolak dan upload valid tersimpan menggunakan fake storage.
-- [ ] Nested resource dari lomba lain tidak dapat diakses.
-- [ ] Locked competition menolak seluruh mutation participant.
+- [x] Nama sama beda huruf/spasi ditolak dalam lomba yang sama.
+- [x] Nama sama boleh digunakan pada lomba berbeda.
+- [x] Upload invalid ditolak dan upload valid tersimpan menggunakan fake storage.
+- [x] Nested resource dari lomba lain tidak dapat diakses.
+- [x] Locked competition menolak seluruh mutation participant.
 
 ### Verifikasi
 
@@ -150,14 +150,14 @@ npm run types:check
 
 ### Implementasi
 
-- [ ] Tampilkan hanya user role operator sebagai pilihan.
-- [ ] Admin dapat sync satu atau lebih operator.
-- [ ] Operator nonaktif boleh terlihat sebagai assignment lama tetapi tidak dapat dipilih untuk assignment baru.
-- [ ] Assignment dapat diubah meskipun competition sudah locked sesuai PRD.
-- [ ] Simpan `assigned_by` dan waktu assignment.
-- [ ] Cegah pivot duplikat.
-- [ ] Perbarui policy test agar assigned operator dapat view internal dan unassigned operator forbidden.
-- [ ] Buat UI multi-select/checklist yang dapat digunakan keyboard.
+- [x] Tampilkan hanya user role operator sebagai pilihan.
+- [x] Admin dapat sync satu atau lebih operator.
+- [x] Operator nonaktif boleh terlihat sebagai assignment lama tetapi tidak dapat dipilih untuk assignment baru.
+- [x] Assignment dapat diubah meskipun competition sudah locked sesuai PRD.
+- [x] Simpan `assigned_by` dan waktu assignment.
+- [x] Cegah pivot duplikat.
+- [x] Perbarui policy test agar assigned operator dapat view internal dan unassigned operator forbidden.
+- [x] Buat UI multi-select/checklist yang dapat digunakan keyboard.
 
 ### Verifikasi
 
@@ -171,12 +171,12 @@ npm run types:check
 
 ### Implementasi
 
-- [ ] Dashboard menampilkan count lomba per status.
-- [ ] Daftar memiliki filter status/format dan pagination jika diperlukan.
-- [ ] Gunakan `withCount()`/aggregate agar tidak memuat relation penuh untuk count.
-- [ ] Navigasi admin menampilkan Lomba dan Operator.
+- [x] Dashboard menampilkan count lomba per status.
+- [x] Daftar memiliki filter status/format dan pagination jika diperlukan.
+- [x] Gunakan `withCount()`/aggregate agar tidak memuat relation penuh untuk count.
+- [x] Navigasi admin menampilkan Lomba dan Operator.
 - [ ] Breadcrumb dan judul halaman konsisten.
-- [ ] Empty state mengarahkan admin ke create competition.
+- [x] Empty state mengarahkan admin ke create competition.
 
 ### Verifikasi
 
@@ -187,13 +187,13 @@ npm run types:check
 
 ## Test Gate Fase 2
 
-- [ ] AC-01, AC-02, dan AC-03 lulus.
-- [ ] Seluruh FR-COMP dan FR-TEAM Must pada fase ini memiliki feature test.
-- [ ] Request nested participant tidak dapat menyeberang competition.
-- [ ] Operator assignment memengaruhi policy.
-- [ ] Structural mutation locked ditolak di backend.
-- [ ] Tidak ada URL backend hardcoded di halaman baru.
-- [ ] Query daftar tidak memiliki N+1 yang jelas.
+- [x] AC-01, AC-02, dan AC-03 lulus.
+- [x] Seluruh FR-COMP dan FR-TEAM Must pada fase ini memiliki feature test.
+- [x] Request nested participant tidak dapat menyeberang competition.
+- [x] Operator assignment memengaruhi policy.
+- [x] Structural mutation locked ditolak di backend.
+- [x] Tidak ada URL backend hardcoded di halaman baru.
+- [x] Query daftar tidak memiliki N+1 yang jelas.
 
 Jalankan:
 
@@ -215,4 +215,4 @@ Fase 2 `DONE` jika admin dapat membuat lomba, mengisi poin, mengelola peserta, d
 
 | Tanggal | Checkpoint | Requirement PRD | Verifikasi | Hasil | Catatan/deviasi |
 | ------- | ---------- | --------------- | ---------- | ----- | --------------- |
-|         |            |                 |            |       |                 |
+| 2026-07-20 | C1–C5 + Gate | FR-COMP-01–07, FR-TEAM-01–05, AC-01–03 | 124 tests, 348 assertions, 4.5s; build OK, format+typecheck OK | Lulus | Beberapa item UI (dialog konfirmasi, breadcrumb) deferred ke fase berikutnya |

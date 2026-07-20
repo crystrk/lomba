@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CompetitionFormat;
 use App\Enums\CompetitionStatus;
 use Database\Factories\CompetitionFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,6 +31,12 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
+#[Fillable([
+    'name', 'slug', 'description', 'format', 'status',
+    'win_points', 'draw_points', 'loss_points',
+    'draw_version', 'starts_at', 'ends_at',
+    'locked_by', 'locked_at',
+])]
 class Competition extends Model
 {
     /** @use HasFactory<CompetitionFactory> */

@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\CompetitionController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OperatorController;
+use App\Http\Controllers\Admin\ParticipantController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Operator\DashboardController as OperatorDashboardController;
 use App\Http\Middleware\CheckUserIsActive;
@@ -14,6 +16,24 @@ Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(functio
 
     Route::prefix('admin')->name('admin.')->middleware('can:admin-access')->group(function () {
         Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('competitions', [CompetitionController::class, 'index'])->name('competitions.index');
+        Route::get('competitions/create', [CompetitionController::class, 'create'])->name('competitions.create');
+        Route::post('competitions', [CompetitionController::class, 'store'])->name('competitions.store');
+        Route::get('competitions/{competition}', [CompetitionController::class, 'show'])->name('competitions.show');
+        Route::get('competitions/{competition}/edit', [CompetitionController::class, 'edit'])->name('competitions.edit');
+        Route::put('competitions/{competition}', [CompetitionController::class, 'update'])->name('competitions.update');
+        Route::delete('competitions/{competition}', [CompetitionController::class, 'destroy'])->name('competitions.destroy');
+
+        Route::get('competitions/{competition}/participants', [ParticipantController::class, 'index'])->name('competitions.participants.index');
+        Route::get('competitions/{competition}/participants/create', [ParticipantController::class, 'create'])->name('competitions.participants.create');
+        Route::post('competitions/{competition}/participants', [ParticipantController::class, 'store'])->name('competitions.participants.store');
+        Route::get('competitions/{competition}/participants/{participant}/edit', [ParticipantController::class, 'edit'])->name('competitions.participants.edit');
+        Route::put('competitions/{competition}/participants/{participant}', [ParticipantController::class, 'update'])->name('competitions.participants.update');
+        Route::delete('competitions/{competition}/participants/{participant}', [ParticipantController::class, 'destroy'])->name('competitions.participants.destroy');
+
+        Route::get('competitions/{competition}/operators', [CompetitionController::class, 'operators'])->name('competitions.operators');
+        Route::put('competitions/{competition}/operators', [CompetitionController::class, 'syncOperators'])->name('competitions.operators.sync');
 
         Route::get('operators', [OperatorController::class, 'index'])->name('operators.index');
         Route::get('operators/create', [OperatorController::class, 'create'])->name('operators.create');

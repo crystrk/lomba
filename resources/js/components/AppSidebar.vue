@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from '@lucide/vue';
+import { BookOpen, FolderGit2, LayoutGrid, Trophy, Users } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -16,14 +16,39 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
+const page = usePage();
+const user = computed(() => page.props.auth?.user as { role?: string } | null);
+const isAdmin = computed(() => user.value?.role === 'admin');
+
+const mainNavItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+    ];
+
+    if (isAdmin.value) {
+        items.push(
+            {
+                title: 'Lomba',
+                href: '/admin/competitions',
+                icon: Trophy,
+            },
+            {
+                title: 'Operator',
+                href: '/admin/operators',
+                icon: Users,
+            },
+        );
+    }
+
+    return items;
+});
 
 const footerNavItems: NavItem[] = [
     {
