@@ -845,4 +845,4 @@ Dokumen ini dapat langsung menjadi dasar MVP dengan asumsi berikut:
 7. Registrasi akun publik dinonaktifkan dan akun operator dikelola admin.
 8. Peringkat yang tetap imbang setelah empat kriteria memperoleh posisi yang sama.
 
-Jika salah satu asumsi berubah, bagian aturan pertandingan, lifecycle, model data, dan kriteria penerimaan terkait harus diperbarui sebelum implementasi.
+Jika salah satu asumsi berubah, bagian aturan pertandingan, lifecycle, model data, dan kriteria penerimaan terkait harus diperbarui sebelum implementasi
