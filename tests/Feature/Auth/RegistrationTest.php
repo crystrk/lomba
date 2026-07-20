@@ -2,24 +2,27 @@
 
 use Laravel\Fortify\Features;
 
-beforeEach(function () {
-    $this->skipUnlessFortifyHas(Features::registration());
+test('registration screen is not available', function () {
+    if (Features::enabled(Features::registration())) {
+        $this->markTestSkipped('Registration feature is enabled.');
+    }
+
+    $response = $this->get('/register');
+
+    $response->assertNotFound();
 });
 
-test('registration screen can be rendered', function () {
-    $response = $this->get(route('register'));
+test('register route is disabled', function () {
+    if (Features::enabled(Features::registration())) {
+        $this->markTestSkipped('Registration feature is enabled.');
+    }
 
-    $response->assertOk();
-});
-
-test('new users can register', function () {
-    $response = $this->post(route('register.store'), [
+    $response = $this->post('/register', [
         'name' => 'Test User',
         'email' => 'test@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertNotFound();
 });
