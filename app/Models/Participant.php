@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CompetitionStatus;
 use Database\Factories\ParticipantFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,6 +40,22 @@ class Participant extends Model
         static::saving(function (Participant $participant): void {
             if ($participant->isDirty('name')) {
                 $participant->normalized_name = Str::lower($participant->name);
+            }
+        });
+
+        static::saved(function (Participant $participant): void {
+            $competition = $participant->competition;
+            if ($competition !== null && $competition->isDrawn()) {
+                $competition->matches()->delete();
+                $competition->update(['status' => CompetitionStatus::Draft]);
+            }
+        });
+
+        static::deleted(function (Participant $participant): void {
+            $competition = $participant->competition()->first();
+            if ($competition !== null && $competition->isDrawn()) {
+                $competition->matches()->delete();
+                $competition->update(['status' => CompetitionStatus::Draft]);
             }
         });
     }

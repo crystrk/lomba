@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CompetitionController;
+use App\Http\Controllers\Admin\CompetitionDrawController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OperatorController;
 use App\Http\Controllers\Admin\ParticipantController;
@@ -34,6 +35,10 @@ Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(functio
 
         Route::get('competitions/{competition}/operators', [CompetitionController::class, 'operators'])->name('competitions.operators');
         Route::put('competitions/{competition}/operators', [CompetitionController::class, 'syncOperators'])->name('competitions.operators.sync');
+
+        Route::get('competitions/{competition}/draw', [CompetitionDrawController::class, 'show'])->name('competitions.draw.show');
+        Route::post('competitions/{competition}/shuffle', [CompetitionDrawController::class, 'shuffle'])->name('competitions.shuffle');
+        Route::post('competitions/{competition}/lock', [CompetitionDrawController::class, 'lock'])->name('competitions.lock');
 
         Route::get('operators', [OperatorController::class, 'index'])->name('operators.index');
         Route::get('operators/create', [OperatorController::class, 'create'])->name('operators.create');
