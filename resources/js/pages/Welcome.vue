@@ -29,7 +29,6 @@ import { dashboard, login } from '@/routes';
                     >
                         Log in
                     </Link>
-
                 </template>
             </nav>
         </header>

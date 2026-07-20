@@ -53,7 +53,11 @@ function submit() {
 
             <div class="space-y-2">
                 <Label for="password_confirmation">Konfirmasi Password</Label>
-                <Input id="password_confirmation" type="password" v-model="form.password_confirmation" />
+                <Input
+                    id="password_confirmation"
+                    type="password"
+                    v-model="form.password_confirmation"
+                />
                 <InputError :message="form.errors.password_confirmation" />
             </div>
 

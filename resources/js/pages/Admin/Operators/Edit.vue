@@ -59,7 +59,9 @@ function toggleActiveFn() {
             </div>
 
             <div class="space-y-2">
-                <Label for="password">Password (biarkan kosong jika tidak diubah)</Label>
+                <Label for="password"
+                    >Password (biarkan kosong jika tidak diubah)</Label
+                >
                 <Input id="password" type="password" v-model="form.password" />
                 <InputError :message="form.errors.password" />
             </div>

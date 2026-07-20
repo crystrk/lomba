@@ -8,7 +8,7 @@ Jika keputusan fase ini bertentangan dengan [PRD](./PRD.md), PRD harus diklarifi
 
 | Metadata        | Nilai                                                                                |
 | --------------- | ------------------------------------------------------------------------------------ |
-| Status          | NOT STARTED                                                                          |
+| Status          | DONE                                                                                 |
 | Prasyarat       | Starter kit dapat dijalankan dan baseline test diketahui                             |
 | Hasil akhir     | Schema domain stabil, role aman, akun operator dapat dikelola, policy dasar tersedia |
 | Fase berikutnya | [Phase 02](./PHASE-02-ADMIN-COMPETITION-MANAGEMENT.md)                               |
@@ -108,11 +108,11 @@ Gunakan migration Artisan, foreign key yang eksplisit, aksi delete yang sesuai P
 
 ### Implementasi
 
-- [ ] Jalankan test starter kit dan catat kegagalan yang sudah ada sebelum perubahan.
-- [ ] Periksa konfigurasi SQLite test.
-- [ ] Gunakan trait reset database sesuai pola Pest proyek untuk feature test domain.
-- [ ] Pertahankan test autentikasi yang masih relevan.
-- [ ] Siapkan struktur test domain tanpa helper spekulatif.
+- [x] Jalankan test starter kit dan catat kegagalan yang sudah ada sebelum perubahan.
+- [x] Periksa konfigurasi SQLite test.
+- [x] Gunakan trait reset database sesuai pola Pest proyek untuk feature test domain.
+- [x] Pertahankan test autentikasi yang masih relevan.
+- [x] Siapkan struktur test domain tanpa helper spekulatif.
 
 ### Verifikasi
 
@@ -129,13 +129,13 @@ php artisan test --compact
 
 ### Implementasi
 
-- [ ] Buat enum `UserRole`, `CompetitionFormat`, `CompetitionStatus`, dan `CompetitionMatchStatus`.
-- [ ] Buat migration melalui Artisan untuk user role/status dan tabel domain.
-- [ ] Tambahkan model `Competition`, `Participant`, dan `CompetitionMatch`.
-- [ ] Definisikan `$fillable`, casts, return type relasi, dan default model yang sama dengan default DB.
-- [ ] Definisikan relasi user/operator/locker/result updater.
-- [ ] Buat factory beserta state format/status yang benar-benar digunakan test.
-- [ ] Buat test schema, casts, relasi, unique constraint, dan cascade/restrict penting.
+- [x] Buat enum `UserRole`, `CompetitionFormat`, `CompetitionStatus`, dan `CompetitionMatchStatus`.
+- [x] Buat migration melalui Artisan untuk user role/status dan tabel domain.
+- [x] Tambahkan model `Competition`, `Participant`, dan `CompetitionMatch`.
+- [x] Definisikan `$fillable`, casts, return type relasi, dan default model yang sama dengan default DB.
+- [x] Definisikan relasi user/operator/locker/result updater.
+- [x] Buat factory beserta state format/status yang benar-benar digunakan test.
+- [x] Buat test schema, casts, relasi, unique constraint, dan cascade/restrict penting.
 
 ### Verifikasi terarah
 
@@ -154,15 +154,15 @@ php artisan test --compact tests/Feature/DomainSchemaTest.php
 
 ### Implementasi
 
-- [ ] Hapus `Features::registration()` dari konfigurasi Fortify.
-- [ ] Hapus link/halaman registrasi dari navigasi yang dapat diakses publik tanpa menghapus test secara sembarang.
-- [ ] Perbarui registration feature test agar membuktikan route registrasi tidak tersedia.
-- [ ] Terapkan pengecekan `is_active` pada pipeline autentikasi Fortify.
-- [ ] Lindungi seluruh route internal dengan pemeriksaan user aktif agar sesi user yang kemudian dinonaktifkan tidak tetap dapat mengubah data.
-- [ ] Pastikan operator/admin aktif dapat login dan seluruh user nonaktif ditolak atau dikeluarkan dari sesi internal.
-- [ ] Pertahankan login throttling starter kit.
-- [ ] Buat dashboard dispatcher/redirect berdasarkan role.
-- [ ] Tambahkan test redirect admin dan operator.
+- [x] Hapus `Features::registration()` dari konfigurasi Fortify.
+- [x] Hapus link/halaman registrasi dari navigasi yang dapat diakses publik tanpa menghapus test secara sembarang.
+- [x] Perbarui registration feature test agar membuktikan route registrasi tidak tersedia.
+- [x] Terapkan pengecekan `is_active` pada pipeline autentikasi Fortify.
+- [x] Lindungi seluruh route internal dengan pemeriksaan user aktif agar sesi user yang kemudian dinonaktifkan tidak tetap dapat mengubah data.
+- [x] Pastikan operator/admin aktif dapat login dan seluruh user nonaktif ditolak atau dikeluarkan dari sesi internal.
+- [x] Pertahankan login throttling starter kit.
+- [x] Buat dashboard dispatcher/redirect berdasarkan role.
+- [x] Tambahkan test redirect admin dan operator.
 
 ### Verifikasi terarah
 
@@ -183,17 +183,17 @@ php artisan test --compact --filter="dashboard role"
 
 ### Implementasi
 
-- [ ] Sediakan prosedur idempotent untuk membuat admin pertama tanpa password hardcoded; rekomendasi: Artisan command dengan password prompt tersembunyi.
-- [ ] Akun internal yang dibuat melalui command/admin ditandai terverifikasi agar dapat melewati middleware `verified`; jangan membuka verifikasi untuk registrasi publik.
-- [ ] Test command membuat admin aktif dan terverifikasi serta menolak/menangani email duplikat dengan aman.
-- [ ] Buat policy dan Form Request pengelolaan operator.
-- [ ] Buat route/controller admin untuk daftar, tambah, ubah identitas, aktifkan, dan nonaktifkan operator.
-- [ ] Password operator di-hash dan tidak pernah dikirim kembali sebagai prop.
-- [ ] Operator baru dibuat aktif dan terverifikasi karena akunnya diprovisikan admin.
-- [ ] Admin tidak dapat mengubah operator menjadi admin melalui form operator.
-- [ ] Buat halaman Inertia pengelolaan operator menggunakan shadcn-vue.
-- [ ] Gunakan Wayfinder pada link dan form.
-- [ ] Tambahkan test guest/operator forbidden dan admin success.
+- [x] Sediakan prosedur idempotent untuk membuat admin pertama tanpa password hardcoded; rekomendasi: Artisan command dengan password prompt tersembunyi.
+- [x] Akun internal yang dibuat melalui command/admin ditandai terverifikasi agar dapat melewati middleware `verified`; jangan membuka verifikasi untuk registrasi publik.
+- [x] Test command membuat admin aktif dan terverifikasi serta menolak/menangani email duplikat dengan aman.
+- [x] Buat policy dan Form Request pengelolaan operator.
+- [x] Buat route/controller admin untuk daftar, tambah, ubah identitas, aktifkan, dan nonaktifkan operator.
+- [x] Password operator di-hash dan tidak pernah dikirim kembali sebagai prop.
+- [x] Operator baru dibuat aktif dan terverifikasi karena akunnya diprovisikan admin.
+- [x] Admin tidak dapat mengubah operator menjadi admin melalui form operator.
+- [x] Buat halaman Inertia pengelolaan operator menggunakan shadcn-vue.
+- [x] Gunakan Wayfinder pada link dan form.
+- [x] Tambahkan test guest/operator forbidden dan admin success.
 
 ### Verifikasi terarah
 
@@ -207,13 +207,13 @@ npm run types:check
 
 ### Implementasi
 
-- [ ] Buat `CompetitionPolicy` dengan ability view internal, create, update, delete, draw, lock, dan update score.
-- [ ] Buat `CompetitionMatchPolicy` jika ownership match lebih jelas dipisahkan.
-- [ ] Admin diizinkan sesuai matriks PRD.
-- [ ] Operator hanya dapat view/update score jika aktif dan ditugaskan ke competition.
-- [ ] Guest tidak memiliki izin internal.
-- [ ] Gunakan policy backend; prop `can` hanya untuk presentasi UI.
-- [ ] Tambahkan unit/feature test policy untuk seluruh kombinasi role dan assignment.
+- [x] Buat `CompetitionPolicy` dengan ability view internal, create, update, delete, draw, lock, dan update score.
+- [x] Buat `CompetitionMatchPolicy` jika ownership match lebih jelas dipisahkan.
+- [x] Admin diizinkan sesuai matriks PRD.
+- [x] Operator hanya dapat view/update score jika aktif dan ditugaskan ke competition.
+- [x] Guest tidak memiliki izin internal.
+- [x] Gunakan policy backend; prop `can` hanya untuk presentasi UI.
+- [x] Tambahkan unit/feature test policy untuk seluruh kombinasi role dan assignment.
 
 ### Verifikasi terarah
 
@@ -223,15 +223,15 @@ php artisan test --compact --filter="competition policy"
 
 ## Test Gate Fase 1
 
-- [ ] Migration fresh dan rollback berhasil.
-- [ ] Login admin/operator aktif berhasil.
-- [ ] Login user nonaktif ditolak.
-- [ ] Sesi user yang dinonaktifkan tidak dapat mengakses route internal.
-- [ ] Registrasi publik tidak tersedia.
-- [ ] Admin awal dan operator dapat dibuat terverifikasi tanpa credential di source control.
-- [ ] Hanya admin dapat mengelola operator.
-- [ ] Policy membedakan operator assigned/unassigned.
-- [ ] Factory dapat membuat semua status/format yang dibutuhkan fase selanjutnya.
+- [x] Migration fresh dan rollback berhasil.
+- [x] Login admin/operator aktif berhasil.
+- [x] Login user nonaktif ditolak.
+- [x] Sesi user yang dinonaktifkan tidak dapat mengakses route internal.
+- [x] Registrasi publik tidak tersedia.
+- [x] Admin awal dan operator dapat dibuat terverifikasi tanpa credential di source control.
+- [x] Hanya admin dapat mengelola operator.
+- [x] Policy membedakan operator assigned/unassigned.
+- [x] Factory dapat membuat semua status/format yang dibutuhkan fase selanjutnya.
 
 Jalankan:
 
@@ -259,4 +259,4 @@ Fase 1 dapat ditandai `DONE` jika:
 
 | Tanggal | Checkpoint | Requirement PRD | Verifikasi | Hasil | Catatan/deviasi |
 | ------- | ---------- | --------------- | ---------- | ----- | --------------- |
-|         |            |                 |            |       |                 |
+| 2026-07-20 | C1–C5 + Gate | FR-AUTH-01–06, PRD 13, 16.1 | 88 tests, 254 assertions, 3.1s; migration fresh+rollback, format+typecheck OK | Lulus | Migration user digabung ke 1 file |

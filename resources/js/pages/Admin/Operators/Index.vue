@@ -3,7 +3,14 @@ import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import { create, edit } from '@/routes/admin/operators';
 
 defineOptions({
@@ -48,7 +55,11 @@ const props = defineProps<{
                         <TableCell class="font-medium">{{ op.name }}</TableCell>
                         <TableCell>{{ op.email }}</TableCell>
                         <TableCell>
-                            <Badge :variant="op.is_active ? 'default' : 'secondary'">
+                            <Badge
+                                :variant="
+                                    op.is_active ? 'default' : 'secondary'
+                                "
+                            >
                                 {{ op.is_active ? 'Aktif' : 'Nonaktif' }}
                             </Badge>
                         </TableCell>
@@ -56,13 +67,18 @@ const props = defineProps<{
                         <TableCell>
                             <div class="flex gap-2">
                                 <Link :href="edit(op.id).url">
-                                    <Button variant="outline" size="sm">Edit</Button>
+                                    <Button variant="outline" size="sm"
+                                        >Edit</Button
+                                    >
                                 </Link>
                             </div>
                         </TableCell>
                     </TableRow>
                     <TableRow v-if="operators.length === 0">
-                        <TableCell colspan="5" class="text-center text-muted-foreground">
+                        <TableCell
+                            colspan="5"
+                            class="text-center text-muted-foreground"
+                        >
                             Belum ada operator.
                         </TableCell>
                     </TableRow>
