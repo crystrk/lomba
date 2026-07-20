@@ -11,7 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { create } from '@/routes/admin/competitions';
+import { create, edit } from '@/routes/admin/competitions';
 
 defineOptions({
     layout: AppLayout,
@@ -107,7 +107,7 @@ const statusVariant = {
                         <TableCell>
                             <div class="flex gap-2">
                                 <Link
-                                    :href="`/admin/competitions/${c.id}/edit`"
+                                    :href="edit(c.id).url"
                                 >
                                     <Button variant="outline" size="sm"
                                         >Edit</Button

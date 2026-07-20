@@ -5,6 +5,8 @@ import { useForm } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { show } from '@/routes/admin/competitions';
+import { sync } from '@/routes/admin/competitions/operators';
 
 defineOptions({
     layout: AppLayout,
@@ -38,7 +40,7 @@ function toggleOperator(id: number) {
 }
 
 function submit() {
-    form.put(`/admin/competitions/${props.competition.id}/operators`);
+    form.put(sync(props.competition.id).url);
 }
 </script>
 
@@ -48,7 +50,7 @@ function submit() {
     <div class="flex flex-col gap-6 p-6">
         <div>
             <Link
-                :href="`/admin/competitions/${competition.id}`"
+                :href="show(competition.id).url"
                 class="text-sm text-muted-foreground hover:underline"
             >
                 &larr; {{ competition.name }}

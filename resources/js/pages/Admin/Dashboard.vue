@@ -2,6 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
+import { create } from '@/routes/admin/competitions';
 
 defineOptions({
     layout: AppLayout,
@@ -24,7 +25,7 @@ const props = defineProps<{
     <div class="flex flex-col gap-6 p-6">
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold">Dashboard Admin</h1>
-            <Link href="/admin/competitions/create">
+            <Link :href="create().url">
                 <Button>Tambah Lomba</Button>
             </Link>
         </div>
@@ -61,7 +62,7 @@ const props = defineProps<{
             class="flex flex-col items-center gap-4 rounded-lg border p-12 text-center"
         >
             <p class="text-lg text-muted-foreground">Belum ada lomba.</p>
-            <Link href="/admin/competitions/create">
+            <Link :href="create().url">
                 <Button>Buat Lomba Pertama</Button>
             </Link>
         </div>

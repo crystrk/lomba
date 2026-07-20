@@ -58,10 +58,10 @@ const statusLabel: Record<string, string> = {
 
 const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'secondary'> = {
     draft: 'secondary',
-    drawn: 'default',
+    drawn: 'secondary',
     locked: 'default',
     in_progress: 'default',
-    completed: 'default',
+    completed: 'outline',
 };
 
 const isKnockout = computed(() => props.competition.format === 'knockout');
@@ -122,7 +122,7 @@ function participantName(match: typeof props.matches[0], side: 'home' | 'away'):
         <div class="flex items-center justify-between">
             <div>
                 <Link
-                    :href="`/admin/competitions/${competition.id}`"
+                    :href="drawShow(competition.id).url"
                     class="text-sm text-muted-foreground hover:underline"
                     >{{ competition.name }}</Link
                 >

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, shallowRef, watch } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
@@ -59,6 +59,14 @@ const statusLabel: Record<string, string> = {
     completed: 'Selesai',
 };
 
+const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'secondary'> = {
+    draft: 'secondary',
+    drawn: 'secondary',
+    locked: 'default',
+    in_progress: 'default',
+    completed: 'outline',
+};
+
 const isKnockout = computed(() => props.competition.format === 'knockout');
 
 const sortedRounds = computed(() => {
@@ -67,22 +75,26 @@ const sortedRounds = computed(() => {
         .sort((a, b) => a - b);
 });
 
-const matchForms = computed(() => {
-    const forms: Record<number, ReturnType<typeof useForm>> = {};
+const matchForms = shallowRef<Record<number, ReturnType<typeof useForm>>>({});
+
+watch(sortedRounds, () => {
+    const forms = { ...matchForms.value };
     for (const round of sortedRounds.value) {
         for (const match of props.matchesByRound[round]) {
             if (match.status === 'bye') continue;
-            forms[match.id] = useForm({
-                score_home: match.score_home ?? '',
-                score_away: match.score_away ?? '',
-                winner_id: match.winner_id ?? '',
-                win_method: '',
-                result_version: match.result_version,
-            });
+            if (!forms[match.id]) {
+                forms[match.id] = useForm({
+                    score_home: match.score_home ?? '',
+                    score_away: match.score_away ?? '',
+                    winner_id: match.winner_id ?? '',
+                    win_method: '',
+                    result_version: match.result_version,
+                });
+            }
         }
     }
-    return forms;
-});
+    matchForms.value = forms;
+}, { immediate: true });
 
 function submitScore(matchId: number) {
     const form = matchForms.value[matchId];
@@ -111,7 +123,7 @@ function roundLabel(round: number, leg: number): string {
                 <h1 class="text-2xl font-bold">{{ competition.name }}</h1>
                 <p class="text-sm text-muted-foreground">Input Skor</p>
             </div>
-            <Badge :variant="competition.status === 'completed' ? 'default' : 'secondary'">
+            <Badge :variant="statusVariant[competition.status] || 'secondary'">
                 {{ statusLabel[competition.status] || competition.status }}
             </Badge>
         </div>

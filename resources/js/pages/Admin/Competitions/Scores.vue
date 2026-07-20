@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, shallowRef, watch } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { update as updateScore } from '@/routes/admin/matches/score';
+import { show } from '@/routes/admin/competitions';
 
 defineOptions({
     layout: AppLayout,
@@ -64,10 +65,10 @@ const statusLabel: Record<string, string> = {
 
 const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'secondary'> = {
     draft: 'secondary',
-    drawn: 'default',
+    drawn: 'secondary',
     locked: 'default',
     in_progress: 'default',
-    completed: 'default',
+    completed: 'outline',
 };
 
 const isKnockout = computed(() => props.competition.format === 'knockout');
@@ -78,22 +79,26 @@ const sortedRounds = computed(() => {
         .sort((a, b) => a - b);
 });
 
-const matchForms = computed(() => {
-    const forms: Record<number, ReturnType<typeof useForm>> = {};
+const matchForms = shallowRef<Record<number, ReturnType<typeof useForm>>>({});
+
+watch(sortedRounds, () => {
+    const forms = { ...matchForms.value };
     for (const round of sortedRounds.value) {
         for (const match of props.matchesByRound[round]) {
             if (match.status === 'bye') continue;
-            forms[match.id] = useForm({
-                score_home: match.score_home ?? '',
-                score_away: match.score_away ?? '',
-                winner_id: match.winner_id ?? '',
-                win_method: '',
-                result_version: match.result_version,
-            });
+            if (!forms[match.id]) {
+                forms[match.id] = useForm({
+                    score_home: match.score_home ?? '',
+                    score_away: match.score_away ?? '',
+                    winner_id: match.winner_id ?? '',
+                    win_method: '',
+                    result_version: match.result_version,
+                });
+            }
         }
     }
-    return forms;
-});
+    matchForms.value = forms;
+}, { immediate: true });
 
 function submitScore(matchId: number) {
     const form = matchForms.value[matchId];
@@ -122,7 +127,7 @@ function roundLabel(round: number, leg: number): string {
     <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
         <div class="flex items-center justify-between">
             <div>
-                <Link :href="`/admin/competitions/${competition.id}`" class="text-sm text-muted-foreground hover:underline">
+                <Link :href="show(competition.id).url" class="text-sm text-muted-foreground hover:underline">
                     {{ competition.name }}
                 </Link>
                 <h1 class="text-2xl font-bold">Skor</h1>

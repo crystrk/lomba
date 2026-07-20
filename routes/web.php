@@ -10,10 +10,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MatchScoreController;
 use App\Http\Controllers\Operator\DashboardController as OperatorDashboardController;
 use App\Http\Controllers\Operator\ScoreController as OperatorScoreController;
+use App\Http\Controllers\PublicCompetitionController;
 use App\Http\Middleware\CheckUserIsActive;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'Welcome')->name('home');
+Route::get('/', [PublicCompetitionController::class, 'index'])->name('home');
+Route::get('lomba/{competition:slug}', [PublicCompetitionController::class, 'show'])->name('public.competitions.show');
 
 Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');

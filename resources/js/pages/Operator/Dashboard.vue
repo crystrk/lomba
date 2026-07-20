@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { scores } from '@/routes/operator/competitions';
 
 defineOptions({
     layout: AppLayout,
@@ -28,6 +29,14 @@ const statusLabel: Record<string, string> = {
     completed: 'Selesai',
 };
 
+const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'secondary'> = {
+    draft: 'secondary',
+    drawn: 'secondary',
+    locked: 'default',
+    in_progress: 'default',
+    completed: 'outline',
+};
+
 const formatLabel: Record<string, string> = {
     knockout: 'Gugur',
     full_competition: 'Kompetisi Penuh',
@@ -48,14 +57,14 @@ const formatLabel: Record<string, string> = {
             <Link
                 v-for="comp in competitions"
                 :key="comp.id"
-                :href="`/operator/competitions/${comp.id}/scores`"
+                :href="scores(comp.id).url"
                 class="block"
             >
                 <Card class="transition-colors hover:bg-accent/50">
                     <CardHeader>
                         <div class="flex items-start justify-between">
                             <CardTitle class="text-lg">{{ comp.name }}</CardTitle>
-                            <Badge variant="secondary" class="text-xs">{{ statusLabel[comp.status] || comp.status }}</Badge>
+                            <Badge :variant="statusVariant[comp.status] || 'secondary'" class="text-xs">{{ statusLabel[comp.status] || comp.status }}</Badge>
                         </div>
                     </CardHeader>
                     <CardContent>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/InputError.vue';
+import { index, update } from '@/routes/admin/competitions/participants';
 
 defineOptions({
     layout: AppLayout,
@@ -31,13 +32,9 @@ const form = useForm({
 });
 
 function submit() {
-    form.post(
-        `/admin/competitions/${props.competition.id}/participants/${props.participant.id}`,
-        {
-            method: 'put',
-            headers: { 'Content-Type': 'multipart/form-data' },
-        },
-    );
+    form.put(update([props.competition.id, props.participant.id]).url, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
 }
 
 function onLogoChange(event: Event) {
@@ -54,7 +51,7 @@ function onLogoChange(event: Event) {
     <div class="flex flex-col gap-6 p-6">
         <div>
             <Link
-                :href="`/admin/competitions/${competition.id}/participants`"
+                :href="index(competition.id).url"
                 class="text-sm text-muted-foreground hover:underline"
             >
                 &larr; Kembali ke daftar peserta

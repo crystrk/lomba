@@ -11,6 +11,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { show } from '@/routes/admin/competitions';
+import { create, edit } from '@/routes/admin/competitions/participants';
 
 defineOptions({
     layout: AppLayout,
@@ -43,7 +45,7 @@ const isEditable = () =>
         <div class="flex items-center justify-between">
             <div>
                 <Link
-                    :href="`/admin/competitions/${competition.id}`"
+                    :href="show(competition.id).url"
                     class="text-sm text-muted-foreground hover:underline"
                 >
                     &larr; {{ competition.name }}
@@ -52,7 +54,7 @@ const isEditable = () =>
             </div>
             <Link
                 v-if="isEditable()"
-                :href="`/admin/competitions/${competition.id}/participants/create`"
+                :href="create(competition.id).url"
             >
                 <Button>Tambah Peserta</Button>
             </Link>
@@ -85,7 +87,7 @@ const isEditable = () =>
                             <div class="flex gap-2">
                                 <Link
                                     v-if="isEditable()"
-                                    :href="`/admin/competitions/${competition.id}/participants/${p.id}/edit`"
+                                    :href="edit([competition.id, p.id]).url"
                                 >
                                     <Button variant="outline" size="sm"
                                         >Edit</Button

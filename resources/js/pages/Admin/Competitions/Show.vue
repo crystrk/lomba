@@ -3,6 +3,8 @@ import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { edit, scores } from '@/routes/admin/competitions';
+import draw from '@/routes/admin/competitions/draw';
 
 defineOptions({
     layout: AppLayout,
@@ -38,6 +40,14 @@ const labelStatus: Record<string, string> = {
     in_progress: 'Berlangsung',
     completed: 'Selesai',
 };
+
+const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'secondary'> = {
+    draft: 'secondary',
+    drawn: 'secondary',
+    locked: 'default',
+    in_progress: 'default',
+    completed: 'outline',
+};
 </script>
 
 <template>
@@ -46,7 +56,7 @@ const labelStatus: Record<string, string> = {
     <div class="flex flex-col gap-6 p-6">
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold">{{ competition.name }}</h1>
-            <Link :href="`/admin/competitions/${competition.id}/edit`">
+            <Link :href="edit(competition.id).url">
                 <Button variant="outline">Edit</Button>
             </Link>
         </div>
@@ -61,7 +71,7 @@ const labelStatus: Record<string, string> = {
             <div>
                 <span class="text-sm text-muted-foreground">Status</span>
                 <p>
-                    <Badge>{{
+                    <Badge :variant="statusVariant[competition.status] || 'secondary'">{{
                         labelStatus[competition.status] || competition.status
                     }}</Badge>
                 </p>
@@ -99,10 +109,10 @@ const labelStatus: Record<string, string> = {
         </div>
 
         <div class="flex gap-3">
-            <Link :href="`/admin/competitions/${competition.id}/draw`">
+            <Link :href="draw.show(competition.id).url">
                 <Button variant="outline">Atur Undian</Button>
             </Link>
-            <Link :href="`/admin/competitions/${competition.id}/scores`">
+            <Link :href="scores(competition.id).url">
                 <Button variant="outline">Kelola Skor</Button>
             </Link>
         </div>
