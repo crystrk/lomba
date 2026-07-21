@@ -45,6 +45,7 @@ class UpdateParticipantRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'name.required' => 'Nama peserta wajib diisi.',
             'logo.image' => 'Logo harus berupa gambar.',
             'logo.mimes' => 'Logo harus berformat PNG, JPG, JPEG, atau WebP.',
             'logo.max' => 'Logo maksimal 2MB.',

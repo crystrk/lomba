@@ -142,16 +142,20 @@ class CompetitionController extends Controller
 
     public function operators(Competition $competition): Response|ResponseFactory
     {
-        $assignedIds = $competition->operators->pluck('id');
+        $assignedIds = $competition->operators()
+            ->pluck('users.id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
 
         $allOperators = User::where('role', UserRole::Operator->value)
             ->orderBy('name')
             ->get()
             ->map(fn (User $u) => [
-                'id' => $u->id,
+                'id' => (int) $u->id,
                 'name' => $u->name,
                 'email' => $u->email,
-                'is_active' => $u->is_active,
+                'is_active' => (bool) $u->is_active,
             ]);
 
         return Inertia('Admin/Competitions/Operators', [
@@ -183,7 +187,7 @@ class CompetitionController extends Controller
 
         $competition->operators()->sync($syncData);
 
-        return redirect()->route('admin.competitions.show', $competition)
+        return redirect()->route('admin.competitions.operators', $competition)
             ->with('success', 'Operator berhasil disinkronkan.');
     }
 

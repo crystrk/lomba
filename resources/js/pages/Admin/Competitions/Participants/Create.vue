@@ -30,9 +30,7 @@ const form = useForm({
 const previewUrl = ref<string | null>(null);
 
 function submit() {
-    form.post(store(props.competition.id).url, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    form.post(store(props.competition.id).url);
 }
 
 function onLogoChange(event: Event) {
@@ -42,6 +40,7 @@ function onLogoChange(event: Event) {
         form.logo = file;
         previewUrl.value = URL.createObjectURL(file);
     } else {
+        form.logo = null;
         previewUrl.value = null;
     }
 }

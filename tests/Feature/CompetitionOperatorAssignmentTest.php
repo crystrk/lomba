@@ -21,7 +21,7 @@ it('admin can sync operators to competition', function () {
 
     $this->put(route('admin.competitions.operators.sync', $this->competition), [
         'operator_ids' => [$this->operator->id, $this->anotherOperator->id],
-    ])->assertRedirect(route('admin.competitions.show', $this->competition));
+    ])->assertRedirect(route('admin.competitions.operators', $this->competition));
 
     $this->competition->load('operators');
 

@@ -47,6 +47,7 @@ function onLogoChange(event: Event) {
         form.logo = file;
         previewUrl.value = URL.createObjectURL(file);
     } else {
+        form.logo = null;
         previewUrl.value = null;
     }
 }
