@@ -93,7 +93,7 @@ php artisan test --compact --filter="competition management"
 - [x] Field poin muncul hanya untuk full/half competition.
 - [x] Field poin dikosongkan ketika user mengganti format ke knockout.
 - [x] Tampilkan error backend per field, processing state, dan toast sukses/gagal.
-- [ ] Gunakan dialog konfirmasi untuk delete.
+- [x] Gunakan dialog konfirmasi untuk delete.
 - [x] Jangan jadikan kondisi frontend satu-satunya guard status.
 
 ### Verifikasi
@@ -128,7 +128,7 @@ php artisan test --compact --filter="competition pages"
 
 - [x] Daftar peserta memiliki empty state dan jumlah peserta.
 - [x] Form tambah/edit menampilkan preview logo bila diperlukan.
-- [ ] Delete menggunakan dialog konfirmasi.
+- [x] Delete menggunakan dialog konfirmasi.
 - [x] Kontrol edit tidak ditampilkan jika policy melarang, tetapi backend tetap memeriksa.
 
 ### Test
@@ -175,7 +175,7 @@ npm run types:check
 - [x] Daftar memiliki filter status/format dan pagination jika diperlukan.
 - [x] Gunakan `withCount()`/aggregate agar tidak memuat relation penuh untuk count.
 - [x] Navigasi admin menampilkan Lomba dan Operator.
-- [ ] Breadcrumb dan judul halaman konsisten.
+- [x] Breadcrumb dan judul halaman konsisten.
 - [x] Empty state mengarahkan admin ke create competition.
 
 ### Verifikasi

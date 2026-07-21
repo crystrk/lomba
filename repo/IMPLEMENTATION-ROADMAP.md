@@ -39,13 +39,13 @@ Gunakan salah satu status berikut dan perbarui tabel ketika pekerjaan dimulai at
 - `BLOCKED`
 - `DONE`
 
-| Urutan | Fase                               | Status awal | Bergantung pada      | Dokumen                                                 |
-| -----: | ---------------------------------- | ----------- | -------------------- | ------------------------------------------------------- |
-|      1 | Fondasi akses dan domain           | NOT STARTED | Baseline starter kit | [PHASE-01](./PHASE-01-FOUNDATION-ACCESS-DOMAIN.md)      |
-|      2 | Pengelolaan lomba                  | NOT STARTED | Fase 1 `DONE`        | [PHASE-02](./PHASE-02-ADMIN-COMPETITION-MANAGEMENT.md)  |
-|      3 | Shuffle, generator, dan penguncian | NOT STARTED | Fase 2 `DONE`        | [PHASE-03](./PHASE-03-DRAW-MATCH-GENERATION-LOCKING.md) |
-|      4 | Skor, klasemen, dan progres bagan  | NOT STARTED | Fase 3 `DONE`        | [PHASE-04](./PHASE-04-SCORING-STANDINGS-PROGRESSION.md) |
-|      5 | Halaman publik dan hardening       | NOT STARTED | Fase 4 `DONE`        | [PHASE-05](./PHASE-05-PUBLIC-UI-HARDENING.md)           |
+| Urutan | Fase                               | Status | Bergantung pada      | Dokumen                                                 |
+| -----: | ---------------------------------- | ------ | -------------------- | ------------------------------------------------------- |
+|      1 | Fondasi akses dan domain           | DONE   | Baseline starter kit | [PHASE-01](./PHASE-01-FOUNDATION-ACCESS-DOMAIN.md)      |
+|      2 | Pengelolaan lomba                  | DONE   | Fase 1 `DONE`        | [PHASE-02](./PHASE-02-ADMIN-COMPETITION-MANAGEMENT.md)  |
+|      3 | Shuffle, generator, dan penguncian | DONE   | Fase 2 `DONE`        | [PHASE-03](./PHASE-03-DRAW-MATCH-GENERATION-LOCKING.md) |
+|      4 | Skor, klasemen, dan progres bagan  | DONE   | Fase 3 `DONE`        | [PHASE-04](./PHASE-04-SCORING-STANDINGS-PROGRESSION.md) |
+|      5 | Halaman publik dan hardening       | DONE   | Fase 4 `DONE`        | [PHASE-05](./PHASE-05-PUBLIC-UI-HARDENING.md)           |
 
 Fase harus dikerjakan berurutan. Pekerjaan fase berikutnya hanya boleh dimulai jika test gate fase sebelumnya hijau dan tidak ada bug blocker yang belum diselesaikan.
 
