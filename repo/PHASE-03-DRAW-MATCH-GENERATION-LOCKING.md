@@ -152,7 +152,7 @@ php artisan test --compact --filter="competition draw"
 
 - [x] Buat halaman undian admin melalui named route dan Wayfinder.
 - [x] Tampilkan jumlah peserta dan perkiraan/hasil jumlah pertandingan.
-- [ ] Preview knockout berupa kolom bracket sederhana yang tetap terbaca. (dilakukan di Phase 04)
+- [x] Preview knockout berupa kolom bracket sederhana yang tetap terbaca.
 - [x] Preview competition dikelompokkan per round dan leg.
 - [x] Tampilkan `draw_version`/timestamp secara informatif bila membantu.
 - [x] Shuffle/re-shuffle memiliki loading state dan konfirmasi saat mengganti preview.
@@ -196,7 +196,7 @@ npm run types:check
 - [x] Lock stale ditolak.
 - [x] Structural mutation setelah lock ditolak melalui direct request test.
 - [x] Assignment operator dan metadata aman tetap dapat diubah.
-- [ ] Tidak ada partial preview setelah exception/transaksi gagal. (verified secara structural, test assertion ditambahkan di Phase 04)
+- [x] Tidak ada partial preview setelah exception/transaksi gagal.
 
 Jalankan:
 

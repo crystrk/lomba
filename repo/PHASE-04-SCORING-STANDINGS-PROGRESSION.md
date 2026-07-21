@@ -172,10 +172,10 @@ php artisan test --compact --filter="knockout result correction"
 ### Backend/UI
 
 - [x] Dashboard operator hanya query competition assigned.
-- [ ] Daftar match dapat difilter round/status. (dilakukan di hardening)
+- [x] Daftar match dapat difilter round/status.
 - [x] Operator dapat melihat rules, participant, bracket/standings internal.
 - [x] Form score menampilkan dua participant, score sebelumnya, dan result version.
-- [ ] Tie-break winner field hanya tampil untuk knockout dengan skor sama. (dilakukan di hardening)
+- [x] Tie-break winner field hanya tampil untuk knockout dengan skor sama.
 - [ ] Submit menampilkan dialog konfirmasi dan dampak ke klasemen/bracket. (dilakukan di hardening)
 - [x] Konflik stale menampilkan pesan error, bukan mengganti data lokal diam-diam.
 - [x] Admin dapat menggunakan halaman hasil administratif dengan action backend yang sama.
