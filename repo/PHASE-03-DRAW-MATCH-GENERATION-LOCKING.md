@@ -177,7 +177,7 @@ php artisan test --compact --filter="draw page"
 - [x] Request lock dari tab stale ditolak dengan validasi `draw_version`.
 - [x] Setelah lock, tolak format, poin, participant, shuffle, dan delete di backend (via Policy).
 - [x] Metadata non-struktural dan assignment operator tetap dapat diubah.
-- [ ] UI dialog lock menampilkan format, participant count, scored-match count, dan scoring rules jika relevan. (konfirmasi sederhana dengan confirm() sudah ada)
+- [x] UI dialog lock menampilkan format, participant count, scored-match count, dan scoring rules jika relevan.
 - [x] Tidak ada fitur unlock pada MVP.
 
 ### Verifikasi
