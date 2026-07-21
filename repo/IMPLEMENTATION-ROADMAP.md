@@ -221,13 +221,13 @@ Deviasi tidak boleh dibiarkan hanya di log. Jika mengubah perilaku produk, perba
 
 ## Definition of Done Proyek
 
-- [ ] Seluruh lima fase berstatus `DONE`.
-- [ ] Seluruh FR Must pada PRD memiliki test atau bukti verifikasi.
-- [ ] AC-01 sampai AC-16 lulus.
-- [ ] Otorisasi diuji sebagai admin, operator ditugaskan, operator tidak ditugaskan, dan guest.
-- [ ] Generator teruji untuk peserta genap, ganjil, pangkat dua, dan non-pangkat dua.
-- [ ] Koreksi skor tidak menggandakan klasemen atau merusak bracket.
-- [ ] Landing hanya menampilkan lomba aktif dan detail completed tetap dapat dibuka.
-- [ ] Tidak ada URL backend yang di-hardcode di Vue.
-- [ ] Formatter, static analysis, lint, typecheck, seluruh test, dan production build lulus.
-- [ ] Tidak ada bug blocker atau deviasi PRD yang belum diselesaikan.
+- [x] Seluruh lima fase berstatus `DONE`.
+- [x] Seluruh FR Must pada PRD memiliki test atau bukti verifikasi.
+- [x] AC-01 sampai AC-16 lulus.
+- [x] Otorisasi diuji sebagai admin, operator ditugaskan, operator tidak ditugaskan, dan guest.
+- [x] Generator teruji untuk peserta genap, ganjil, pangkat dua, dan non-pangkat dua.
+- [x] Koreksi skor tidak menggandakan klasemen atau merusak bracket.
+- [x] Landing hanya menampilkan lomba aktif dan detail completed tetap dapat dibuka.
+- [x] Tidak ada URL backend yang di-hardcode di Vue.
+- [x] Formatter, static analysis, lint, typecheck, seluruh test, dan production build lulus.
+- [x] Tidak ada bug blocker atau deviasi PRD yang belum diselesaikan.

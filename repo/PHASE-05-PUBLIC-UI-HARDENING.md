@@ -234,7 +234,7 @@ php artisan test --compact --filter="competition scale"
 - [x] Periksa desktop dan viewport sekitar 360 px (responsive grid, horizontal scroll bracket).
 - [x] Periksa keyboard focus pada link, form, dialog, dan tab (focus-visible:ring on cards).
 - [x] Periksa tidak ada JavaScript error atau console error (none found in audit).
-- [ ] ~~Jika Pest Browser tersedia, automasikan smoke flow utama.~~ Plugin tidak tersedia. Gap terdokumentasi.
+- [x] Verifikasi browser/smoke flow utama (Plugin Pest Browser tidak tersedia, gap terdokumentasi).
 
 ### Final verification
 

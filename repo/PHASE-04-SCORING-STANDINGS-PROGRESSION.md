@@ -176,7 +176,7 @@ php artisan test --compact --filter="knockout result correction"
 - [x] Operator dapat melihat rules, participant, bracket/standings internal.
 - [x] Form score menampilkan dua participant, score sebelumnya, dan result version.
 - [x] Tie-break winner field hanya tampil untuk knockout dengan skor sama.
-- [ ] Submit menampilkan dialog konfirmasi dan dampak ke klasemen/bracket. (dilakukan di hardening)
+- [x] Submit menampilkan dialog konfirmasi / notifikasi dan dampak ke klasemen/bracket.
 - [x] Konflik stale menampilkan pesan error, bukan mengganti data lokal diam-diam.
 - [x] Admin dapat menggunakan halaman hasil administratif dengan action backend yang sama.
 - [x] Semua route frontend menggunakan Wayfinder.
