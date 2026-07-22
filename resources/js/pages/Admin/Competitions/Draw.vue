@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import {
     ArrowLeft,
@@ -118,7 +118,7 @@ const shuffleForm = useForm({});
 
 function executeShuffle() {
     shuffleForm.post(shuffle(props.competition.id).url, {
-        onFinish: () => {
+        onSuccess: () => {
             shuffleDialogOpen.value = false;
         },
     });
@@ -128,9 +128,18 @@ const lockForm = useForm({
     draw_version: props.competition.draw_version,
 });
 
+watch(
+    () => props.competition.draw_version,
+    (newVersion) => {
+        lockForm.draw_version = newVersion;
+    },
+    { immediate: true },
+);
+
 function executeLock() {
+    lockForm.draw_version = props.competition.draw_version;
     lockForm.post(lock(props.competition.id).url, {
-        onFinish: () => {
+        onSuccess: () => {
             lockDialogOpen.value = false;
         },
     });
@@ -321,6 +330,9 @@ function participantName(match: typeof props.matches[0], side: 'home' | 'away'):
                             <p><strong>Format:</strong> {{ formatLabel[competition.format] }}</p>
                             <p><strong>Peserta:</strong> {{ participants.length }} Peserta</p>
                             <p><strong>Pertandingan Bernilai Skor:</strong> {{ scoredMatchCount }} Match</p>
+                        </div>
+                        <div v-if="lockForm.errors.draw_version" class="rounded-md bg-destructive/15 p-3 text-xs font-medium text-destructive">
+                            {{ lockForm.errors.draw_version }}
                         </div>
                     </DialogDescription>
                 </DialogHeader>

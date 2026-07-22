@@ -70,7 +70,8 @@ class CompetitionController extends Controller
 
     public function show(Competition $competition): Response|ResponseFactory
     {
-        $competition->loadCount('participants');
+        $competition->loadCount(['participants', 'matches']);
+        $competition->load(['operators' => fn ($q) => $q->select('users.id', 'users.name', 'users.email', 'users.is_active')]);
 
         return Inertia('Admin/Competitions/Show', [
             'competition' => [
@@ -84,8 +85,15 @@ class CompetitionController extends Controller
                 'draw_points' => $competition->draw_points,
                 'loss_points' => $competition->loss_points,
                 'participants_count' => $competition->participants_count,
+                'matches_count' => $competition->matches_count,
                 'starts_at' => $competition->starts_at?->format('Y-m-d'),
                 'ends_at' => $competition->ends_at?->format('Y-m-d'),
+                'operators' => $competition->operators->map(fn ($u) => [
+                    'id' => (int) $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'is_active' => (bool) $u->is_active,
+                ]),
             ],
         ]);
     }
