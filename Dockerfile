@@ -7,7 +7,8 @@ RUN composer install \
     --no-interaction \
     --prefer-dist \
     --ignore-platform-reqs \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --no-scripts
 
 # Stage 2: Build Frontend Assets (Vite & Vue)
 FROM node:22-bookworm-slim AS frontend
