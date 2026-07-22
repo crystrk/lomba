@@ -35,11 +35,32 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $toast = $request->session()->get('toast');
+
+        if (! $toast) {
+            if ($success = $request->session()->get('success')) {
+                $toast = ['type' => 'success', 'message' => $success];
+            } elseif ($error = $request->session()->get('error')) {
+                $toast = ['type' => 'error', 'message' => $error];
+            } elseif ($warning = $request->session()->get('warning')) {
+                $toast = ['type' => 'warning', 'message' => $warning];
+            } elseif ($info = $request->session()->get('info')) {
+                $toast = ['type' => 'info', 'message' => $info];
+            }
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+            ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+                'warning' => $request->session()->get('warning'),
+                'info' => $request->session()->get('info'),
+                'toast' => $toast,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

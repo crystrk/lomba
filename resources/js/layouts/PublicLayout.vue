@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import PublicTopNav from '@/components/PublicTopNav.vue';
+import { Toaster } from '@/components/ui/sonner';
+import { useFlashToast } from '@/composables/useFlashToast';
 import { Trophy, Heart } from '@lucide/vue';
 import { Link } from '@inertiajs/vue3';
 import { home } from '@/routes';
+
+useFlashToast();
 
 defineProps<{
     competitionName?: string;
@@ -43,5 +47,6 @@ defineProps<{
                 </div>
             </div>
         </footer>
+        <Toaster rich-colors />
     </div>
 </template>
