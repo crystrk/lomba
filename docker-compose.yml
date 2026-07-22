@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lomba-app:latest
+    container_name: lomba_app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      APP_NAME: "${APP_NAME:-Lomba}"
+      APP_ENV: "${APP_ENV:-production}"
+      APP_KEY: "${APP_KEY}"
+      APP_DEBUG: "${APP_DEBUG:-false}"
+      APP_URL: "${APP_URL:-http://localhost:8080}"
+      DB_CONNECTION: "${DB_CONNECTION:-sqlite}"
+      DB_DATABASE: "${DB_DATABASE:-/var/www/html/database/database.sqlite}"
+      AUTORUN_ENABLED: "true"
+    volumes:
+      - storage_data:/var/www/html/storage
+
+volumes:
+  storage_data:

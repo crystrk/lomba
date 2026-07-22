@@ -1,0 +1,16 @@
+.git
+.github
+.agents
+node_modules
+vendor
+public/build
+storage/*.key
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*
+storage/logs/*
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
