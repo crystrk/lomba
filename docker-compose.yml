@@ -19,6 +19,8 @@ services:
       AUTORUN_ENABLED: "true"
     volumes:
       - storage_data:/var/www/html/storage
+      - db_data:/var/www/html/database
 
 volumes:
   storage_data:
+  db_data:
