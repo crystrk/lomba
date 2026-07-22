@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowLeft, Plus, Pencil, Trash2 } from '@lucide/vue';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { ArrowLeft, Plus, Pencil, Trash2, FileText } from '@lucide/vue';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
     Table,
     TableBody,
@@ -23,7 +25,7 @@ import {
     DialogClose,
 } from '@/components/ui/dialog';
 import { show } from '@/routes/admin/competitions';
-import { create, edit, destroy } from '@/routes/admin/competitions/participants';
+import { create, edit, destroy, bulkStore } from '@/routes/admin/competitions/participants';
 
 defineOptions({
     layout: AppLayout,
@@ -51,6 +53,20 @@ const isEditable = computed(
 const deleteDialogOpen = ref(false);
 const selectedParticipant = ref<{ id: number; name: string } | null>(null);
 const isDeleting = ref(false);
+
+const bulkDialogOpen = ref(false);
+const bulkForm = useForm({
+    raw_names: '',
+});
+
+function submitBulk() {
+    bulkForm.post(bulkStore(props.competition.id).url, {
+        onSuccess: () => {
+            bulkDialogOpen.value = false;
+            bulkForm.reset();
+        },
+    });
+}
 
 function confirmDelete(p: { id: number; name: string }) {
     selectedParticipant.value = p;
@@ -88,15 +104,18 @@ function handleDelete() {
                     <Badge variant="outline">{{ participants.length }} Peserta</Badge>
                 </div>
             </div>
-            <Link
-                v-if="isEditable"
-                :href="create(competition.id)"
-            >
-                <Button>
-                    <Plus class="mr-2 size-4" />
-                    Tambah Peserta
+            <div v-if="isEditable" class="flex items-center gap-2">
+                <Button variant="outline" @click="bulkDialogOpen = true">
+                    <FileText class="mr-2 size-4" />
+                    Tambah Sekaligus
                 </Button>
-            </Link>
+                <Link :href="create(competition.id)">
+                    <Button>
+                        <Plus class="mr-2 size-4" />
+                        Tambah Peserta
+                    </Button>
+                </Link>
+            </div>
         </div>
 
         <div class="rounded-lg border">
@@ -173,6 +192,46 @@ function handleDelete() {
                         {{ isDeleting ? 'Menghapus...' : 'Hapus Peserta' }}
                     </Button>
                 </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <Dialog :open="bulkDialogOpen" @update:open="bulkDialogOpen = $event">
+            <DialogContent class="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle class="flex items-center gap-2">
+                        <FileText class="size-5 text-primary" />
+                        Tambah Peserta Sekaligus
+                    </DialogTitle>
+                    <DialogDescription>
+                        Masukkan nama peserta/tim satu per baris. Baris kosong akan diabaikan secara otomatis.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <form @submit.prevent="submitBulk" class="space-y-4 py-2">
+                    <div class="space-y-2">
+                        <Label for="raw_names">Daftar Nama Peserta (1 baris = 1 peserta)</Label>
+                        <Textarea
+                            id="raw_names"
+                            v-model="bulkForm.raw_names"
+                            rows="8"
+                            placeholder="Contoh:&#10;FC Garuda Jakarta&#10;Elang United Bandung&#10;Harimau FC Surabaya&#10;Badak Hitam FC Medan"
+                            class="font-mono text-sm"
+                            :disabled="bulkForm.processing"
+                        />
+                        <div v-if="bulkForm.errors.raw_names" class="text-sm font-medium text-rose-600">
+                            {{ bulkForm.errors.raw_names }}
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button type="button" variant="outline" :disabled="bulkForm.processing" @click="bulkDialogOpen = false">
+                            Batal
+                        </Button>
+                        <Button type="submit" :disabled="bulkForm.processing">
+                            {{ bulkForm.processing ? 'Menyimpan...' : 'Simpan Semua Peserta' }}
+                        </Button>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     </div>

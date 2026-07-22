@@ -64,6 +64,53 @@ class ParticipantController extends Controller
             ->with('success', 'Peserta berhasil ditambahkan.');
     }
 
+    public function bulkStore(\App\Http\Requests\Admin\BulkStoreParticipantRequest $request, Competition $competition): RedirectResponse
+    {
+        if (! $competition->isEditable()) {
+            abort(403, 'Peserta tidak dapat ditambah pada lomba yang sudah terkunci.');
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', $request->input('raw_names'));
+        $count = 0;
+
+        foreach ($lines as $line) {
+            $name = trim($line);
+            if ($name === '') {
+                continue;
+            }
+
+            $shortName = $this->generateShortName($name);
+
+            $competition->participants()->create([
+                'name' => $name,
+                'short_name' => $shortName,
+            ]);
+
+            $count++;
+        }
+
+        if ($count === 0) {
+            return redirect()->back()->withErrors(['raw_names' => 'Tidak ada nama peserta valid yang dimasukkan.']);
+        }
+
+        return redirect()->route('admin.competitions.participants.index', $competition)
+            ->with('success', "Berhasil menambahkan {$count} peserta.");
+    }
+
+    private function generateShortName(string $name): ?string
+    {
+        $words = preg_split('/\s+/', trim($name));
+        if (count($words) >= 3) {
+            $short = mb_strtoupper(mb_substr($words[0], 0, 1).mb_substr($words[1], 0, 1).mb_substr($words[2], 0, 1));
+        } elseif (count($words) === 2) {
+            $short = mb_strtoupper(mb_substr($words[0], 0, 2).mb_substr($words[1], 0, 1));
+        } else {
+            $short = mb_strtoupper(mb_substr($name, 0, 3));
+        }
+
+        return mb_strlen($short) >= 2 ? $short : null;
+    }
+
     public function edit(Competition $competition, Participant $participant): Response|ResponseFactory
     {
         return Inertia('Admin/Competitions/Participants/Edit', [

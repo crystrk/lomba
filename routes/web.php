@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(functio
         Route::get('competitions/{competition}/participants', [ParticipantController::class, 'index'])->name('competitions.participants.index');
         Route::get('competitions/{competition}/participants/create', [ParticipantController::class, 'create'])->name('competitions.participants.create');
         Route::post('competitions/{competition}/participants', [ParticipantController::class, 'store'])->name('competitions.participants.store');
+        Route::post('competitions/{competition}/participants/bulk', [ParticipantController::class, 'bulkStore'])->name('competitions.participants.bulk-store');
         Route::get('competitions/{competition}/participants/{participant}/edit', [ParticipantController::class, 'edit'])->name('competitions.participants.edit');
         Route::put('competitions/{competition}/participants/{participant}', [ParticipantController::class, 'update'])->name('competitions.participants.update');
         Route::delete('competitions/{competition}/participants/{participant}', [ParticipantController::class, 'destroy'])->name('competitions.participants.destroy');

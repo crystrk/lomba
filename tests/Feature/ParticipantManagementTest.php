@@ -142,3 +142,17 @@ it('operator cannot manage participants', function () {
             'name' => 'Hacked',
         ])->assertForbidden();
 });
+
+it('admin can bulk store participants per line', function () {
+    $this->actingAs($this->admin);
+
+    $raw = "FC Garuda Jakarta\nElang United Bandung\nHarimau FC Surabaya\n\nBadak Hitam FC Medan";
+
+    $this->post(route('admin.competitions.participants.bulk-store', $this->competition), [
+        'raw_names' => $raw,
+    ])->assertRedirect(route('admin.competitions.participants.index', $this->competition));
+
+    expect($this->competition->participants()->count())->toBe(4);
+    expect(Participant::where('name', 'FC Garuda Jakarta')->exists())->toBeTrue();
+    expect(Participant::where('name', 'Elang United Bandung')->exists())->toBeTrue();
+});
