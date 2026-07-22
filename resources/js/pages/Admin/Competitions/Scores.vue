@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, shallowRef, watch } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Save, Trophy, Medal, AlertCircle, Filter } from '@lucide/vue';
+import { ArrowLeft, Save, Trophy, Medal, AlertCircle, Filter, Lock, Unlock } from '@lucide/vue';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,8 +9,17 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { update as updateScore } from '@/routes/admin/matches/score';
-import { show } from '@/routes/admin/competitions';
+import { show, lockResults } from '@/routes/admin/competitions';
 
 defineOptions({
     layout: AppLayout,
@@ -27,6 +36,7 @@ const props = defineProps<{
         draw_points: number | null;
         loss_points: number | null;
         draw_version: number;
+        is_results_locked?: boolean;
     };
     matchesByRound: Record<number, Array<{
         id: number;
@@ -119,6 +129,18 @@ watch(sortedRounds, () => {
     matchForms.value = forms;
 }, { immediate: true });
 
+const lockResultsForm = useForm({});
+const lockResultsDialogOpen = ref(false);
+
+function executeToggleResultsLock() {
+    lockResultsForm.post(lockResults.url({ competition: props.competition.id }), {
+        preserveScroll: true,
+        onSuccess: () => {
+            lockResultsDialogOpen.value = false;
+        },
+    });
+}
+
 function submitScore(matchId: number) {
     const form = matchForms.value[matchId];
     form.post(updateScore.url({ competition: props.competition.id, match: matchId }), {
@@ -155,15 +177,36 @@ function roundLabel(round: number, leg: number): string {
                 <ArrowLeft class="size-4" />
                 <span>{{ competition.name }}</span>
             </Link>
-            <div class="flex items-center justify-between mt-1">
+            <div class="flex flex-wrap items-center justify-between gap-4 mt-1">
                 <h1 class="text-2xl font-bold">Input & Koreksi Skor</h1>
-                <Badge :variant="statusVariant[competition.status] || 'secondary'">
-                    {{ statusLabel[competition.status] || competition.status }}
-                </Badge>
+                <div class="flex items-center gap-2">
+                    <Button
+                        v-if="competition.status !== 'draft' && competition.status !== 'drawn'"
+                        :variant="competition.is_results_locked ? 'outline' : 'default'"
+                        size="sm"
+                        :disabled="lockResultsForm.processing || (!competition.is_results_locked && competition.status !== 'completed')"
+                        :title="!competition.is_results_locked && competition.status !== 'completed' ? 'Penguncian hasil hanya dapat dilakukan setelah seluruh pertandingan selesai' : ''"
+                        @click="lockResultsDialogOpen = true"
+                    >
+                        <component :is="competition.is_results_locked ? Unlock : Lock" class="mr-1.5 size-4" />
+                        <span>{{ competition.is_results_locked ? 'Buka Kunci Hasil' : 'Kunci Hasil Pertandingan' }}</span>
+                    </Button>
+                    <Badge :variant="statusVariant[competition.status] || 'secondary'">
+                        {{ statusLabel[competition.status] || competition.status }}
+                    </Badge>
+                </div>
             </div>
         </div>
 
-        <div v-if="competition.status === 'draft' || competition.status === 'drawn'" class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-amber-800 dark:text-amber-300 flex items-start gap-3">
+        <div v-if="competition.is_results_locked" class="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-rose-800 dark:text-rose-300 flex items-start gap-3">
+            <Lock class="size-5 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+            <div>
+                <h4 class="font-semibold text-sm">Hasil Pertandingan Terkunci Final</h4>
+                <p class="text-xs mt-0.5">Hasil pertandingan telah dikunci secara final oleh Admin. Skor tidak dapat diubah lagi kecuali kunci dibuka kembali.</p>
+            </div>
+        </div>
+
+        <div v-else-if="competition.status === 'draft' || competition.status === 'drawn'" class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-amber-800 dark:text-amber-300 flex items-start gap-3">
             <AlertCircle class="size-5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
             <div>
                 <h4 class="font-semibold text-sm">Input Skor Belum Diizinkan</h4>
@@ -275,7 +318,7 @@ function roundLabel(round: number, leg: number): string {
                                             min="0"
                                             class="w-16 text-center text-lg font-bold"
                                             v-model="matchForms[match.id].score_home"
-                                            :disabled="matchForms[match.id].processing"
+                                            :disabled="matchForms[match.id].processing || competition.is_results_locked"
                                         />
                                         <span class="font-bold text-muted-foreground">:</span>
                                         <Input
@@ -283,7 +326,7 @@ function roundLabel(round: number, leg: number): string {
                                             min="0"
                                             class="w-16 text-center text-lg font-bold"
                                             v-model="matchForms[match.id].score_away"
-                                            :disabled="matchForms[match.id].processing"
+                                            :disabled="matchForms[match.id].processing || competition.is_results_locked"
                                         />
                                     </div>
 
@@ -300,7 +343,7 @@ function roundLabel(round: number, leg: number): string {
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div class="space-y-1">
                                             <span class="text-xs text-muted-foreground">Pemenang Tie-break</span>
-                                            <Select v-model="matchForms[match.id].winner_id">
+                                            <Select v-model="matchForms[match.id].winner_id" :disabled="competition.is_results_locked">
                                                 <SelectTrigger class="w-full bg-background">
                                                     <SelectValue placeholder="Pilih Tim Pemenang" />
                                                 </SelectTrigger>
@@ -320,6 +363,7 @@ function roundLabel(round: number, leg: number): string {
                                                 v-model="matchForms[match.id].win_method"
                                                 placeholder="Contoh: Penalti (5-4)"
                                                 class="bg-background"
+                                                :disabled="competition.is_results_locked"
                                             />
                                         </div>
                                     </div>
@@ -337,7 +381,7 @@ function roundLabel(round: number, leg: number): string {
                                         <span class="text-xs font-mono text-muted-foreground">v{{ match.result_version }}</span>
                                     </div>
 
-                                    <Button type="submit" size="sm" :disabled="matchForms[match.id].processing">
+                                    <Button type="submit" size="sm" :disabled="matchForms[match.id].processing || competition.is_results_locked">
                                         <Save class="mr-1.5 size-3.5" />
                                         {{ matchForms[match.id].processing ? 'Menyimpan...' : 'Simpan Skor' }}
                                     </Button>
@@ -353,6 +397,45 @@ function roundLabel(round: number, leg: number): string {
         <Card v-if="sortedRounds.length === 0" class="p-8 text-center text-muted-foreground">
             Belum ada pertandingan. Lakukan undian terlebih dahulu.
         </Card>
+
+        <!-- Modal Konfirmasi Kunci / Buka Kunci Hasil Pertandingan -->
+        <Dialog :open="lockResultsDialogOpen" @update:open="lockResultsDialogOpen = $event">
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>
+                        {{ competition.is_results_locked ? 'Konfirmasi Buka Kunci Hasil' : 'Konfirmasi Kunci Hasil Pertandingan' }}
+                    </DialogTitle>
+                    <DialogDescription class="space-y-2 pt-2 text-sm">
+                        <template v-if="competition.is_results_locked">
+                            <p>Membuka kunci hasil pertandingan akan mengizinkan Admin dan Operator untuk mengedit kembali skor pertandingan.</p>
+                            <p class="font-medium text-foreground">Apakah Anda yakin ingin membuka kunci hasil pertandingan?</p>
+                        </template>
+                        <template v-else>
+                            <p>Mengunci hasil pertandingan menandakan bahwa seluruh skor sudah final.</p>
+                            <ul class="list-disc pl-5 text-xs text-muted-foreground space-y-1 my-2">
+                                <li>Skor pertandingan tidak dapat diubah lagi oleh Admin maupun Operator.</li>
+                                <li>Klasemen dan status kompetisi dinyatakan final.</li>
+                                <li>Anda dapat membuka kunci ini kembali jika di kemudian hari diperlukan revisi.</li>
+                            </ul>
+                            <p class="font-medium text-foreground">Apakah Anda yakin ingin mengunci hasil pertandingan?</p>
+                        </template>
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <DialogClose as-child>
+                        <Button variant="outline" :disabled="lockResultsForm.processing">Batal</Button>
+                    </DialogClose>
+                    <Button
+                        :variant="competition.is_results_locked ? 'outline' : 'default'"
+                        :disabled="lockResultsForm.processing"
+                        @click="executeToggleResultsLock"
+                    >
+                        <component :is="competition.is_results_locked ? Unlock : Lock" class="mr-1.5 size-4" />
+                        {{ lockResultsForm.processing ? 'Memproses...' : (competition.is_results_locked ? 'Ya, Buka Kunci' : 'Ya, Kunci Hasil') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 

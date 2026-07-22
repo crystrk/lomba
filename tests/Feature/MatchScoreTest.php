@@ -290,6 +290,38 @@ it('competition completes when all scorable matches are done', function () {
     expect($competition->status)->toBe(CompetitionStatus::Completed);
 });
 
+it('can update score on completed competition', function () {
+    $competition = createLockedCompetition();
+    $p1 = Participant::factory()->for($competition)->create();
+    $p2 = Participant::factory()->for($competition)->create();
+
+    $m1 = CompetitionMatch::factory()->create([
+        'competition_id' => $competition->id,
+        'round' => 1, 'sequence' => 1,
+        'participant_id_home' => $p1->id, 'participant_id_away' => $p2->id,
+        'status' => CompetitionMatchStatus::Ready,
+    ]);
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.matches.score.update', [$competition, $m1]), ['score_home' => 1, 'score_away' => 0, 'result_version' => 0]);
+
+    $competition->refresh();
+    expect($competition->status)->toBe(CompetitionStatus::Completed);
+
+    $m1->refresh();
+    $this->actingAs($this->admin)
+        ->post(route('admin.matches.score.update', [$competition, $m1]), ['score_home' => 2, 'score_away' => 1, 'result_version' => 1])
+        ->assertRedirect();
+
+    $m1->refresh();
+    expect($m1->score_home)->toBe(2);
+    expect($m1->score_away)->toBe(1);
+    expect($m1->result_version)->toBe(2);
+
+    $competition->refresh();
+    expect($competition->status)->toBe(CompetitionStatus::Completed);
+});
+
 it('does not complete if one scorable match remains pending', function () {
     $competition = createLockedCompetition();
     $p1 = Participant::factory()->for($competition)->create();
@@ -612,4 +644,68 @@ it('knockout winner change with completed downstream is rejected', function () {
     $match->refresh();
     expect($match->score_home)->toBe(2);
     expect($match->winner_id)->toBe($p1->id);
+});
+
+it('admin can lock and unlock final results on completed competition', function () {
+    $competition = Competition::factory()->completed()->create();
+    $match = createMatchWithParticipants($competition);
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.competitions.lock-results', $competition))
+        ->assertRedirect();
+
+    $competition->refresh();
+    expect($competition->is_results_locked)->toBeTrue();
+    expect($competition->results_locked_by)->toBe($this->admin->id);
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.competitions.lock-results', $competition))
+        ->assertRedirect();
+
+    $competition->refresh();
+    expect($competition->is_results_locked)->toBeFalse();
+    expect($competition->results_locked_by)->toBeNull();
+});
+
+it('cannot lock final results if competition is not completed', function () {
+    $competition = createLockedCompetition();
+    $match = createMatchWithParticipants($competition);
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.competitions.lock-results', $competition))
+        ->assertSessionHasErrors('competition');
+
+    $competition->refresh();
+    expect($competition->is_results_locked)->toBeFalse();
+});
+
+it('operator cannot lock results', function () {
+    $competition = Competition::factory()->completed()->create();
+    attachOperator($competition, $this->operator);
+
+    $this->actingAs($this->operator)
+        ->post(route('admin.competitions.lock-results', $competition))
+        ->assertForbidden();
+});
+
+it('score update is rejected when results are locked', function () {
+    $competition = Competition::factory()->resultsLocked()->create();
+    $match = createMatchWithParticipants($competition);
+    attachOperator($competition, $this->operator);
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.matches.score.update', [$competition, $match]), [
+            'score_home' => 2,
+            'score_away' => 1,
+            'result_version' => 0,
+        ])
+        ->assertSessionHasErrors('competition');
+
+    $this->actingAs($this->operator)
+        ->post(route('operator.matches.score.update', [$competition, $match]), [
+            'score_home' => 2,
+            'score_away' => 1,
+            'result_version' => 0,
+        ])
+        ->assertSessionHasErrors('competition');
 });

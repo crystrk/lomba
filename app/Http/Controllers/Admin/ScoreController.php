@@ -6,6 +6,7 @@ use App\Calculators\StandingsCalculator;
 use App\Enums\CompetitionMatchStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Competition;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -46,5 +47,30 @@ class ScoreController extends Controller
             'matchesByRound' => $matches,
             'standings' => $standings,
         ]);
+    }
+
+    public function toggleLockResults(Request $request, Competition $competition): RedirectResponse
+    {
+        Gate::authorize('lockResults', $competition);
+
+        $isLocked = ! $competition->is_results_locked;
+
+        if ($isLocked && ! $competition->isCompleted()) {
+            return redirect()->back()->withErrors([
+                'competition' => 'Hasil pertandingan hanya dapat dikunci setelah seluruh pertandingan selesai dimainkan.',
+            ]);
+        }
+
+        $competition->update([
+            'is_results_locked' => $isLocked,
+            'results_locked_by' => $isLocked ? $request->user()->id : null,
+            'results_locked_at' => $isLocked ? now() : null,
+        ]);
+
+        $message = $isLocked
+            ? 'Hasil pertandingan berhasil dikunci final.'
+            : 'Kunci hasil pertandingan telah dibuka.';
+
+        return redirect()->back()->with('success', $message);
     }
 }

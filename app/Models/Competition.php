@@ -36,6 +36,7 @@ use Illuminate\Support\Carbon;
     'win_points', 'draw_points', 'loss_points',
     'draw_version', 'starts_at', 'ends_at',
     'locked_by', 'locked_at',
+    'is_results_locked', 'results_locked_by', 'results_locked_at',
 ])]
 class Competition extends Model
 {
@@ -54,12 +55,19 @@ class Competition extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'locked_at' => 'datetime',
+            'is_results_locked' => 'boolean',
+            'results_locked_at' => 'datetime',
         ];
     }
 
     public function locker(): BelongsTo
     {
         return $this->belongsTo(User::class, 'locked_by');
+    }
+
+    public function resultsLocker(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'results_locked_by');
     }
 
     public function participants(): HasMany
@@ -107,7 +115,12 @@ class Competition extends Model
 
     public function isActive(): bool
     {
-        return $this->isLocked() || $this->isInProgress();
+        return $this->isLocked() || $this->isInProgress() || $this->isCompleted();
+    }
+
+    public function isResultsLocked(): bool
+    {
+        return $this->is_results_locked;
     }
 
     public function isEditable(): bool

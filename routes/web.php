@@ -47,6 +47,7 @@ Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(functio
         Route::post('competitions/{competition}/lock', [CompetitionDrawController::class, 'lock'])->name('competitions.lock');
 
         Route::get('competitions/{competition}/scores', [AdminScoreController::class, 'index'])->name('competitions.scores');
+        Route::post('competitions/{competition}/lock-results', [AdminScoreController::class, 'toggleLockResults'])->name('competitions.lock-results');
         Route::post('competitions/{competition}/matches/{match}/score', [MatchScoreController::class, 'update'])->name('matches.score.update');
 
         Route::get('operators', [OperatorController::class, 'index'])->name('operators.index');

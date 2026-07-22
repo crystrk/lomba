@@ -32,6 +32,9 @@ class CompetitionFactory extends Factory
             'draw_version' => 0,
             'starts_at' => fake()->optional()->dateTimeBetween('+1 day', '+1 month'),
             'ends_at' => fake()->optional()->dateTimeBetween('+1 month', '+2 months'),
+            'is_results_locked' => false,
+            'results_locked_by' => null,
+            'results_locked_at' => null,
         ];
     }
 
@@ -93,6 +96,15 @@ class CompetitionFactory extends Factory
     {
         return $this->locked()->state(fn (array $attributes) => [
             'status' => CompetitionStatus::Completed,
+        ]);
+    }
+
+    public function resultsLocked(): static
+    {
+        return $this->completed()->state(fn (array $attributes) => [
+            'is_results_locked' => true,
+            'results_locked_at' => now(),
+            'results_locked_by' => User::factory()->admin(),
         ]);
     }
 }

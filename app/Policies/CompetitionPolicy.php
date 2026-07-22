@@ -50,6 +50,15 @@ class CompetitionPolicy
         return $competition->status === CompetitionStatus::Drawn;
     }
 
+    public function lockResults(User $user, Competition $competition): bool
+    {
+        if ($user->role !== UserRole::Admin) {
+            return false;
+        }
+
+        return in_array($competition->status, [CompetitionStatus::Locked, CompetitionStatus::InProgress, CompetitionStatus::Completed]);
+    }
+
     public function updateScore(User $user, Competition $competition): bool
     {
         if ($user->role === UserRole::Admin) {

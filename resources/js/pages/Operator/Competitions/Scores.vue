@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, shallowRef, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { Save, Trophy, Medal, AlertCircle, Filter } from '@lucide/vue';
+import { Save, Trophy, Medal, AlertCircle, Filter, Lock } from '@lucide/vue';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +23,7 @@ const props = defineProps<{
         format: string;
         status: string;
         draw_version: number;
+        is_results_locked?: boolean;
     };
     matchesByRound: Record<number, Array<{
         id: number;
@@ -156,7 +157,15 @@ function roundLabel(round: number, leg: number): string {
             </Badge>
         </div>
 
-        <div v-if="competition.status === 'draft' || competition.status === 'drawn'" class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-amber-800 dark:text-amber-300 flex items-start gap-3">
+        <div v-if="competition.is_results_locked" class="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-rose-800 dark:text-rose-300 flex items-start gap-3">
+            <Lock class="size-5 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+            <div>
+                <h4 class="font-semibold text-sm">Hasil Pertandingan Terkunci Final</h4>
+                <p class="text-xs mt-0.5">Hasil pertandingan telah dikunci secara final oleh Admin. Skor tidak dapat diubah lagi.</p>
+            </div>
+        </div>
+
+        <div v-else-if="competition.status === 'draft' || competition.status === 'drawn'" class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-amber-800 dark:text-amber-300 flex items-start gap-3">
             <AlertCircle class="size-5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
             <div>
                 <h4 class="font-semibold text-sm">Input Skor Belum Diizinkan</h4>
@@ -268,7 +277,7 @@ function roundLabel(round: number, leg: number): string {
                                             min="0"
                                             class="w-16 text-center text-lg font-bold"
                                             v-model="matchForms[match.id].score_home"
-                                            :disabled="matchForms[match.id].processing"
+                                            :disabled="matchForms[match.id].processing || competition.is_results_locked"
                                         />
                                         <span class="font-bold text-muted-foreground">:</span>
                                         <Input
@@ -276,7 +285,7 @@ function roundLabel(round: number, leg: number): string {
                                             min="0"
                                             class="w-16 text-center text-lg font-bold"
                                             v-model="matchForms[match.id].score_away"
-                                            :disabled="matchForms[match.id].processing"
+                                            :disabled="matchForms[match.id].processing || competition.is_results_locked"
                                         />
                                     </div>
 
@@ -293,7 +302,7 @@ function roundLabel(round: number, leg: number): string {
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div class="space-y-1">
                                             <span class="text-xs text-muted-foreground">Pemenang Tie-break</span>
-                                            <Select v-model="matchForms[match.id].winner_id">
+                                            <Select v-model="matchForms[match.id].winner_id" :disabled="competition.is_results_locked">
                                                 <SelectTrigger class="w-full bg-background">
                                                     <SelectValue placeholder="Pilih Tim Pemenang" />
                                                 </SelectTrigger>
@@ -313,6 +322,7 @@ function roundLabel(round: number, leg: number): string {
                                                 v-model="matchForms[match.id].win_method"
                                                 placeholder="Contoh: Penalti (5-4)"
                                                 class="bg-background"
+                                                :disabled="competition.is_results_locked"
                                             />
                                         </div>
                                     </div>
@@ -330,7 +340,7 @@ function roundLabel(round: number, leg: number): string {
                                         <span class="text-xs font-mono text-muted-foreground">v{{ match.result_version }}</span>
                                     </div>
 
-                                    <Button type="submit" size="sm" :disabled="matchForms[match.id].processing">
+                                    <Button type="submit" size="sm" :disabled="matchForms[match.id].processing || competition.is_results_locked">
                                         <Save class="mr-1.5 size-3.5" />
                                         {{ matchForms[match.id].processing ? 'Menyimpan...' : 'Simpan Skor' }}
                                     </Button>

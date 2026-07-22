@@ -24,6 +24,9 @@ return new class extends Migration
             $table->dateTime('ends_at')->nullable();
             $table->foreignId('locked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->dateTime('locked_at')->nullable();
+            $table->boolean('is_results_locked')->default(false);
+            $table->foreignId('results_locked_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->dateTime('results_locked_at')->nullable();
             $table->timestamps();
 
             $table->index('status');

@@ -68,7 +68,13 @@ class MatchScoreRequest extends FormRequest
                 }
 
                 if (! $competition->isActive()) {
-                    $validator->errors()->add('competition', 'Competition must be locked or in progress.');
+                    $validator->errors()->add('competition', 'Competition must be locked, in progress, or completed.');
+
+                    return;
+                }
+
+                if ($competition->isResultsLocked()) {
+                    $validator->errors()->add('competition', 'Hasil pertandingan telah dikunci final dan tidak dapat diubah lagi.');
 
                     return;
                 }
