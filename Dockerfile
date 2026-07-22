@@ -88,6 +88,6 @@ RUN mkdir -p \
     && chmod -R 775 bootstrap/cache \
     && chmod -R 775 database
 
-EXPOSE 80
+EXPOSE 8080
 
 USER www-data
