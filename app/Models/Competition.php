@@ -120,7 +120,7 @@ class Competition extends Model
 
     public function isResultsLocked(): bool
     {
-        return $this->is_results_locked;
+        return (bool) $this->is_results_locked;
     }
 
     public function isEditable(): bool
