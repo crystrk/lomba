@@ -7,6 +7,7 @@ use App\Enums\CompetitionMatchStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Competition;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,8 +19,8 @@ class ScoreController extends Controller
 
     public function index(Request $request, Competition $competition): Response
     {
-        $this->authorize('updateScore', $competition);
-        $this->authorize('view', $competition);
+        Gate::authorize('updateScore', $competition);
+        Gate::authorize('view', $competition);
 
         $competition->load(['participants', 'matches.homeParticipant', 'matches.awayParticipant', 'matches.winner']);
 
