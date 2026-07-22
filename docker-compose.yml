@@ -1,26 +1,89 @@
+# =============================================================================
+# Docker Compose — Production (Coolify)
+# Stack: Laravel 13 + PHP 8.4 + SQLite / PostgreSQL
+# =============================================================================
+
 services:
+
+  # ---------------------------------------------------------------------------
+  # WEB — Laravel App
+  # ---------------------------------------------------------------------------
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    image: lomba-app:latest
-    container_name: lomba_app
-    restart: unless-stopped
+      target: production
     ports:
-      - "${APP_PORT:-${PORT:-8080}}:80"
+      - '${APP_PORT:-8080}:80'
     environment:
-      APP_NAME: "${APP_NAME:-Lomba}"
-      APP_ENV: "${APP_ENV:-production}"
-      APP_KEY: "${APP_KEY}"
-      APP_DEBUG: "${APP_DEBUG:-false}"
-      APP_URL: "${APP_URL:-http://localhost:${APP_PORT:-8080}}"
-      DB_CONNECTION: "${DB_CONNECTION:-sqlite}"
-      DB_DATABASE: "${DB_DATABASE:-/var/www/html/database/database.sqlite}"
-      AUTORUN_ENABLED: "true"
-    volumes:
-      - storage_data:/var/www/html/storage
-      - db_data:/var/www/html/database
+      # --- App ---
+      APP_NAME: ${APP_NAME:-Lomba}
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL}
+      TZ: Asia/Jakarta
 
+      # --- PHP Tuning ---
+      PHP_OPCACHE_ENABLE: '1'
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: '0'
+      PHP_MEMORY_LIMIT: '512M'
+      PHP_MAX_EXECUTION_TIME: ${PHP_MAX_EXECUTION_TIME:-300}
+      PHP_MAX_INPUT_TIME: ${PHP_MAX_INPUT_TIME:-300}
+      PHP_POST_MAX_SIZE: ${PHP_POST_MAX_SIZE:-100M}
+      PHP_UPLOAD_MAX_FILE_SIZE: ${PHP_UPLOAD_MAX_FILE_SIZE:-100M}
+
+      # --- Queue, Cache, Session ---
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-database}
+      CACHE_STORE: ${CACHE_STORE:-database}
+      SESSION_DRIVER: ${SESSION_DRIVER:-database}
+
+      # --- DB (SQLite default, can be overridden via ENV to pgsql/mysql) ---
+      DB_CONNECTION: ${DB_CONNECTION:-sqlite}
+      DB_DATABASE: ${DB_DATABASE:-/var/www/html/database/database.sqlite}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      # --- Autorun ---
+      AUTORUN_ENABLED: 'true'
+      AUTORUN_LARAVEL_STORAGE_LINK: 'true'
+      AUTORUN_LARAVEL_MIGRATION: 'true'
+      AUTORUN_LARAVEL_MIGRATION_ISOLATION: 'false'
+      AUTORUN_LARAVEL_OPTIMIZE: 'true'
+      AUTORUN_LARAVEL_CONFIG_CACHE: 'true'
+      AUTORUN_LARAVEL_ROUTE_CACHE: 'true'
+      AUTORUN_LARAVEL_VIEW_CACHE: 'true'
+
+      # --- NGINX & Proxy Tuning ---
+      PHP_FPM_PM_CONTROL: 'static'
+      PHP_FPM_PM_MAX_CHILDREN: '15'
+      NGINX_CLIENT_MAX_BODY_SIZE: ${NGINX_CLIENT_MAX_BODY_SIZE:-100M}
+      TRUSTED_PROXIES: '*'
+    volumes:
+      - storage-data:/var/www/html/storage
+      - db-data:/var/www/html/database
+    networks:
+      - coolify
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:80/up']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  coolify:
+    external: true
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
 volumes:
-  storage_data:
-  db_data:
+  storage-data:
+  db-data:
