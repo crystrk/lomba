@@ -48,6 +48,15 @@ class DemoDataSeeder extends Seeder
                 ]
             );
 
+            // Clean up existing demo competitions if re-running seeder
+            Competition::whereIn('slug', [
+                'liga-mini-soccer-indonesia-2026',
+                'kejuaraan-voli-putra-open-2026',
+                'turnamen-tenis-lapangan-master-2026',
+                'kejuaraan-tenis-meja-tunggal-2026',
+                'turnamen-catur-cepat-rapid-chess-2026',
+            ])->delete();
+
             // Seed 5 Competitions
             $this->seedMiniSoccer($admin, $wasit);
             $this->seedVolleyball($admin, $wasit);
@@ -209,8 +218,10 @@ class DemoDataSeeder extends Seeder
         $this->generateDrawAndMatches($competition, $participants);
 
         $competition->update([
-            'status' => CompetitionStatus::Drawn,
+            'status' => CompetitionStatus::InProgress,
             'draw_version' => 1,
+            'locked_by' => $admin->id,
+            'locked_at' => now(),
         ]);
 
         $competition->operators()->attach($wasit->id, [

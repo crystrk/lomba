@@ -156,6 +156,14 @@ function roundLabel(round: number, leg: number): string {
             </Badge>
         </div>
 
+        <div v-if="competition.status === 'draft' || competition.status === 'drawn'" class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-amber-800 dark:text-amber-300 flex items-start gap-3">
+            <AlertCircle class="size-5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+            <div>
+                <h4 class="font-semibold text-sm">Input Skor Belum Diizinkan</h4>
+                <p class="text-xs mt-0.5">Status lomba saat ini adalah <strong>{{ statusLabel[competition.status] || competition.status }}</strong>. Lomba harus dikunci (Locked) terlebih dahulu oleh Admin sebelum skor pertandingan dapat diinput.</p>
+            </div>
+        </div>
+
         <div v-if="!isKnockout && standings.length > 0" class="space-y-4">
             <Card>
                 <CardHeader class="flex flex-row items-center justify-between pb-2">
@@ -310,8 +318,8 @@ function roundLabel(round: number, leg: number): string {
                                     </div>
                                 </div>
 
-                                <div v-if="matchForms[match.id].errors.score_home || matchForms[match.id].errors.score_away || matchForms[match.id].errors.winner_id || matchForms[match.id].errors.match || matchForms[match.id].errors.result_version" class="text-sm font-medium text-rose-600">
-                                    {{ matchForms[match.id].errors.score_home || matchForms[match.id].errors.score_away || matchForms[match.id].errors.winner_id || matchForms[match.id].errors.match || matchForms[match.id].errors.result_version }}
+                                <div v-if="Object.keys(matchForms[match.id].errors).length > 0" class="text-sm font-medium text-rose-600">
+                                    {{ Object.values(matchForms[match.id].errors)[0] }}
                                 </div>
 
                                 <div class="flex items-center justify-between pt-1 border-t">
