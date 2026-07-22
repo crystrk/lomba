@@ -77,7 +77,8 @@ class MatchScoreRequest extends FormRequest
                     $validator->errors()->add('result_version', 'This result has been updated by another user. Please refresh and try again.');
                 }
 
-                $winnerId = $this->input('winner_id');
+                $rawWinnerId = $this->input('winner_id');
+                $winnerId = ($rawWinnerId !== null && $rawWinnerId !== '') ? (int) $rawWinnerId : null;
                 $scoreHome = (int) $this->input('score_home');
                 $scoreAway = (int) $this->input('score_away');
 
@@ -86,7 +87,7 @@ class MatchScoreRequest extends FormRequest
                         $validator->errors()->add('winner_id', 'A tie-break winner is required when scores are equal in knockout format.');
                     }
 
-                    if ($winnerId !== null && $winnerId !== $match->participant_id_home && $winnerId !== $match->participant_id_away) {
+                    if ($winnerId !== null && $winnerId !== (int) $match->participant_id_home && $winnerId !== (int) $match->participant_id_away) {
                         $validator->errors()->add('winner_id', 'Tie-break winner must be one of the match participants.');
                     }
                 }

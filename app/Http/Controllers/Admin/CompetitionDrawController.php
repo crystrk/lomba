@@ -96,9 +96,6 @@ class CompetitionDrawController extends Controller
                 }
 
                 $target = $created->firstWhere('sequence', $slot->nextMatchId);
-                if ($target === null) {
-                    $target = $created->where('round', $slot->round + 1)->first();
-                }
 
                 if ($target !== null) {
                     $created[$i]->update(['next_match_id' => $target->id]);

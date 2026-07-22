@@ -108,25 +108,29 @@ class KnockoutGenerator implements MatchGenerator
     private function toDrawSlots(array $rounds, array $hasAdvancer, int $totalRounds): DrawResult
     {
         $slots = [];
-        $sequence = 0;
-        $absoluteId = 0;
         $idMap = [];
+        $seq = 0;
+
+        foreach ($rounds as $round => $matches) {
+            $idMap[$round] = [];
+            foreach ($matches as $pos => $match) {
+                $seq++;
+                $idMap[$round][$pos] = $seq;
+            }
+        }
 
         foreach ($rounds as $round => $matches) {
             $roundNumber = $round + 1;
-            $idMap[$round] = [];
 
             foreach ($matches as $pos => $match) {
-                $absoluteId++;
-                $sequence++;
-                $idMap[$round][$pos] = $absoluteId;
+                $sequence = $idMap[$round][$pos];
 
                 $nextMatchId = null;
                 $nextSlot = null;
 
                 if ($roundNumber < $totalRounds) {
                     $nextPos = (int) floor($pos / 2);
-                    $nextMatchId = $idMap[$round + 1][$nextPos] ?? 0;
+                    $nextMatchId = $idMap[$round + 1][$nextPos] ?? null;
                     $nextSlot = ($pos % 2 === 0) ? 1 : 2;
                 }
 

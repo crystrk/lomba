@@ -114,17 +114,17 @@ class MatchScoreController extends Controller
         return redirect()->back()->with('success', 'Score updated.');
     }
 
-    private function determineKnockoutWinner(CompetitionMatch $match, int $scoreHome, int $scoreAway, ?int $submittedWinnerId): int
+    private function determineKnockoutWinner(CompetitionMatch $match, int $scoreHome, int $scoreAway, mixed $submittedWinnerId): int
     {
         if ($scoreHome > $scoreAway) {
-            return $match->participant_id_home;
+            return (int) $match->participant_id_home;
         }
 
         if ($scoreHome < $scoreAway) {
-            return $match->participant_id_away;
+            return (int) $match->participant_id_away;
         }
 
-        return $submittedWinnerId;
+        return (int) $submittedWinnerId;
     }
 
     private function advanceWinner(CompetitionMatch $match, int $winnerId): void

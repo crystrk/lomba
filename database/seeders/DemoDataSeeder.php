@@ -366,9 +366,6 @@ class DemoDataSeeder extends Seeder
             }
 
             $target = $createdMatches->firstWhere('sequence', $slot->nextMatchId);
-            if ($target === null) {
-                $target = $createdMatches->where('round', $slot->round + 1)->first();
-            }
 
             if ($target !== null) {
                 $createdMatches[$i]->update(['next_match_id' => $target->id]);
