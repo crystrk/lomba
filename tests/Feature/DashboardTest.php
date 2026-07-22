@@ -7,12 +7,18 @@ test('guests are redirected to the login page', function () {
     $response->assertRedirect(route('login'));
 });
 
-test('admin can visit admin dashboard', function () {
+test('admin can visit admin dashboard with stats and competition lists', function () {
     $user = User::factory()->admin()->create();
     $this->actingAs($user);
 
     $response = $this->get(route('admin.dashboard'));
-    $response->assertOk();
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Admin/Dashboard')
+            ->has('stats')
+            ->has('recent_competitions')
+            ->has('active_competitions')
+        );
 });
 
 test('operator cannot visit admin dashboard', function () {
