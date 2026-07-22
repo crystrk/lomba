@@ -233,7 +233,7 @@ function scrollToBracketRound(round: number) {
                     <!-- Progress Ring / Bar Summary -->
                     <div v-if="totalScorableMatchesCount > 0" class="w-full md:w-64 p-4 rounded-xl bg-muted/40 border border-border/60 space-y-2">
                         <div class="flex items-center justify-between text-xs font-semibold">
-                            <span class="text-muted-foreground">Kemajuan Lomba</span>
+                            <span class="text-muted-foreground">Progress Lomba</span>
                             <span class="text-foreground font-bold">{{ matchProgressPercentage }}%</span>
                         </div>
                         <div class="h-2.5 w-full rounded-full bg-muted overflow-hidden">

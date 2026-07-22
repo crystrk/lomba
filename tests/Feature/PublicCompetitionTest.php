@@ -20,7 +20,7 @@ it('guest can access landing', function () {
     $this->get(route('home'))->assertSuccessful();
 });
 
-it('landing only shows active competitions (locked and in_progress)', function () {
+it('landing shows active and completed competitions (locked, in_progress, completed)', function () {
     Competition::factory()->create(['name' => 'Draft', 'status' => CompetitionStatus::Draft]);
     Competition::factory()->create(['name' => 'Drawn', 'status' => CompetitionStatus::Drawn]);
     $locked = Competition::factory()->create(['name' => 'Locked', 'status' => CompetitionStatus::Locked]);
@@ -32,11 +32,11 @@ it('landing only shows active competitions (locked and in_progress)', function (
     $response->assertSuccessful();
     $props = $response->inertiaProps();
 
-    expect($props['competitions'])->toHaveCount(2);
-    expect(collect($props['competitions'])->pluck('name')->sort()->values()->toArray())->toBe(['In Progress', 'Locked']);
+    expect($props['competitions'])->toHaveCount(3);
+    expect(collect($props['competitions'])->pluck('name')->sort()->values()->toArray())->toBe(['Completed', 'In Progress', 'Locked']);
 });
 
-it('completed competition does not appear on landing but is accessible via slug', function () {
+it('completed competition appears on landing and is accessible via slug', function () {
     $competition = Competition::factory()->create([
         'name' => 'Past Event',
         'slug' => 'past-event',
@@ -44,7 +44,7 @@ it('completed competition does not appear on landing but is accessible via slug'
     ]);
 
     $landingResponse = $this->get(route('home'));
-    expect($landingResponse->inertiaProps()['competitions'])->toHaveCount(0);
+    expect($landingResponse->inertiaProps()['competitions'])->toHaveCount(1);
 
     $this->get(route('public.competitions.show', $competition))
         ->assertSuccessful();

@@ -19,7 +19,7 @@ class PublicCompetitionController extends Controller
     public function index(): Response
     {
         $competitions = Competition::query()
-            ->whereIn('status', [CompetitionStatus::Locked, CompetitionStatus::InProgress])
+            ->whereIn('status', [CompetitionStatus::Locked, CompetitionStatus::InProgress, CompetitionStatus::Completed])
             ->withCount('participants')
             ->withCount([
                 'matches as total_scorable_matches' => function ($q) {

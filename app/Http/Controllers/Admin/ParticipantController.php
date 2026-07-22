@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\BulkStoreParticipantRequest;
 use App\Http\Requests\Admin\StoreParticipantRequest;
 use App\Http\Requests\Admin\UpdateParticipantRequest;
 use App\Models\Competition;
@@ -64,7 +65,7 @@ class ParticipantController extends Controller
             ->with('success', 'Peserta berhasil ditambahkan.');
     }
 
-    public function bulkStore(\App\Http\Requests\Admin\BulkStoreParticipantRequest $request, Competition $competition): RedirectResponse
+    public function bulkStore(BulkStoreParticipantRequest $request, Competition $competition): RedirectResponse
     {
         if (! $competition->isEditable()) {
             abort(403, 'Peserta tidak dapat ditambah pada lomba yang sudah terkunci.');

@@ -41,11 +41,12 @@ const formatLabel: Record<string, string> = {
 const statusLabel: Record<string, string> = {
     locked: 'Terkunci / Siap',
     in_progress: 'Sedang Berlangsung',
+    completed: 'Selesai',
 };
 
 // Filter states
 const searchQuery = ref('');
-const statusFilter = ref<'all' | 'in_progress' | 'locked'>('all');
+const statusFilter = ref<'all' | 'in_progress' | 'locked' | 'completed'>('all');
 const formatFilter = ref<'all' | 'knockout' | 'full_competition' | 'half_competition'>('all');
 
 const filteredCompetitions = computed(() => {
@@ -169,6 +170,13 @@ const totalParticipants = computed(() => props.competitions.reduce((acc, c) => a
                 >
                     🔒 Terkunci / Siap
                 </button>
+                <button
+                    @click="statusFilter = 'completed'"
+                    class="rounded-full px-3 py-1 text-xs font-medium transition-colors border"
+                    :class="statusFilter === 'completed' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-background text-muted-foreground hover:bg-accent border-border'"
+                >
+                    🏆 Selesai
+                </button>
 
                 <div class="h-4 w-px bg-border my-auto mx-1 hidden sm:block"></div>
 
@@ -232,7 +240,7 @@ const totalParticipants = computed(() => props.competitions.reduce((acc, c) => a
                         <!-- Top Accent Banner -->
                         <div 
                             class="h-1.5 w-full"
-                            :class="comp.status === 'in_progress' ? 'bg-linear-to-r from-emerald-500 to-teal-500' : 'bg-linear-to-r from-amber-500 to-orange-500'"
+                            :class="comp.status === 'in_progress' ? 'bg-linear-to-r from-emerald-500 to-teal-500' : comp.status === 'completed' ? 'bg-linear-to-r from-indigo-500 to-purple-500' : 'bg-linear-to-r from-amber-500 to-orange-500'"
                         ></div>
 
                         <CardHeader class="pb-3 pt-5">
@@ -243,7 +251,7 @@ const totalParticipants = computed(() => props.competitions.reduce((acc, c) => a
                                 <Badge 
                                     :variant="comp.status === 'in_progress' ? 'default' : 'secondary'"
                                     class="shrink-0 text-xs font-semibold px-2.5 py-0.5"
-                                    :class="comp.status === 'in_progress' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''"
+                                    :class="comp.status === 'in_progress' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : comp.status === 'completed' ? 'bg-indigo-600 text-white' : ''"
                                 >
                                     <span v-if="comp.status === 'in_progress'" class="size-1.5 rounded-full bg-white animate-pulse mr-1.5 inline-block"></span>
                                     {{ statusLabel[comp.status] || comp.status }}
