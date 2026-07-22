@@ -45,52 +45,86 @@ class KnockoutGenerator implements MatchGenerator
         $n = count($participantIds);
         $totalRounds = (int) round(log($bracketSize, 2));
 
+        $byes = $bracketSize - $n;
+        $m1 = (2 * $n) - $bracketSize; // Number of participants playing in Round 1 2-player matches
+        $readyMatchesR1 = intdiv($m1, 2);
+
         $rounds = [];
         $hasAdvancer = [];
         $current = [];
         $currentAdv = [];
+        $advancerValues = [];
 
-        for ($i = 0; $i < $bracketSize / 2; $i++) {
-            $home = ($i * 2 < $n) ? $participantIds[$i * 2] : null;
-            $away = ($i * 2 + 1 < $n) ? $participantIds[$i * 2 + 1] : null;
-
-            if ($home !== null && $away !== null) {
+        // Round 1 (r = 0)
+        for ($k = 0; $k < $bracketSize / 2; $k++) {
+            if ($k < $readyMatchesR1) {
+                $home = $participantIds[$k * 2];
+                $away = $participantIds[$k * 2 + 1];
                 $current[] = ['home' => $home, 'away' => $away, 'status' => CompetitionMatchStatus::Ready];
-                $currentAdv[] = true;
-            } elseif ($home !== null) {
-                $current[] = ['home' => $home, 'away' => null, 'status' => CompetitionMatchStatus::Bye];
-                $currentAdv[] = true;
-            } elseif ($away !== null) {
-                $current[] = ['home' => $away, 'away' => null, 'status' => CompetitionMatchStatus::Bye];
-                $currentAdv[] = true;
-            } else {
-                $current[] = ['home' => null, 'away' => null, 'status' => CompetitionMatchStatus::Bye];
                 $currentAdv[] = false;
+                $advancerValues[] = null;
+            } else {
+                $pIndex = $m1 + ($k - $readyMatchesR1);
+                $home = ($pIndex < $n) ? $participantIds[$pIndex] : null;
+                $status = $home !== null ? CompetitionMatchStatus::Bye : CompetitionMatchStatus::Bye;
+                $current[] = ['home' => $home, 'away' => null, 'status' => $status];
+                $currentAdv[] = $home !== null;
+                $advancerValues[] = $home;
             }
         }
 
         $rounds[] = $current;
         $hasAdvancer[] = $currentAdv;
 
+        // Subsequent rounds
         for ($round = 1; $round < $totalRounds; $round++) {
-            $previous = $current;
-            $previousAdv = $currentAdv;
+            $prevMatches = $current;
+            $prevAdv = $currentAdv;
+            $prevAdvValues = $advancerValues;
+
             $current = [];
             $currentAdv = [];
+            $advancerValues = [];
 
-            for ($i = 0; $i < count($previous) / 2; $i++) {
-                $aHasAdv = $previousAdv[$i * 2];
-                $bHasAdv = $previousAdv[$i * 2 + 1];
+            for ($k = 0; $k < count($prevMatches) / 2; $k++) {
+                $parentA = $prevMatches[$k * 2];
+                $parentB = $prevMatches[$k * 2 + 1];
 
-                if ($aHasAdv && $bHasAdv) {
-                    $current[] = ['home' => null, 'away' => null, 'status' => CompetitionMatchStatus::Pending];
-                    $currentAdv[] = true;
-                } elseif ($aHasAdv || $bHasAdv) {
-                    $current[] = ['home' => null, 'away' => null, 'status' => CompetitionMatchStatus::Bye];
-                    $currentAdv[] = true;
+                $parentAAdv = $prevAdvValues[$k * 2];
+                $parentBAdv = $prevAdvValues[$k * 2 + 1];
+
+                $home = $parentA['status'] === CompetitionMatchStatus::Bye ? $parentAAdv : null;
+                $away = $parentB['status'] === CompetitionMatchStatus::Bye ? $parentBAdv : null;
+
+                $bothParentsBye = ($parentA['status'] === CompetitionMatchStatus::Bye)
+                    && ($parentB['status'] === CompetitionMatchStatus::Bye);
+
+                if ($bothParentsBye) {
+                    if ($home !== null && $away !== null) {
+                        $current[] = ['home' => $home, 'away' => $away, 'status' => CompetitionMatchStatus::Ready];
+                        $currentAdv[] = false;
+                        $advancerValues[] = null;
+                    } elseif ($home !== null) {
+                        $current[] = ['home' => $home, 'away' => null, 'status' => CompetitionMatchStatus::Bye];
+                        $currentAdv[] = true;
+                        $advancerValues[] = $home;
+                    } elseif ($away !== null) {
+                        $current[] = ['home' => $away, 'away' => null, 'status' => CompetitionMatchStatus::Bye];
+                        $currentAdv[] = true;
+                        $advancerValues[] = $away;
+                    } else {
+                        $current[] = ['home' => null, 'away' => null, 'status' => CompetitionMatchStatus::Bye];
+                        $currentAdv[] = false;
+                        $advancerValues[] = null;
+                    }
                 } else {
-                    $current[] = ['home' => null, 'away' => null, 'status' => CompetitionMatchStatus::Bye];
+                    $status = ($home !== null && $away !== null)
+                        ? CompetitionMatchStatus::Ready
+                        : CompetitionMatchStatus::Pending;
+
+                    $current[] = ['home' => $home, 'away' => $away, 'status' => $status];
                     $currentAdv[] = false;
+                    $advancerValues[] = null;
                 }
             }
 
