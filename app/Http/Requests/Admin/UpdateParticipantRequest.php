@@ -2,17 +2,17 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\UserRole;
 use App\Models\Participant;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
 
 class UpdateParticipantRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $competition = $this->route('competition');
+        $user = $this->user();
 
-        return Gate::allows('update', $competition);
+        return $user && $user->role === UserRole::Admin;
     }
 
     public function rules(): array

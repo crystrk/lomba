@@ -144,7 +144,6 @@ function handleDelete() {
                         <TableCell>
                             <div class="flex justify-end gap-2">
                                 <Link
-                                    v-if="isEditable"
                                     :href="edit([competition.id, p.id])"
                                 >
                                     <Button variant="outline" size="sm">

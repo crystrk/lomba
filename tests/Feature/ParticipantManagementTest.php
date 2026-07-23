@@ -108,7 +108,7 @@ it('admin can delete participant', function () {
     expect(Participant::find($participant->id))->toBeNull();
 });
 
-it('cannot mutate participant on locked competition', function () {
+it('cannot store or delete participant on locked competition, but can update', function () {
     $locked = Competition::factory()->locked()->create();
     $participant = Participant::factory()->create([
         'competition_id' => $locked->id,
@@ -121,8 +121,10 @@ it('cannot mutate participant on locked competition', function () {
 
     $this->actingAs($this->admin)
         ->put(route('admin.competitions.participants.update', [$locked, $participant]), [
-            'name' => 'Hacked',
-        ])->assertForbidden();
+            'name' => 'Renamed Team',
+        ])->assertRedirect(route('admin.competitions.participants.index', $locked));
+
+    expect($participant->fresh()->name)->toBe('Renamed Team');
 
     $this->actingAs($this->admin)
         ->delete(route('admin.competitions.participants.destroy', [$locked, $participant]))
