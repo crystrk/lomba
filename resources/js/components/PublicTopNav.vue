@@ -94,8 +94,8 @@ function toggleTheme() {
                     class="inline-flex items-center justify-center size-9 rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                     :title="appearance === 'dark' ? 'Beralih ke mode terang' : 'Beralih ke mode gelap'"
                 >
-                    <Sun v-if="appearance === 'dark'" class="size-4 text-amber-400" />
-                    <Moon v-else class="size-4 text-slate-700" />
+                    <Sun class="size-4 text-amber-500 hidden dark:block" />
+                    <Moon class="size-4 text-slate-700 dark:hidden" />
                     <span class="sr-only">Toggle Theme</span>
                 </button>
 
@@ -124,9 +124,10 @@ function toggleTheme() {
                     type="button"
                     @click="toggleTheme"
                     class="inline-flex items-center justify-center size-9 rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                    :title="appearance === 'dark' ? 'Beralih ke mode terang' : 'Beralih ke mode gelap'"
                 >
-                    <Sun v-if="appearance === 'dark'" class="size-4 text-amber-400" />
-                    <Moon v-else class="size-4 text-slate-700" />
+                    <Sun class="size-4 text-amber-500 hidden dark:block" />
+                    <Moon class="size-4 text-slate-700 dark:hidden" />
                 </button>
 
                 <button
