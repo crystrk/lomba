@@ -5,6 +5,21 @@
 
 services:
 
+  db-permissions:
+    image: alpine:3.21
+    user: root
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        touch /var/www/db/database.sqlite
+        chown 33:33 /var/www/db
+        chmod 775 /var/www/db
+        find /var/www/db -maxdepth 1 -type f -name 'database.sqlite*' -exec chown 33:33 {} + -exec chmod 664 {} +
+    volumes:
+      - db-data:/var/www/db
+    restart: 'no'
+
   # ---------------------------------------------------------------------------
   # WEB — Laravel App
   # ---------------------------------------------------------------------------
@@ -61,6 +76,9 @@ services:
       PHP_FPM_PM_MAX_CHILDREN: '15'
       NGINX_CLIENT_MAX_BODY_SIZE: ${NGINX_CLIENT_MAX_BODY_SIZE:-100M}
       TRUSTED_PROXIES: '*'
+    depends_on:
+      db-permissions:
+        condition: service_completed_successfully
     volumes:
       - storage-data:/var/www/html/storage
       - db-data:/var/www/db
