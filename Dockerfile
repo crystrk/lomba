@@ -83,7 +83,8 @@ RUN mkdir -p \
         storage/framework/sessions \
         storage/framework/views \
         database \
-    && chown -R www-data:www-data /var/www/html \
+        /var/www/db \
+    && chown -R www-data:www-data /var/www/html /var/www/db \
     && chmod -R 775 storage \
     && chmod -R 775 bootstrap/cache \
     && chmod -R 775 database
