@@ -37,7 +37,7 @@ test('it uploads a gzipped sqlite backup that contains the source data', functio
         $this->artisan('app:backup-database')->assertSuccessful();
 
         $disk = Storage::disk('s3');
-        $files = $disk->allFiles('backups/testing');
+        $files = $disk->allFiles('backups-arena/testing');
         expect($files)->toHaveCount(1)
             ->and($files[0])->toEndWith('.sqlite.gz');
 
@@ -67,19 +67,19 @@ test('it prunes backups beyond the retention limit', function (): void {
         '2026-07-22/050000',
     ];
     foreach ($stamps as $stamp) {
-        $disk->put("backups/testing/{$stamp}-database.sqlite.gz", 'old');
+        $disk->put("backups-arena/testing/{$stamp}-database.sqlite.gz", 'old');
     }
 
     try {
         $this->artisan('app:backup-database')->assertSuccessful();
 
-        expect($disk->allFiles('backups/testing'))->toHaveCount(3);
+        expect($disk->allFiles('backups-arena/testing'))->toHaveCount(3);
 
-        $disk->assertMissing('backups/testing/2026-07-18/010000-database.sqlite.gz');
-        $disk->assertMissing('backups/testing/2026-07-19/020000-database.sqlite.gz');
-        $disk->assertMissing('backups/testing/2026-07-20/030000-database.sqlite.gz');
-        $disk->assertExists('backups/testing/2026-07-21/040000-database.sqlite.gz');
-        $disk->assertExists('backups/testing/2026-07-22/050000-database.sqlite.gz');
+        $disk->assertMissing('backups-arena/testing/2026-07-18/010000-database.sqlite.gz');
+        $disk->assertMissing('backups-arena/testing/2026-07-19/020000-database.sqlite.gz');
+        $disk->assertMissing('backups-arena/testing/2026-07-20/030000-database.sqlite.gz');
+        $disk->assertExists('backups-arena/testing/2026-07-21/040000-database.sqlite.gz');
+        $disk->assertExists('backups-arena/testing/2026-07-22/050000-database.sqlite.gz');
     } finally {
         @unlink($dbPath);
     }
@@ -95,7 +95,7 @@ test('it fails fast when the default connection is not sqlite', function (): voi
 
         $this->artisan('app:backup-database')->assertFailed();
 
-        expect(Storage::disk('s3')->allFiles('backups/testing'))->toBeEmpty();
+        expect(Storage::disk('s3')->allFiles('backups-arena/testing'))->toBeEmpty();
     } finally {
         config(['database.default' => $original]);
     }
@@ -107,5 +107,5 @@ test('it fails fast when the sqlite database is in-memory or missing', function 
 
     $this->artisan('app:backup-database')->assertFailed();
 
-    expect(Storage::disk('s3')->allFiles('backups/testing'))->toBeEmpty();
+    expect(Storage::disk('s3')->allFiles('backups-arena/testing'))->toBeEmpty();
 });

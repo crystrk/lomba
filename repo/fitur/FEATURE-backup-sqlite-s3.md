@@ -58,7 +58,7 @@ Fitur ini berjalan otomatis di background; tidak ada interaksi pengguna. Flow di
 ```text
 Scheduler terpicu setiap 3 jam → command membaca path database SQLite dari config →
 VACUUM INTO membuat snapshot konsisten ke file sementara di storage lokal →
-snapshot dikompresi gzip → file `.gz` di-stream ke S3 (key: backups/{env}/YYYY-MM-DD/HHmmss-database.sqlite.gz) →
+snapshot dikompresi gzip → file `.gz` di-stream ke S3 (key: backups-arena/{env}/YYYY-MM-DD/HHmmss-database.sqlite.gz) →
 file sementara lokal dihapus → backup lama di luar retensi 14 hari dipruning → hasil dicatat ke log
 ```
 
@@ -85,7 +85,7 @@ Administrator server menjalankan `php artisan app:backup-database` → flow sama
 
 - [x] Artisan command `app:backup-database` yang membuat snapshot konsisten via `VACUUM INTO` ke file sementara di disk lokal.
 - [x] Kompresi gzip pada snapshot sebelum upload (streaming, tanpa memuat seluruh file ke memory).
-- [x] Upload snapshot terkompresi ke disk S3 dengan key ber-timestamp dan prefix per lingkungan, misal `backups/production/2026-07-24/150000-database.sqlite.gz`.
+- [x] Upload snapshot terkompresi ke disk S3 dengan key ber-timestamp dan prefix per lingkungan, misal `backups-arena/production/2026-07-24/150000-database.sqlite.gz`.
 - [x] File sementara lokal (`.sqlite` dan `.gz`) selalu dihapus setelah upload berhasil maupun gagal (finally block).
 - [x] Penjadwalan otomatis setiap 3 jam di `routes/console.php` dengan `withoutOverlapping`.
 - [x] Pruning: backup di luar batas retensi dihapus dari S3. Retensi ditetapkan **14 hari = 112 backup terakhir** (8 backup/hari), dikonfigurasi via config.
@@ -157,13 +157,13 @@ Tidak ada antarmuka pengguna pada fitur ini. Seluruh interaksi melalui command l
 - **Business logic (di dalam command, langsung dan sederhana):**
   1. Validasi `DB_CONNECTION` adalah `sqlite` dan konfigurasi disk S3 lengkap; jika tidak, gagal cepat dengan pesan jelas.
   2. Ambil path absolut database dari `config('database.connections.sqlite.database')`.
-  3. Jalankan `VACUUM INTO '<path sementara>'` melalui koneksi database (`DB::statement`), dengan path tujuan unik di `storage/app/backups/tmp/`. *[catatan: gunakan quoting path yang aman; di Windows path mengandung backslash/spasi]*
+  3. Jalankan `VACUUM INTO '<path sementara>'` melalui koneksi database (`DB::statement`), dengan path tujuan unik di `storage/app/backups-arena/tmp/`. *[catatan: gunakan quoting path yang aman; di Windows path mengandung backslash/spasi]*
   4. Kompresi snapshot ke `*.sqlite.gz` secara streaming (`gzopen`/`gzwrite` per chunk) agar file tidak dimuat penuh ke memory.
   5. Stream file `.gz` ke disk S3: `Storage::disk(config('backup.disk'))->put($key, fopen($path, 'r'))`.
   6. Verifikasi ukuran objek di S3, lalu hapus seluruh file sementara dalam `finally`.
   7. Pruning: list objek dengan prefix, urutkan, hapus yang melebihi `config('backup.retention')`.
   8. Log hasil via `Log::info` / `Log::error` dengan context terstruktur.
-- **Config baru `config/backup.php`:** `disk` (default `s3`), `prefix` (default `backups/{app_env}`), `retention` (default `112`, setara 14 hari × 8 backup/hari). Semua env-driven.
+- **Config baru `config/backup.php`:** `disk` (default `s3`), `prefix` (default `backups-arena/{app_env}`), `retention` (default `112`, setara 14 hari × 8 backup/hari). Semua env-driven.
 - **Scheduling (`routes/console.php`):**
 
   ```php
@@ -217,7 +217,7 @@ Tidak ada perubahan schema. File backup di S3 adalah artefak di luar database.
 ### Integration
 
 - [ ] Object storage **kompatibel S3** (keputusan PO): dikonfigurasi via `AWS_ENDPOINT` dan `AWS_USE_PATH_STYLE_ENDPOINT=true` yang sudah didukung `config/filesystems.php`. Menggunakan dependency `league/flysystem-aws-s3-v3` yang sudah terinstall — tidak ada package baru.
-- [ ] **Bucket lifecycle rule** di sisi S3 sebagai pelengkap pruning aplikasi (misal hapus objek di prefix `backups/` yang lebih tua dari 30 hari) — pertahanan lapis kedua jika pruning aplikasi gagal. Diatur di level infrastruktur, bukan kode aplikasi.
+- [ ] **Bucket lifecycle rule** di sisi S3 sebagai pelengkap pruning aplikasi (misal hapus objek di prefix `backups-arena/` yang lebih tua dari 30 hari) — pertahanan lapis kedua jika pruning aplikasi gagal. Diatur di level infrastruktur, bukan kode aplikasi.
 
 ---
 

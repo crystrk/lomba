@@ -159,7 +159,7 @@ class BackupDatabase extends Command
     protected function buildKey(): string
     {
         $now = now();
-        $prefix = (string) config('backup.prefix', 'backups/'.config('app.env'));
+        $prefix = (string) config('backup.prefix', 'backups-arena/'.config('app.env'));
 
         return $prefix.'/'.$now->format('Y-m-d').'/'.$now->format('His').'-database.sqlite.gz';
     }
@@ -171,7 +171,7 @@ class BackupDatabase extends Command
             return;
         }
 
-        $prefix = (string) config('backup.prefix', 'backups/'.config('app.env'));
+        $prefix = (string) config('backup.prefix', 'backups-arena/'.config('app.env'));
 
         $files = $disk->allFiles($prefix);
         rsort($files);
