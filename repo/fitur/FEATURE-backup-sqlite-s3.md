@@ -8,7 +8,7 @@
 ## 1. Overview
 
 **Nama Fitur:** Backup SQLite Otomatis ke S3
-**Status:** Draft
+**Status:** Implemented (MVP)
 **Priority:** High *[asumsi: database SQLite adalah satu-satunya sumber kebenaran seluruh data lomba; kehilangan data tanpa backup berdampak fatal pada produk]*
 **Epic/Module:** Operasional & Infrastruktur (di luar modul domain lomba)
 **Detected Stack:** PHP 8.4, Laravel 13, SQLite, Flysystem S3 v3 (`league/flysystem-aws-s3-v3: 3.0` sudah terinstall di `composer.json`), Pest 4, deployment Docker via Coolify
@@ -83,18 +83,18 @@ Administrator server menjalankan `php artisan app:backup-database` → flow sama
 
 ### Must Have (MVP)
 
-- [ ] Artisan command `app:backup-database` yang membuat snapshot konsisten via `VACUUM INTO` ke file sementara di disk lokal.
-- [ ] Kompresi gzip pada snapshot sebelum upload (streaming, tanpa memuat seluruh file ke memory).
-- [ ] Upload snapshot terkompresi ke disk S3 dengan key ber-timestamp dan prefix per lingkungan, misal `backups/production/2026-07-24/150000-database.sqlite.gz`.
-- [ ] File sementara lokal (`.sqlite` dan `.gz`) selalu dihapus setelah upload berhasil maupun gagal (finally block).
-- [ ] Penjadwalan otomatis setiap 3 jam di `routes/console.php` dengan `withoutOverlapping`.
-- [ ] Pruning: backup di luar batas retensi dihapus dari S3. Retensi ditetapkan **14 hari = 112 backup terakhir** (8 backup/hari), dikonfigurasi via config.
-- [ ] Fail fast dengan pesan jelas jika koneksi DB bukan SQLite atau konfigurasi S3 belum lengkap.
-- [ ] Logging terstruktur hasil setiap run: sukses (key, ukuran, durasi) atau gagal (exception).
+- [x] Artisan command `app:backup-database` yang membuat snapshot konsisten via `VACUUM INTO` ke file sementara di disk lokal.
+- [x] Kompresi gzip pada snapshot sebelum upload (streaming, tanpa memuat seluruh file ke memory).
+- [x] Upload snapshot terkompresi ke disk S3 dengan key ber-timestamp dan prefix per lingkungan, misal `backups/production/2026-07-24/150000-database.sqlite.gz`.
+- [x] File sementara lokal (`.sqlite` dan `.gz`) selalu dihapus setelah upload berhasil maupun gagal (finally block).
+- [x] Penjadwalan otomatis setiap 3 jam di `routes/console.php` dengan `withoutOverlapping`.
+- [x] Pruning: backup di luar batas retensi dihapus dari S3. Retensi ditetapkan **14 hari = 112 backup terakhir** (8 backup/hari), dikonfigurasi via config.
+- [x] Fail fast dengan pesan jelas jika koneksi DB bukan SQLite atau konfigurasi S3 belum lengkap.
+- [x] Logging terstruktur hasil setiap run: sukses (key, ukuran, durasi) atau gagal (exception).
 
 ### Should Have
 
-- [ ] Verifikasi pasca-upload: bandingkan ukuran file `.gz` lokal vs `Content-Length` di S3 sebelum menghapus file sementara.
+- [x] Verifikasi pasca-upload: bandingkan ukuran file `.gz` lokal vs `Content-Length` di S3 sebelum menghapus file sementara.
 - [ ] Metadata objek S3 (misal `app`, `environment`, `created-at`) untuk audit.
 
 ### Won't Have (untuk versi ini)
@@ -225,16 +225,16 @@ Tidak ada perubahan schema. File backup di S3 adalah artefak di luar database.
 
 Fitur dinyatakan selesai jika:
 
-- [ ] `php artisan app:backup-database` menghasilkan satu objek `.sqlite.gz` valid di S3 dengan key ber-timestamp dan seluruh file sementara lokal terhapus.
-- [ ] File hasil backup (setelah dekompresi) dapat dibuka sebagai database SQLite dan memuat data yang sama dengan database sumber (terverifikasi di test).
-- [ ] `php artisan schedule:list` menampilkan jadwal `app:backup-database` setiap 3 jam, dan run tumpang tindih tidak terjadi (`withoutOverlapping`).
-- [ ] Retensi terpenuhi: setelah jumlah backup melebihi 112 objek (14 hari), objek terlama terhapus dari S3.
-- [ ] Kegagalan konfigurasi (kredensial kosong / koneksi non-SQLite) menghasilkan exit code non-zero dan pesan error yang jelas, tanpa artefak parsial.
+- [x] `php artisan app:backup-database` menghasilkan satu objek `.sqlite.gz` valid di S3 dengan key ber-timestamp dan seluruh file sementara lokal terhapus.
+- [x] File hasil backup (setelah dekompresi) dapat dibuka sebagai database SQLite dan memuat data yang sama dengan database sumber (terverifikasi di test).
+- [x] `php artisan schedule:list` menampilkan jadwal `app:backup-database` setiap 3 jam, dan run tumpang tindih tidak terjadi (`withoutOverlapping`).
+- [x] Retensi terpenuhi: setelah jumlah backup melebihi 112 objek (14 hari), objek terlama terhapus dari S3.
+- [x] Kegagalan konfigurasi (kredensial kosong / koneksi non-SQLite) menghasilkan exit code non-zero dan pesan error yang jelas, tanpa artefak parsial.
 - [ ] Scheduled task Coolify aktif menjalankan `schedule:run` setiap menit dan backup terlihat di S3 dalam interval ≤ 3 jam setelah deploy.
 - [ ] Bucket lifecycle rule pelengkap terkonfigurasi di sisi S3.
-- [ ] Test Pest untuk skenario di atas berhasil dijalankan (`php artisan test --compact`).
-- [ ] Tidak ada regression pada fitur existing.
-- [ ] `.env.example` dan dokumen operasional restore diperbarui.
+- [x] Test Pest untuk skenario di atas berhasil dijalankan (`php artisan test --compact`).
+- [x] Tidak ada regression pada fitur existing.
+- [x] `.env.example` dan dokumen operasional restore diperbarui.
 
 ---
 
@@ -260,14 +260,14 @@ Sisa prasyarat operasional (bukan keputusan produk):
 
 ## 10. Timeline Estimasi
 
-| Fase          | Estimasi    | Keterangan                                                                      |
-| ------------- | ----------- | ------------------------------------------------------------------------------- |
-| Design & Spec | Selesai     | Seluruh keputusan diambil pada 24 Juli 2026.                                     |
-| Development   | 1–2 hari    | Command, config, scheduling, pruning; tanpa perubahan domain.                    |
-| Testing       | 0.5–1 hari  | Test Pest + uji manual di environment staging/produksi (termasuk restore drill). |
-| Release       | *[menyusul]* | Menunggu ketersediaan endpoint/bucket/kredensial S3-compatible produksi.        |
+| Fase          | Estimasi    | Keterangan                                                                              |
+| ------------- | ----------- | --------------------------------------------------------------------------------------- |
+| Design & Spec | Selesai     | Seluruh keputusan diambil pada 24 Juli 2026.                                             |
+| Development   | 1 hari      | Command, config, scheduling, pruning selesai pada 24 Juli 2026.                          |
+| Testing       | 0.5 hari    | Test Pest (4 test, 15 assertions) selesai; uji end-to-end menunggu kredensial S3.        |
+| Release       | *[menyusul]* | Menunggu ketersediaan endpoint/bucket/kredensial S3-compatible produksi.                |
 
-**Confidence:** High — implementasi teknis sederhana, dependency sudah tersedia, dan seluruh keputusan operasional telah ditetapkan; satu-satunya sisa adalah prasyarat kredensial S3 produksi.
+**Confidence:** High — kode dan test selesai; blocker hanya prasyarat infrastruktur produksi (kredensial S3 + scheduled task Coolify).
 
 ---
 

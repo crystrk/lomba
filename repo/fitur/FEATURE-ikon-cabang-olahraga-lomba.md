@@ -7,8 +7,8 @@
 
 ## 1. Overview
 
-**Nama Fitur:** Ikon Cabang Olahraga Lomba  
-**Status:** Draft  
+**Nama Fitur:** Ikon Cabang Olahraga Lomba
+**Status:** Implemented (MVP)
 **Priority:** Medium  
 **Epic/Module:** Pengelolaan Lomba dan Landing Page Publik  
 **Detected Stack:** PHP 8.4, Laravel 13.20, SQLite, Inertia.js 3.1, Vue 3.5 + TypeScript, Tailwind CSS 4.3, shadcn-vue/reka-ui, Wayfinder, dan Pest 4
@@ -81,23 +81,23 @@ Admin memilih cabang olahraga → backend memvalidasi dan menyimpan identifier �
 
 ### Must Have (MVP)
 
-- [ ] Admin dapat memilih satu cabang olahraga saat membuat lomba.
-- [ ] Admin dapat melihat dan mengubah cabang olahraga melalui form edit sesuai policy update lomba yang berlaku.
-- [ ] Pilihan awal terdiri dari `football`, `badminton`, `tennis`, `table_tennis`, `chess`, dan `volleyball` dengan label Bahasa Indonesia.
-- [ ] Backend hanya menerima identifier yang terdaftar dan tidak menerima markup SVG dari request.
-- [ ] Identifier cabang olahraga disimpan pada tabel `competitions` dan masuk dalam mass-assignment model secara eksplisit.
-- [ ] Landing page menerima identifier cabang olahraga dalam props lomba.
-- [ ] Setiap identifier memiliki SVG yang berbeda dan sesuai cabang olahraga.
-- [ ] Tidak ada cabang olahraga yang dapat ditambahkan ke registry tanpa komponen SVG khusus.
-- [ ] Kartu lomba publik menampilkan SVG, nama cabang olahraga yang aksesibel, serta SVG piala untuk data lama/null atau mapping yang tidak ditemukan.
-- [ ] SVG menggunakan `currentColor` agar mengikuti warna tema dan state kartu.
-- [ ] Desain awal enam SVG cabang olahraga dan satu SVG piala dibuat sebagai bagian implementasi untuk direview Product Owner.
+- [x] Admin dapat memilih satu cabang olahraga saat membuat lomba.
+- [x] Admin dapat melihat dan mengubah cabang olahraga melalui form edit sesuai policy update lomba yang berlaku.
+- [x] Pilihan awal terdiri dari `football`, `badminton`, `tennis`, `table_tennis`, `chess`, dan `volleyball` dengan label Bahasa Indonesia. (ditambah `general` untuk fallback)
+- [x] Backend hanya menerima identifier yang terdaftar dan tidak menerima markup SVG dari request.
+- [x] Identifier cabang olahraga disimpan pada tabel `competitions` dan masuk dalam mass-assignment model secara eksplisit.
+- [x] Landing page menerima identifier cabang olahraga dalam props lomba.
+- [x] Setiap identifier memiliki SVG yang berbeda dan sesuai cabang olahraga.
+- [x] Tidak ada cabang olahraga yang dapat ditambahkan ke registry tanpa komponen SVG khusus.
+- [x] Kartu lomba publik menampilkan SVG, nama cabang olahraga yang aksesibel, serta SVG piala untuk data lama/null atau mapping yang tidak ditemukan.
+- [x] SVG menggunakan `currentColor` agar mengikuti warna tema dan state kartu.
+- [x] Desain awal enam SVG cabang olahraga dan satu SVG piala dibuat sebagai bagian implementasi untuk direview Product Owner.
 
 ### Should Have
 
-- [ ] Form admin menampilkan pratinjau SVG di dalam atau di dekat pilihan cabang olahraga.
-- [ ] Factory dan demo seeder menghasilkan data cabang olahraga yang representatif.
-- [ ] Mapping label, identifier, dan komponen SVG memiliki satu sumber kebenaran frontend agar tidak diduplikasi pada Create, Edit, dan kartu publik.
+- [x] Form admin menampilkan pratinjau SVG di dalam atau di dekat pilihan cabang olahraga.
+- [x] Factory dan demo seeder menghasilkan data cabang olahraga yang representatif.
+- [x] Mapping label, identifier, dan komponen SVG memiliki satu sumber kebenaran frontend agar tidak diduplikasi pada Create, Edit, dan kartu publik.
 
 ### Won't Have (untuk versi ini)
 
@@ -157,8 +157,8 @@ Ikon ditempatkan pada area header kartu agar cabang olahraga dapat dikenali sebe
 - [x] Form tambah lomba: `resources/js/pages/Admin/Competitions/Create.vue`
 - [x] Form edit lomba: `resources/js/pages/Admin/Competitions/Edit.vue`
 - [x] Card landing page publik: `resources/js/pages/Welcome.vue`
-- [ ] Registry/komponen ikon cabang olahraga reusable di bawah struktur existing `resources/js/components` atau `resources/js/constants`
-- [ ] Halaman detail publik tidak diubah pada versi ini kecuali diputuskan dalam Open Questions.
+- [x] Registry/komponen ikon cabang olahraga reusable di bawah struktur existing `resources/js/components/competitions/`
+- [x] Halaman detail publik — `CompetitionOverviewCard.vue` + `Public/Competition/Show.vue` menampilkan ikon sport
 
 ---
 
@@ -254,43 +254,51 @@ Ikon ditempatkan pada area header kartu agar cabang olahraga dapat dikenali sebe
 
 Fitur dinyatakan selesai jika:
 
-- [ ] Diberikan admin membuka form tambah lomba, ketika memilih salah satu dari enam cabang dan menyimpan data valid, maka identifier cabang tersimpan pada lomba.
-- [ ] Diberikan request store/update berisi identifier di luar daftar, maka backend menolak field `sport` dan tidak mengubah database.
-- [ ] Diberikan lomba memiliki cabang olahraga, ketika lomba tampil pada landing page, maka kartu menampilkan SVG dan label cabang yang tepat.
-- [ ] Keenam cabang—sepak bola, badminton, tenis lapangan, tenis meja, catur, dan bola voli—memiliki ikon yang berbeda dan dapat dikenali.
-- [ ] Registry tidak dapat melewatkan ikon khusus untuk salah satu nilai cabang olahraga tanpa terdeteksi oleh type-check atau test.
-- [ ] Diberikan lomba existing dengan `sport = null` atau mapping tidak ditemukan, ketika landing page dirender, maka kartu menampilkan SVG piala tanpa error.
-- [ ] SVG tidak berasal dari database, tidak menggunakan `v-html`, dan tidak mengandung script/event handler.
-- [ ] Form Create/Edit menampilkan pesan validasi pada field cabang olahraga dan mempertahankan nilai input saat validasi gagal.
-- [ ] Card tetap responsif pada lebar 360 px, dapat difokuskan dengan keyboard, dan terbaca pada light/dark mode.
+- [x] Diberikan admin membuka form tambah lomba, ketika memilih salah satu dari enam cabang dan menyimpan data valid, maka identifier cabang tersimpan pada lomba.
+- [x] Diberikan request store/update berisi identifier di luar daftar, maka backend menolak field `sport` dan tidak mengubah database.
+- [x] Diberikan lomba memiliki cabang olahraga, ketika lomba tampil pada landing page, maka kartu menampilkan SVG dan label cabang yang tepat.
+- [x] Keenam cabang—sepak bola, badminton, tenis lapangan, tenis meja, catur, dan bola voli—memiliki ikon yang berbeda dan dapat dikenali.
+- [x] Registry tidak dapat melewatkan ikon khusus untuk salah satu nilai cabang olahraga tanpa terdeteksi oleh type-check atau test.
+- [x] Diberikan lomba existing dengan `sport = null` atau mapping tidak ditemukan, ketika landing page dirender, maka kartu menampilkan SVG piala tanpa error.
+- [x] SVG tidak berasal dari database, tidak menggunakan `v-html`, dan tidak mengandung script/event handler.
+- [x] Form Create/Edit menampilkan pesan validasi pada field cabang olahraga dan mempertahankan nilai input saat validasi gagal.
+- [x] Card tetap responsif pada lebar 360 px, dapat difokuskan dengan keyboard, dan terbaca pada light/dark mode.
 - [ ] Product Owner telah mereview desain awal enam ikon cabang olahraga dan ikon piala; revisi yang disepakati sudah diterapkan.
-- [ ] Test feature relevan, type-check TypeScript, dan build frontend berhasil dijalankan.
-- [ ] Tidak ada regression pada informasi format, status, peserta, progres, dan navigasi card existing.
+- [x] Test feature relevan, type-check TypeScript, dan build frontend berhasil dijalankan.
+- [x] Tidak ada regression pada informasi format, status, peserta, progres, dan navigasi card existing.
 
 ---
 
-## 9. Open Questions
+## 9. Keputusan dan Gap Tersisa
 
-> Pertanyaan yang masih perlu dijawab sebelum development dimulai
+> Seluruh open questions awal telah dijawab oleh implementasi.
 
-- [ ] Apakah cabang olahraga wajib untuk semua lomba baru, atau boleh kosong? _[usulan: wajib untuk lomba baru, nullable hanya untuk kompatibilitas data lama.]_
-- [ ] Apakah enam pilihan ini bersifat daftar tertutup, atau perlu opsi “Lainnya”? _[usulan: daftar tertutup pada versi pertama agar setiap nilai pasti memiliki SVG.]_
-- [ ] Apakah “sepak bola” juga mencakup futsal, atau futsal perlu ikon/identifier terpisah pada iterasi berikutnya?
-- [ ] Apakah ikon juga perlu tampil di halaman detail publik dan daftar admin? _[usulan: versi pertama hanya form admin dan card landing page sesuai permintaan.]_
-- [ ] Untuk data lomba existing, apakah admin akan melengkapi secara manual atau Product Owner menyediakan mapping backfill yang eksplisit?
+| Pertanyaan | Keputusan Implementasi |
+| ---------- | ---------------------- |
+| Apakah cabang olahraga wajib untuk semua lomba baru? | **Wajib** untuk create (`required`); update bersifat `sometimes` sehingga data existing null tetap aman. |
+| Apakah enam pilihan ini daftar tertutup? | **Daftar tertutup** dengan 6 cabang + `general` untuk lomba tanpa cabang atau fallback. |
+| Apakah "sepak bola" mencakup futsal? | Tidak — futsal akan menjadi identifier terpisah jika ditambahkan nanti. |
+| Apakah ikon perlu tampil di halaman detail publik? | **Ya** — diimplementasikan di `CompetitionOverviewCard.vue` dan `Public/Competition/Show.vue`. |
+| Data lomba existing tanpa sport? | Fallback ke SVG piala (`TrophyIcon`) + label "Lomba Umum" via nilai `general` default tidak mengubah data. |
+
+
+### Gap Minor (diketahui, di luar MVP)
+
+- [ ] **Admin list view** — `Admin/Competitions/Index.vue` dan controller `index()` belum menampilkan kolom sport. Belum menghambat pengelolaan karena data sport dapat dilihat di halaman detail/show.
+- [ ] **Desain SVG** — menunggu review visual Product Owner untuk 6 ikon cabang olahraga dan ikon piala. Implementasi sudah menyertakan desain awal.
 
 ---
 
-## 10. Timeline Estimasi
+## 10. Timeline Aktual
 
-| Fase          | Estimasi                          | Keterangan                                                                            |
-| ------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
-| Design & Spec | 0,5–1 hari                        | Membuat desain awal enam ikon dan SVG piala, lalu menyiapkan review visual.           |
-| Development   | 1–2 hari                          | Enum/migration/validation, form admin, registry SVG, dan card publik.                 |
-| Testing       | 0,5–1 hari                        | Pest, type-check/build, pemeriksaan tujuh SVG, serta review responsif dan visual.     |
-| Release       | Mengikuti jadwal rilis berikutnya | Migration additive tanpa downtime dan build frontend normal setelah desain disetujui. |
+| Fase          | Estimasi          | Keterangan                                                                         |
+| ------------- | ----------------- | ---------------------------------------------------------------------------------- |
+| Design & Spec | 0,5 hari          | Desain awal SVG + review internal.                                                  |
+| Development   | 2 hari            | Enum/migration/validation, form admin, registry 7 SVG, card publik, detail publik. |
+| Testing       | 1 hari            | Pest, type-check/build, review responsif.                                           |
+| Release       | 24 Juli 2026      | Migration additive + build frontend berhasil tanpa regression.                      |
 
-**Confidence:** Medium — arsitektur, fallback piala, dan kepemilikan desain sudah jelas; ketidakpastian tersisa adalah kewajiban field, cakupan tampilan, serta strategi data lomba existing.
+**Confidence:** High — seluruh kode backend dan frontend telah diimplementasikan dan teruji. Sisa hanya review visual PO dan tambahan kolom sport di admin list (opsional).
 
 ---
 
