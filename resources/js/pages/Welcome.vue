@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import {
     Trophy,
@@ -7,22 +6,29 @@ import {
     Users,
     Search,
     Filter,
-    Sparkles,
     CheckCircle2,
     ChevronRight,
     Flame,
     Layers,
+    Circle,
+    Lock,
 } from '@lucide/vue';
-import { show } from '@/routes/public/competitions';
-import PublicLayout from '@/layouts/PublicLayout.vue';
+import { ref, computed } from 'vue';
+import { competitionSports } from '@/components/competitions/competitionSport';
+import type { CompetitionSport } from '@/components/competitions/competitionSport';
+import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
 import {
-    competitionSports,
-    type CompetitionSport,
-} from '@/components/competitions/competitionSport';
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import PublicLayout from '@/layouts/PublicLayout.vue';
+import { show } from '@/routes/public/competitions';
 
 const props = defineProps<{
     competitions: Array<{
@@ -53,9 +59,14 @@ const statusLabel: Record<string, string> = {
 // Filter states
 const searchQuery = ref('');
 const statusFilter = ref<'all' | 'in_progress' | 'locked' | 'completed'>('all');
-const formatFilter = ref<
-    'all' | 'knockout' | 'full_competition' | 'half_competition'
->('all');
+const sportFilter = ref<'all' | CompetitionSport>('all');
+
+const sportOptions = computed(() => {
+    return Object.entries(competitionSports).map(([key, value]) => ({
+        value: key as CompetitionSport,
+        label: value.label,
+    }));
+});
 
 const filteredCompetitions = computed(() => {
     return props.competitions.filter((comp) => {
@@ -64,9 +75,10 @@ const filteredCompetitions = computed(() => {
             .includes(searchQuery.value.toLowerCase());
         const matchesStatus =
             statusFilter.value === 'all' || comp.status === statusFilter.value;
-        const matchesFormat =
-            formatFilter.value === 'all' || comp.format === formatFilter.value;
-        return matchesSearch && matchesStatus && matchesFormat;
+        const matchesSport =
+            sportFilter.value === 'all' || comp.sport === sportFilter.value;
+
+        return matchesSearch && matchesStatus && matchesSport;
     });
 });
 
@@ -78,10 +90,28 @@ const totalParticipants = computed(() =>
 );
 
 function sportLabel(sport: string | null): string {
+    if (!sport) {
+        return 'Cabang olahraga belum ditentukan';
+    }
+
     return (
         competitionSports[sport as CompetitionSport]?.label ??
         'Cabang olahraga belum ditentukan'
     );
+}
+
+function progressPercentage(completed: number, total: number): number {
+    if (total === 0) {
+        return 0;
+    }
+
+    return Math.min(100, Math.round((completed / total) * 100));
+}
+
+function resetFilters(): void {
+    searchQuery.value = '';
+    statusFilter.value = 'all';
+    sportFilter.value = 'all';
 }
 </script>
 
@@ -98,7 +128,10 @@ function sportLabel(sport: string | null): string {
                     <div
                         class="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-600 backdrop-blur dark:text-amber-400"
                     >
-                        <Flame class="size-3.5 fill-amber-500" />
+                        <Flame
+                            class="size-3.5 fill-amber-500"
+                            aria-hidden="true"
+                        />
                         <span
                             >Portal Informasi & Hasil Pertandingan
                             Real-Time</span
@@ -134,7 +167,7 @@ function sportLabel(sport: string | null): string {
                             <div
                                 class="flex size-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500"
                             >
-                                <Trophy class="size-4" />
+                                <Trophy class="size-4" aria-hidden="true" />
                             </div>
                             <div>
                                 <span
@@ -153,7 +186,7 @@ function sportLabel(sport: string | null): string {
                             <div
                                 class="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
                             >
-                                <Flame class="size-4" />
+                                <Flame class="size-4" aria-hidden="true" />
                             </div>
                             <div>
                                 <span
@@ -173,7 +206,7 @@ function sportLabel(sport: string | null): string {
                             <div
                                 class="flex size-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500"
                             >
-                                <Users class="size-4" />
+                                <Users class="size-4" aria-hidden="true" />
                             </div>
                             <div>
                                 <span
@@ -202,7 +235,10 @@ function sportLabel(sport: string | null): string {
                     <h2
                         class="flex items-center gap-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl"
                     >
-                        <Trophy class="size-5 text-amber-500" />
+                        <Trophy
+                            class="size-5 text-amber-500"
+                            aria-hidden="true"
+                        />
                         Daftar Lomba Aktif
                     </h2>
                     <p class="text-xs text-muted-foreground sm:text-sm">
@@ -215,6 +251,7 @@ function sportLabel(sport: string | null): string {
                 <div class="relative w-full sm:w-72">
                     <Search
                         class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                        aria-hidden="true"
                     />
                     <Input
                         v-model="searchQuery"
@@ -225,108 +262,101 @@ function sportLabel(sport: string | null): string {
                 </div>
             </div>
 
-            <!-- Format & Status Pill Filters -->
-            <div class="flex flex-wrap items-center gap-2">
-                <span
-                    class="mr-1 flex items-center gap-1 text-xs font-semibold text-muted-foreground"
-                >
-                    <Filter class="size-3.5" />
-                    Filter:
-                </span>
+            <!-- Status & Sport Filters -->
+            <div
+                class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+                <div class="flex flex-wrap items-center gap-2">
+                    <span
+                        class="mr-1 flex items-center gap-1 text-xs font-semibold text-muted-foreground"
+                    >
+                        <Filter class="size-3.5" aria-hidden="true" />
+                        Filter:
+                    </span>
 
-                <button
-                    @click="statusFilter = 'all'"
-                    class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-                    :class="
-                        statusFilter === 'all'
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : 'border-border bg-background text-muted-foreground hover:bg-accent'
-                    "
-                >
-                    Semua Status
-                </button>
-                <button
-                    @click="statusFilter = 'in_progress'"
-                    class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-                    :class="
-                        statusFilter === 'in_progress'
-                            ? 'border-emerald-600 bg-emerald-600 text-white'
-                            : 'border-border bg-background text-muted-foreground hover:bg-accent'
-                    "
-                >
-                    🟢 Sedang Berlangsung
-                </button>
-                <button
-                    @click="statusFilter = 'locked'"
-                    class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-                    :class="
-                        statusFilter === 'locked'
-                            ? 'border-amber-600 bg-amber-600 text-white'
-                            : 'border-border bg-background text-muted-foreground hover:bg-accent'
-                    "
-                >
-                    🔒 Terkunci / Siap
-                </button>
-                <button
-                    @click="statusFilter = 'completed'"
-                    class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-                    :class="
-                        statusFilter === 'completed'
-                            ? 'border-indigo-600 bg-indigo-600 text-white'
-                            : 'border-border bg-background text-muted-foreground hover:bg-accent'
-                    "
-                >
-                    🏆 Selesai
-                </button>
+                    <button
+                        @click="statusFilter = 'all'"
+                        type="button"
+                        class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
+                        :class="
+                            statusFilter === 'all'
+                                ? 'border-primary bg-primary text-primary-foreground'
+                                : 'border-border bg-background text-muted-foreground hover:bg-accent'
+                        "
+                    >
+                        Semua Status
+                    </button>
+                    <button
+                        @click="statusFilter = 'in_progress'"
+                        type="button"
+                        class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors"
+                        :class="
+                            statusFilter === 'in_progress'
+                                ? 'border-emerald-600 bg-emerald-600 text-white'
+                                : 'border-border bg-background text-muted-foreground hover:bg-accent'
+                        "
+                    >
+                        <Circle
+                            class="size-3 fill-emerald-500 text-emerald-500"
+                            aria-hidden="true"
+                        />
+                        Sedang Berlangsung
+                    </button>
+                    <button
+                        @click="statusFilter = 'locked'"
+                        type="button"
+                        class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors"
+                        :class="
+                            statusFilter === 'locked'
+                                ? 'border-amber-600 bg-amber-600 text-white'
+                                : 'border-border bg-background text-muted-foreground hover:bg-accent'
+                        "
+                    >
+                        <Lock
+                            class="size-3 text-amber-500"
+                            aria-hidden="true"
+                        />
+                        Terkunci / Siap
+                    </button>
+                    <button
+                        @click="statusFilter = 'completed'"
+                        type="button"
+                        class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors"
+                        :class="
+                            statusFilter === 'completed'
+                                ? 'border-indigo-600 bg-indigo-600 text-white'
+                                : 'border-border bg-background text-muted-foreground hover:bg-accent'
+                        "
+                    >
+                        <CheckCircle2
+                            class="size-3 text-indigo-500"
+                            aria-hidden="true"
+                        />
+                        Selesai
+                    </button>
+                </div>
 
-                <div
-                    class="mx-1 my-auto hidden h-4 w-px bg-border sm:block"
-                ></div>
-
-                <button
-                    @click="formatFilter = 'all'"
-                    class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-                    :class="
-                        formatFilter === 'all'
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : 'border-border bg-background text-muted-foreground hover:bg-accent'
-                    "
-                >
-                    Semua Format
-                </button>
-                <button
-                    @click="formatFilter = 'knockout'"
-                    class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-                    :class="
-                        formatFilter === 'knockout'
-                            ? 'border-amber-600 bg-amber-600 text-white'
-                            : 'border-border bg-background text-muted-foreground hover:bg-accent'
-                    "
-                >
-                    Knockout
-                </button>
-                <button
-                    @click="formatFilter = 'full_competition'"
-                    class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-                    :class="
-                        formatFilter === 'full_competition'
-                            ? 'border-indigo-600 bg-indigo-600 text-white'
-                            : 'border-border bg-background text-muted-foreground hover:bg-accent'
-                    "
-                >
-                    Liga (Penuh)
-                </button>
-                <button
-                    @click="formatFilter = 'half_competition'"
-                    class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-                    :class="
-                        formatFilter === 'half_competition'
-                            ? 'border-sky-600 bg-sky-600 text-white'
-                            : 'border-border bg-background text-muted-foreground hover:bg-accent'
-                    "
-                >
-                    Setengah Kompetisi
-                </button>
+                <!-- Sport Filter Select -->
+                <div class="w-full sm:w-56">
+                    <Select v-model="sportFilter">
+                        <SelectTrigger
+                            aria-label="Filter jenis lomba"
+                            class="rounded-full text-xs"
+                        >
+                            <SelectValue placeholder="Pilih jenis lomba..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Semua Jenis</SelectItem>
+                            <SelectItem
+                                v-for="option in sportOptions"
+                                :key="option.value"
+                                :value="option.value"
+                            >
+                                {{ option.label }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             <!-- Empty State -->
@@ -337,7 +367,7 @@ function sportLabel(sport: string | null): string {
                 <div
                     class="mb-4 flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground/50"
                 >
-                    <Trophy class="size-8" />
+                    <Trophy class="size-8" aria-hidden="true" />
                 </div>
                 <h3 class="text-base font-bold text-foreground">
                     Tidak Ada Lomba Ditemukan
@@ -346,7 +376,7 @@ function sportLabel(sport: string | null): string {
                     {{
                         searchQuery ||
                         statusFilter !== 'all' ||
-                        formatFilter !== 'all'
+                        sportFilter !== 'all'
                             ? 'Coba sesuaikan kata kunci atau filter pencarian Anda.'
                             : 'Belum ada lomba yang aktif saat ini. Pantau terus halaman ini untuk undian lomba terbaru!'
                     }}
@@ -355,13 +385,10 @@ function sportLabel(sport: string | null): string {
                     v-if="
                         searchQuery ||
                         statusFilter !== 'all' ||
-                        formatFilter !== 'all'
+                        sportFilter !== 'all'
                     "
-                    @click="
-                        searchQuery = '';
-                        statusFilter = 'all';
-                        formatFilter = 'all';
-                    "
+                    @click="resetFilters"
+                    type="button"
                     class="mt-4 text-xs font-semibold text-primary hover:underline"
                 >
                     Reset Filter
@@ -393,7 +420,7 @@ function sportLabel(sport: string | null): string {
 
                         <!-- Decorative Sport Icon Background -->
                         <div
-                            class="pointer-events-none absolute bottom-0 right-0 z-0 translate-x-4 translate-y-4 text-muted-foreground"
+                            class="pointer-events-none absolute right-0 bottom-0 z-0 translate-x-4 translate-y-4 text-muted-foreground"
                         >
                             <CompetitionSportIcon
                                 :sport="comp.sport"
@@ -412,6 +439,7 @@ function sportLabel(sport: string | null): string {
                                     <p
                                         class="text-xs font-medium text-muted-foreground"
                                     >
+                                        {{ sportLabel(comp.sport) }}
                                     </p>
                                 </div>
                                 <Badge
@@ -449,6 +477,7 @@ function sportLabel(sport: string | null): string {
                                 >
                                     <Layers
                                         class="size-4 shrink-0 text-amber-500"
+                                        aria-hidden="true"
                                     />
                                     <span
                                         class="font-semibold text-foreground"
@@ -462,6 +491,7 @@ function sportLabel(sport: string | null): string {
                                 <div class="flex items-center gap-2.5 text-xs">
                                     <Users
                                         class="size-4 shrink-0 text-indigo-500"
+                                        aria-hidden="true"
                                     />
                                     <span
                                         >{{ comp.participants_count }} Peserta
@@ -472,6 +502,7 @@ function sportLabel(sport: string | null): string {
                                 <div class="flex items-center gap-2.5 text-xs">
                                     <Calendar
                                         class="size-4 shrink-0 text-emerald-500"
+                                        aria-hidden="true"
                                     />
                                     <span v-if="comp.total_matches > 0">
                                         <strong class="text-foreground">{{
@@ -499,10 +530,9 @@ function sportLabel(sport: string | null): string {
                                     <span>Progress Lomba</span>
                                     <span class="font-bold text-foreground">
                                         {{
-                                            Math.round(
-                                                (comp.completed_matches /
-                                                    comp.total_matches) *
-                                                    100,
+                                            progressPercentage(
+                                                comp.completed_matches,
+                                                comp.total_matches,
                                             )
                                         }}%
                                     </span>
@@ -519,7 +549,7 @@ function sportLabel(sport: string | null): string {
                                                 : 'bg-amber-500'
                                         "
                                         :style="{
-                                            width: `${Math.min(100, Math.round((comp.completed_matches / comp.total_matches) * 100))}%`,
+                                            width: `${progressPercentage(comp.completed_matches, comp.total_matches)}%`,
                                         }"
                                     ></div>
                                 </div>
@@ -530,7 +560,10 @@ function sportLabel(sport: string | null): string {
                                 class="flex items-center justify-between pt-2 text-xs font-bold text-primary transition-transform group-hover:translate-x-0.5"
                             >
                                 <span>Lihat Match & Detail</span>
-                                <ChevronRight class="size-4" />
+                                <ChevronRight
+                                    class="size-4"
+                                    aria-hidden="true"
+                                />
                             </div>
                         </CardContent>
                     </Card>
