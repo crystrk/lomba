@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\CompetitionFormat;
+use App\Enums\CompetitionSport;
 use App\Enums\CompetitionStatus;
 use App\Models\Competition;
 use App\Models\User;
@@ -24,6 +25,7 @@ class CompetitionFactory extends Factory
             'name' => $name,
             'slug' => Str::slug($name.'-'.Str::random(4)),
             'description' => fake()->optional()->sentence(),
+            'sport' => fake()->randomElement(CompetitionSport::cases()),
             'format' => CompetitionFormat::HalfCompetition,
             'status' => CompetitionStatus::Draft,
             'win_points' => 3,

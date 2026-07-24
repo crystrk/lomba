@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\CompetitionFormat;
 use App\Enums\CompetitionMatchStatus;
+use App\Enums\CompetitionSport;
 use App\Enums\CompetitionStatus;
 use App\Enums\UserRole;
 use App\Generators\DrawGenerator;
@@ -72,6 +73,7 @@ class DemoDataSeeder extends Seeder
             'name' => 'Liga Mini Soccer Indonesia 2026',
             'slug' => 'liga-mini-soccer-indonesia-2026',
             'description' => 'Kompetisi Mini Soccer 7v7 format setengah kompetisi (Round-Robin).',
+            'sport' => CompetitionSport::Football,
             'format' => CompetitionFormat::HalfCompetition,
             'status' => CompetitionStatus::Draft,
             'win_points' => 3,
@@ -129,6 +131,7 @@ class DemoDataSeeder extends Seeder
             'name' => 'Kejuaraan Voli Putra Open 2026',
             'slug' => 'kejuaraan-voli-putra-open-2026',
             'description' => 'Kejuaraan Bola Voli Putra format sistem gugur (Knockout).',
+            'sport' => CompetitionSport::Volleyball,
             'format' => CompetitionFormat::Knockout,
             'status' => CompetitionStatus::Draft,
             'win_points' => null,
@@ -189,6 +192,7 @@ class DemoDataSeeder extends Seeder
             'name' => 'Turnamen Tenis Lapangan Master 2026',
             'slug' => 'turnamen-tenis-lapangan-master-2026',
             'description' => 'Turnamen Tenis Lapangan Tunggal Putra format kompetisi penuh (Double Round-Robin).',
+            'sport' => CompetitionSport::Tennis,
             'format' => CompetitionFormat::FullCompetition,
             'status' => CompetitionStatus::Draft,
             'win_points' => 3,
@@ -236,6 +240,7 @@ class DemoDataSeeder extends Seeder
             'name' => 'Kejuaraan Tenis Meja Tunggal 2026',
             'slug' => 'kejuaraan-tenis-meja-tunggal-2026',
             'description' => 'Kejuaraan Tenis Meja Tunggal Putra sistem gugur.',
+            'sport' => CompetitionSport::TableTennis,
             'format' => CompetitionFormat::Knockout,
             'status' => CompetitionStatus::Draft,
             'win_points' => null,
@@ -300,6 +305,7 @@ class DemoDataSeeder extends Seeder
             'name' => 'Turnamen Catur Cepat (Rapid Chess) 2026',
             'slug' => 'turnamen-catur-cepat-rapid-chess-2026',
             'description' => 'Turnamen Catur Cepat 15 menit format setengah kompetisi (Draft).',
+            'sport' => CompetitionSport::Chess,
             'format' => CompetitionFormat::HalfCompetition,
             'status' => CompetitionStatus::Draft,
             'win_points' => 3,

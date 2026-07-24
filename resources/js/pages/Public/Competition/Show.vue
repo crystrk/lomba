@@ -34,6 +34,7 @@ const props = defineProps<{
         id: number;
         name: string;
         slug: string;
+        sport: string | null;
         format: string;
         status: string;
         win_points: number | null;
@@ -164,6 +165,7 @@ const filteredLeagueMatches = computed(() => {
             <!-- Competition Overview Header Card -->
             <CompetitionOverviewCard
                 :competition="competition"
+                :sport="competition.sport"
                 :participants-count="props.participants.length"
                 :completed-matches-count="completedMatchesCount"
                 :total-scorable-matches-count="totalScorableMatchesCount"

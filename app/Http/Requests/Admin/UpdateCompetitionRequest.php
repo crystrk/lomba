@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\CompetitionFormat;
+use App\Enums\CompetitionSport;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -24,6 +25,7 @@ class UpdateCompetitionRequest extends FormRequest
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'sport' => ['sometimes', 'required', Rule::enum(CompetitionSport::class)],
             'format' => ['sometimes', 'required', Rule::in($formats)],
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\CompetitionFormat;
+use App\Enums\CompetitionSport;
 use App\Models\Competition;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -23,6 +24,7 @@ class StoreCompetitionRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'sport' => ['required', Rule::enum(CompetitionSport::class)],
             'format' => ['required', Rule::in($formats)],
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],

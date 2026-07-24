@@ -120,7 +120,7 @@ it('shuffle fails when competition is locked', function () {
 
     $this->actingAs($this->admin)
         ->post(route('admin.competitions.shuffle', $competition))
-        ->assertForbidden();
+        ->assertStatus(422);
 });
 
 it('shuffle fails when competition is in progress', function () {
@@ -131,7 +131,7 @@ it('shuffle fails when competition is in progress', function () {
 
     $this->actingAs($this->admin)
         ->post(route('admin.competitions.shuffle', $competition))
-        ->assertForbidden();
+        ->assertStatus(422);
 });
 
 it('shuffle generates correct match count for half competition', function () {
@@ -327,5 +327,5 @@ it('shuffle after lock is forbidden', function () {
 
     $this->actingAs($this->admin)
         ->post(route('admin.competitions.shuffle', $competition))
-        ->assertForbidden();
+        ->assertStatus(422);
 });

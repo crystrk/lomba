@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
 import { Users, Calendar, Shield, Layers } from '@lucide/vue';
+import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
 
 defineProps<{
     competition: {
@@ -13,6 +14,7 @@ defineProps<{
         draw_points: number | null;
         loss_points: number | null;
     };
+    sport: string | null;
     participantsCount: number;
     completedMatchesCount: number;
     totalScorableMatchesCount: number;
@@ -26,6 +28,11 @@ defineProps<{
     <div class="relative overflow-hidden rounded-2xl border border-border/80 bg-card p-5 sm:p-8 shadow-xs">
         <!-- Top Glow Accent -->
         <div class="absolute -top-24 -right-24 size-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+
+        <!-- Decorative Sport Icon Background -->
+        <div class="pointer-events-none absolute bottom-0 right-0 z-0 translate-x-4 translate-y-4 text-muted-foreground">
+            <CompetitionSportIcon :sport="sport" class="size-36 opacity-60" />
+        </div>
 
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div class="space-y-3 max-w-2xl">

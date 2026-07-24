@@ -16,11 +16,7 @@ class CompetitionPolicy
 
     public function update(User $user, Competition $competition): bool
     {
-        if ($user->role !== UserRole::Admin) {
-            return false;
-        }
-
-        return in_array($competition->status, [CompetitionStatus::Draft, CompetitionStatus::Drawn]);
+        return $user->role === UserRole::Admin;
     }
 
     public function delete(User $user, Competition $competition): bool

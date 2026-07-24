@@ -2,6 +2,7 @@
 
 use App\Enums\CompetitionFormat;
 use App\Enums\CompetitionMatchStatus;
+use App\Enums\CompetitionSport;
 use App\Enums\CompetitionStatus;
 use App\Enums\UserRole;
 use App\Models\Competition;
@@ -34,6 +35,16 @@ it('landing shows active and completed competitions (locked, in_progress, comple
 
     expect($props['competitions'])->toHaveCount(3);
     expect(collect($props['competitions'])->pluck('name')->sort()->values()->toArray())->toBe(['Completed', 'In Progress', 'Locked']);
+});
+
+it('landing includes competition sport and safely returns null for legacy competitions', function () {
+    Competition::factory()->locked()->create(['name' => 'Badminton', 'sport' => CompetitionSport::Badminton]);
+    Competition::factory()->locked()->create(['name' => 'Legacy', 'sport' => null]);
+
+    $competitions = collect($this->get(route('home'))->inertiaProps()['competitions'])->keyBy('name');
+
+    expect($competitions['Badminton']['sport'])->toBe(CompetitionSport::Badminton->value)
+        ->and($competitions['Legacy']['sport'])->toBeNull();
 });
 
 it('completed competition appears on landing and is accessible via slug', function () {

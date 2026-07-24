@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\CompetitionFormat;
+use App\Enums\CompetitionSport;
 use App\Enums\CompetitionStatus;
 use App\Models\Competition;
 use App\Models\User;
@@ -36,6 +37,7 @@ it('admin can create half competition', function () {
     $response = $this->post(route('admin.competitions.store'), [
         'name' => 'Kejuaraan Bulutangkis',
         'description' => 'Pertandingan tahunan',
+        'sport' => CompetitionSport::Badminton->value,
         'format' => 'half_competition',
         'starts_at' => '2026-08-01',
         'ends_at' => '2026-08-10',
@@ -50,6 +52,7 @@ it('admin can create half competition', function () {
 
     expect($competition)->not->toBeNull()
         ->and($competition->format)->toBe(CompetitionFormat::HalfCompetition)
+        ->and($competition->sport)->toBe(CompetitionSport::Badminton)
         ->and($competition->status)->toBe(CompetitionStatus::Draft)
         ->and($competition->win_points)->toBe(3)
         ->and($competition->draw_points)->toBe(1)
@@ -63,6 +66,7 @@ it('admin can create knockout competition', function () {
 
     $response = $this->post(route('admin.competitions.store'), [
         'name' => 'Turnamen Tenis',
+        'sport' => CompetitionSport::Tennis->value,
         'format' => 'knockout',
     ]);
 
@@ -82,6 +86,7 @@ it('admin can create full competition with negative points', function () {
 
     $this->post(route('admin.competitions.store'), [
         'name' => 'Lomba Mancing',
+        'sport' => CompetitionSport::Football->value,
         'format' => 'full_competition',
         'win_points' => 2,
         'draw_points' => 0,
@@ -98,6 +103,7 @@ it('knockout format rejects point values', function () {
 
     $this->post(route('admin.competitions.store'), [
         'name' => 'Bad Knockout',
+        'sport' => CompetitionSport::Badminton->value,
         'format' => 'knockout',
         'win_points' => 3,
     ])->assertInvalid(['win_points']);
@@ -108,6 +114,7 @@ it('half competition requires all point fields', function () {
 
     $this->post(route('admin.competitions.store'), [
         'name' => 'Incomplete',
+        'sport' => CompetitionSport::Chess->value,
         'format' => 'half_competition',
     ])->assertInvalid(['win_points', 'draw_points', 'loss_points']);
 });
@@ -117,11 +124,13 @@ it('generates unique slug for similar names', function () {
 
     $this->post(route('admin.competitions.store'), [
         'name' => 'Kejuaraan',
+        'sport' => CompetitionSport::Volleyball->value,
         'format' => 'knockout',
     ])->assertRedirect();
 
     $this->post(route('admin.competitions.store'), [
         'name' => 'Kejuaraan',
+        'sport' => CompetitionSport::Volleyball->value,
         'format' => 'knockout',
     ])->assertRedirect();
 
@@ -176,6 +185,40 @@ it('admin can update draft competition', function () {
     expect($competition->fresh()->name)->toBe('Updated Name');
 });
 
+it('admin can update competition sport', function () {
+    $competition = Competition::factory()->draft()->create(['sport' => CompetitionSport::Football]);
+
+    $this->actingAs($this->admin)
+        ->put(route('admin.competitions.update', $competition), [
+            'sport' => CompetitionSport::Volleyball->value,
+        ])
+        ->assertRedirect(route('admin.competitions.index'));
+
+    expect($competition->fresh()->sport)->toBe(CompetitionSport::Volleyball);
+});
+
+it('rejects an unregistered competition sport', function () {
+    $this->actingAs($this->admin)
+        ->post(route('admin.competitions.store'), [
+            'name' => 'Cabang Tidak Valid',
+            'sport' => 'fishing',
+            'format' => 'knockout',
+        ])
+        ->assertInvalid(['sport']);
+});
+
+it('rejects an unregistered competition sport when updating', function () {
+    $competition = Competition::factory()->draft()->create();
+
+    $this->actingAs($this->admin)
+        ->put(route('admin.competitions.update', $competition), [
+            'sport' => 'fishing',
+        ])
+        ->assertInvalid(['sport']);
+
+    expect($competition->fresh()->sport)->not->toBeNull();
+});
+
 it('admin can delete draft competition', function () {
     $competition = Competition::factory()->draft()->create();
 
@@ -186,14 +229,35 @@ it('admin can delete draft competition', function () {
     expect(Competition::find($competition->id))->toBeNull();
 });
 
-it('cannot update locked competition', function () {
-    $competition = Competition::factory()->locked()->create();
+it('admin can update locked competition details (name, sport, dates)', function () {
+    $competition = Competition::factory()->locked()->create([
+        'name' => 'Original Name',
+        'sport' => CompetitionSport::Football,
+        'format' => CompetitionFormat::FullCompetition,
+        'win_points' => 3,
+        'draw_points' => 1,
+        'loss_points' => 0,
+    ]);
 
     $this->actingAs($this->admin)
         ->put(route('admin.competitions.update', $competition), [
-            'name' => 'Hacked Name',
+            'name' => 'Updated Name',
+            'sport' => CompetitionSport::Volleyball->value,
+            'format' => CompetitionFormat::Knockout->value,
         ])
-        ->assertForbidden();
+        ->assertRedirect(route('admin.competitions.index'));
+
+    $fresh = $competition->fresh();
+
+    // Descriptive fields should be updated
+    expect($fresh->name)->toBe('Updated Name');
+    expect($fresh->sport)->toBe(CompetitionSport::Volleyball);
+
+    // Format and scoring rules must remain frozen
+    expect($fresh->format)->toBe(CompetitionFormat::FullCompetition);
+    expect($fresh->win_points)->toBe(3);
+    expect($fresh->draw_points)->toBe(1);
+    expect($fresh->loss_points)->toBe(0);
 });
 
 it('cannot delete locked competition', function () {
@@ -207,5 +271,5 @@ it('cannot delete locked competition', function () {
 it('validates required fields', function () {
     $this->actingAs($this->admin)
         ->post(route('admin.competitions.store'), [])
-        ->assertInvalid(['name', 'format']);
+        ->assertInvalid(['name', 'sport', 'format']);
 });

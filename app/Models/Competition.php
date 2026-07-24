@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CompetitionFormat;
+use App\Enums\CompetitionSport;
 use App\Enums\CompetitionStatus;
 use Database\Factories\CompetitionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -18,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string $slug
  * @property string|null $description
+ * @property CompetitionSport|null $sport
  * @property CompetitionFormat $format
  * @property CompetitionStatus $status
  * @property int|null $win_points
@@ -32,7 +34,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  */
 #[Fillable([
-    'name', 'slug', 'description', 'format', 'status',
+    'name', 'slug', 'description', 'sport', 'format', 'status',
     'win_points', 'draw_points', 'loss_points',
     'draw_version', 'starts_at', 'ends_at',
     'locked_by', 'locked_at',
@@ -47,6 +49,7 @@ class Competition extends Model
     {
         return [
             'format' => CompetitionFormat::class,
+            'sport' => CompetitionSport::class,
             'status' => CompetitionStatus::class,
             'win_points' => 'integer',
             'draw_points' => 'integer',

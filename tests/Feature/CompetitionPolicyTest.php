@@ -45,10 +45,10 @@ it('admin can update draft competition', function () {
     expect($this->admin->can('update', $competition))->toBeTrue();
 });
 
-it('admin cannot update locked competition', function () {
+it('admin can update locked competition', function () {
     $competition = Competition::factory()->locked()->create();
 
-    expect($this->admin->can('update', $competition))->toBeFalse();
+    expect($this->admin->can('update', $competition))->toBeTrue();
 });
 
 it('admin can delete draft competition', function () {

@@ -50,6 +50,10 @@ class ParticipantController extends Controller
 
     public function store(StoreParticipantRequest $request, Competition $competition): RedirectResponse
     {
+        if (! $competition->isEditable()) {
+            abort(403, 'Peserta tidak dapat ditambah pada lomba yang sudah terkunci.');
+        }
+
         $data = $request->safe()->except('logo');
 
         if ($request->hasFile('logo')) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\CompetitionFormat;
+use App\Enums\CompetitionSport;
 use App\Enums\CompetitionStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
@@ -12,6 +13,7 @@ use App\Http\Requests\Admin\UpdateCompetitionRequest;
 use App\Models\Competition;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Inertia\Response;
@@ -46,6 +48,7 @@ class CompetitionController extends Controller
     {
         return Inertia('Admin/Competitions/Create', [
             'formats' => collect(CompetitionFormat::cases())->map->value,
+            'sports' => collect(CompetitionSport::cases())->map->value,
         ]);
     }
 
@@ -79,6 +82,7 @@ class CompetitionController extends Controller
                 'name' => $competition->name,
                 'slug' => $competition->slug,
                 'description' => $competition->description,
+                'sport' => $competition->sport?->value,
                 'format' => $competition->format->value,
                 'status' => $competition->status->value,
                 'win_points' => $competition->win_points,
@@ -106,6 +110,7 @@ class CompetitionController extends Controller
                 'name' => $competition->name,
                 'slug' => $competition->slug,
                 'description' => $competition->description,
+                'sport' => $competition->sport?->value,
                 'format' => $competition->format->value,
                 'status' => $competition->status->value,
                 'win_points' => $competition->win_points,
@@ -115,6 +120,7 @@ class CompetitionController extends Controller
                 'ends_at' => $competition->ends_at?->format('Y-m-d'),
             ],
             'formats' => collect(CompetitionFormat::cases())->map->value,
+            'sports' => collect(CompetitionSport::cases())->map->value,
         ]);
     }
 
@@ -130,6 +136,20 @@ class CompetitionController extends Controller
             $data['win_points'] = null;
             $data['draw_points'] = null;
             $data['loss_points'] = null;
+        }
+
+        // Once a competition is locked, running, or completed, only allow
+        // editing descriptive fields. Format and scoring rules must stay
+        // frozen to avoid corrupting already-computed standings/matches.
+        if (! in_array($competition->status, [CompetitionStatus::Draft, CompetitionStatus::Drawn])) {
+            $data = Arr::only($data, [
+                'name',
+                'slug',
+                'description',
+                'sport',
+                'starts_at',
+                'ends_at',
+            ]);
         }
 
         $competition->update($data);

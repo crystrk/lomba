@@ -17,6 +17,7 @@ import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
 import { index, edit, scores, operators } from '@/routes/admin/competitions';
 import draw from '@/routes/admin/competitions/draw';
 import participants from '@/routes/admin/competitions/participants';
@@ -38,6 +39,7 @@ const props = defineProps<{
         name: string;
         slug: string;
         description: string | null;
+        sport: string | null;
         format: string;
         status: string;
         win_points: number | null;
@@ -88,8 +90,18 @@ function getInitials(name: string): string {
 
     <div class="flex flex-col gap-6 p-4 sm:p-6 max-w-7xl mx-auto w-full">
         <!-- Header & Navigation -->
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
+        <div class="relative overflow-hidden flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <!-- Decorative Sport Icon Background -->
+            <div
+                class="pointer-events-none absolute -top-4 -right-4 z-0 text-muted-foreground"
+            >
+                <CompetitionSportIcon
+                    :sport="competition.sport"
+                    class="size-32 opacity-60"
+                />
+            </div>
+
+            <div class="relative z-10">
                 <Link
                     :href="index()"
                     class="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -106,7 +118,7 @@ function getInitials(name: string): string {
                     </Badge>
                 </div>
             </div>
-            <Link :href="edit(competition.id)" class="w-full sm:w-auto">
+            <Link :href="edit(competition.id)" class="relative z-10 w-full sm:w-auto">
                 <Button variant="outline" class="w-full sm:w-auto shadow-xs">
                     <Pencil class="mr-2 size-4" />
                     Edit Lomba
