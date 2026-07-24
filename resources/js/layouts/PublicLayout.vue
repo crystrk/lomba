@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Heart } from '@lucide/vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import PublicTopNav from '@/components/PublicTopNav.vue';
 import { Toaster } from '@/components/ui/sonner';
@@ -49,14 +48,15 @@ defineProps<{
                 </div>
 
                 <div class="flex items-center gap-1">
-                    <span>Dibuat dengan</span>
-                    <Heart
-                        class="inline size-3.5 fill-rose-500 text-rose-500"
-                    />
-                    <span
-                        >untuk mendukung kegiatan kompetisi yang transparan &
-                        realtime.</span
+                    <span>Handcrafted by</span>
+                    <a
+                        href="https://t.me/crystark"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="underline hover:text-foreground transition-colors"
                     >
+                        crystark
+                    </a>
                 </div>
 
                 <div>

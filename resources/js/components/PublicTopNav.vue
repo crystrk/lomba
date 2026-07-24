@@ -26,10 +26,10 @@ const page = usePage();
 const authUser = computed(() => page.props.auth?.user);
 
 const mobileMenuOpen = ref(false);
-const { appearance, updateAppearance } = useAppearance();
+const { appearance, resolvedAppearance, updateAppearance } = useAppearance();
 
 function toggleTheme() {
-    if (appearance.value === 'dark') {
+    if (resolvedAppearance.value === 'dark') {
         updateAppearance('light');
     } else {
         updateAppearance('dark');
