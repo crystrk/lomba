@@ -1,6 +1,7 @@
 import type { Component } from 'vue';
 import BadmintonIcon from '@/components/competitions/sport-icons/BadmintonIcon.vue';
 import ChessIcon from '@/components/competitions/sport-icons/ChessIcon.vue';
+import EsportIcon from '@/components/competitions/sport-icons/EsportIcon.vue';
 import FootballIcon from '@/components/competitions/sport-icons/FootballIcon.vue';
 import TableTennisIcon from '@/components/competitions/sport-icons/TableTennisIcon.vue';
 import TennisIcon from '@/components/competitions/sport-icons/TennisIcon.vue';
@@ -14,6 +15,7 @@ export type CompetitionSport =
     | 'table_tennis'
     | 'chess'
     | 'volleyball'
+    | 'esport'
     | 'general';
 
 interface SportDefinition {
@@ -30,5 +32,6 @@ export const competitionSports: Record<CompetitionSport, SportDefinition> = {
     table_tennis: { label: 'Tenis Meja', icon: TableTennisIcon },
     chess: { label: 'Catur', icon: ChessIcon },
     volleyball: { label: 'Bola Voli', icon: VolleyballIcon },
+    esport: { label: 'Esport', icon: EsportIcon },
     general: { label: 'Lomba Umum', icon: TrophyIcon },
 };

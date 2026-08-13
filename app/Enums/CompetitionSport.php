@@ -10,5 +10,6 @@ enum CompetitionSport: string
     case TableTennis = 'table_tennis';
     case Chess = 'chess';
     case Volleyball = 'volleyball';
+    case Esport = 'esport';
     case General = 'general';
 }

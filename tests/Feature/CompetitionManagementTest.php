@@ -61,6 +61,25 @@ it('admin can create half competition', function () {
         ->and($competition->slug)->not->toBeNull();
 });
 
+it('admin can create competition with esport category', function () {
+    $this->actingAs($this->admin);
+
+    $response = $this->post(route('admin.competitions.store'), [
+        'name' => 'Turnamen Mobile Legends',
+        'sport' => CompetitionSport::Esport->value,
+        'format' => 'knockout',
+        'starts_at' => '2026-08-15',
+        'ends_at' => '2026-08-20',
+    ]);
+
+    $response->assertRedirect(route('admin.competitions.index'));
+
+    $competition = Competition::where('name', 'Turnamen Mobile Legends')->first();
+
+    expect($competition)->not->toBeNull()
+        ->and($competition->sport)->toBe(CompetitionSport::Esport);
+});
+
 it('admin can create knockout competition', function () {
     $this->actingAs($this->admin);
 
