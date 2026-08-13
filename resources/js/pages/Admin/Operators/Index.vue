@@ -11,6 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Trophy } from '@lucide/vue';
 import { create, edit } from '@/routes/admin/operators';
 
 defineOptions({
@@ -23,6 +24,7 @@ const props = defineProps<{
         name: string;
         email: string;
         is_active: boolean;
+        assigned_competitions_count: number;
         created_at: string;
     }>;
 }>();
@@ -46,6 +48,7 @@ const props = defineProps<{
                         <TableHead>Nama</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Lomba Ditugaskan</TableHead>
                         <TableHead>Dibuat</TableHead>
                         <TableHead>Aksi</TableHead>
                     </TableRow>
@@ -63,12 +66,19 @@ const props = defineProps<{
                                 {{ op.is_active ? 'Aktif' : 'Nonaktif' }}
                             </Badge>
                         </TableCell>
+                        <TableCell>
+                            <div class="flex items-center gap-1.5">
+                                <Trophy class="size-3.5 text-amber-500" />
+                                <span class="font-medium text-sm">{{ op.assigned_competitions_count }}</span>
+                                <span class="text-xs text-muted-foreground">lomba</span>
+                            </div>
+                        </TableCell>
                         <TableCell>{{ op.created_at }}</TableCell>
                         <TableCell>
                             <div class="flex gap-2">
                                 <Link :href="edit(op.id).url">
                                     <Button variant="outline" size="sm"
-                                        >Edit</Button
+                                        >Edit & Kelola Lomba</Button
                                     >
                                 </Link>
                             </div>
@@ -76,7 +86,7 @@ const props = defineProps<{
                     </TableRow>
                     <TableRow v-if="operators.length === 0">
                         <TableCell
-                            colspan="5"
+                            colspan="6"
                             class="text-center text-muted-foreground"
                         >
                             Belum ada operator.

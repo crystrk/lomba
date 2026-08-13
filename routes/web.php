@@ -59,6 +59,7 @@ Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(functio
         Route::get('operators/{user}/edit', [OperatorController::class, 'edit'])->name('operators.edit');
         Route::put('operators/{user}', [OperatorController::class, 'update'])->name('operators.update');
         Route::patch('operators/{user}/toggle-active', [OperatorController::class, 'toggleActive'])->name('operators.toggle-active');
+        Route::put('operators/{user}/competitions', [OperatorController::class, 'syncCompetitions'])->name('operators.sync-competitions');
     });
 
     Route::prefix('operator')->name('operator.')->middleware('can:operator-access')->group(function () {

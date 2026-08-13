@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, shallowRef, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { Save, Trophy, Medal, AlertCircle, Filter, Lock, Clock } from '@lucide/vue';
+import { Save, Trophy, Medal, AlertCircle, Filter, Lock, Clock, ExternalLink } from '@lucide/vue';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -188,9 +188,21 @@ function roundLabel(round: number, leg: number): string {
                 <h1 class="text-2xl font-bold">{{ competition.name }}</h1>
                 <p class="text-sm text-muted-foreground">Input & Koreksi Skor Operator</p>
             </div>
-            <Badge :variant="statusVariant[competition.status] || 'secondary'">
-                {{ statusLabel[competition.status] || competition.status }}
-            </Badge>
+            <div class="flex items-center gap-2">
+                <a
+                    :href="`/lomba/${competition.slug}`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <Button variant="outline" size="sm">
+                        <ExternalLink class="mr-1.5 size-4" />
+                        Lihat Halaman Publik
+                    </Button>
+                </a>
+                <Badge :variant="statusVariant[competition.status] || 'secondary'">
+                    {{ statusLabel[competition.status] || competition.status }}
+                </Badge>
+            </div>
         </div>
 
         <div v-if="competition.is_results_locked" class="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-rose-800 dark:text-rose-300 flex items-start gap-3">
