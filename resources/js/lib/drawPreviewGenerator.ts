@@ -16,6 +16,9 @@ export interface ClientMatchSlot {
     status: 'ready' | 'pending' | 'bye';
     next_match_id: number | null;
     next_slot: number | null;
+    loser_next_match_id?: number | null;
+    loser_next_slot?: number | null;
+    match_type?: string;
 }
 
 function nextPowerOfTwo(n: number): number {
@@ -40,6 +43,8 @@ export function generateClientPreview(
         return generateFullCompetition(participants);
     } else if (format === 'knockout') {
         return generateKnockout(participants);
+    } else if (format === 'final_four') {
+        return generateFinalFour(participants);
     }
 
     return [];
@@ -231,4 +236,79 @@ function generateKnockout(participants: ParticipantItem[]): ClientMatchSlot[] {
     }
 
     return slots;
+}
+
+function generateFinalFour(participants: ParticipantItem[]): ClientMatchSlot[] {
+    const baseSlots = generateKnockout(participants);
+    if (baseSlots.length === 0) return [];
+
+    let totalRounds = 0;
+    for (const slot of baseSlots) {
+        if (slot.round > totalRounds) {
+            totalRounds = slot.round;
+        }
+    }
+
+    if (totalRounds < 2) return baseSlots;
+
+    let finalSequence = 0;
+    for (const slot of baseSlots) {
+        if (slot.round === totalRounds) {
+            finalSequence = slot.sequence;
+            break;
+        }
+    }
+
+    const thirdPlaceSequence = finalSequence + 1;
+    const resultSlots: ClientMatchSlot[] = [];
+    const semifinalSlots: number[] = [];
+
+    for (const slot of baseSlots) {
+        let matchType = 'standard';
+        if (slot.round === totalRounds) {
+            matchType = 'final';
+        } else if (slot.round === totalRounds - 1) {
+            matchType = 'semifinal';
+        }
+
+        let nextMatchId = slot.next_match_id;
+        let nextSlot = slot.next_slot;
+        let loserNextMatchId: number | null = null;
+        let loserNextSlot: number | null = null;
+
+        if (matchType === 'semifinal') {
+            semifinalSlots.push(slot.sequence);
+            const sfIndex = semifinalSlots.length;
+            nextMatchId = finalSequence;
+            nextSlot = sfIndex;
+            loserNextMatchId = thirdPlaceSequence;
+            loserNextSlot = sfIndex;
+        }
+
+        resultSlots.push({
+            ...slot,
+            next_match_id: nextMatchId,
+            next_slot: nextSlot,
+            loser_next_match_id: loserNextMatchId,
+            loser_next_slot: loserNextSlot,
+            match_type: matchType,
+        });
+    }
+
+    resultSlots.push({
+        id: -thirdPlaceSequence,
+        round: totalRounds,
+        leg: 1,
+        sequence: thirdPlaceSequence,
+        home: null,
+        away: null,
+        status: 'pending',
+        next_match_id: null,
+        next_slot: null,
+        loser_next_match_id: null,
+        loser_next_slot: null,
+        match_type: 'third_place',
+    });
+
+    return resultSlots;
 }

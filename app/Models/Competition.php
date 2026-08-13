@@ -133,7 +133,12 @@ class Competition extends Model
 
     public function isKnockout(): bool
     {
-        return $this->format === CompetitionFormat::Knockout;
+        return $this->format === CompetitionFormat::Knockout || $this->format === CompetitionFormat::FinalFour;
+    }
+
+    public function isFinalFour(): bool
+    {
+        return $this->format === CompetitionFormat::FinalFour;
     }
 
     public function usesPoints(): bool

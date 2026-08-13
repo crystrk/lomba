@@ -15,5 +15,8 @@ final readonly class DrawSlot
         public CompetitionMatchStatus $status,
         public ?int $nextMatchId = null,
         public ?int $nextSlot = null,
+        public ?int $loserNextMatchId = null,
+        public ?int $loserNextSlot = null,
+        public string $matchType = 'standard',
     ) {}
 }

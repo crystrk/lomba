@@ -40,6 +40,7 @@ const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'sec
 
 const formatLabel: Record<string, string> = {
     knockout: 'Knockout',
+    final_four: 'Final Four',
     full_competition: 'Kompetisi Penuh',
     half_competition: 'Setengah Kompetisi',
 };

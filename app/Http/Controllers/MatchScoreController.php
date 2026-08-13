@@ -102,8 +102,11 @@ class MatchScoreController extends Controller
         int $scoreAway,
     ) {
         $winnerId = $this->determineKnockoutWinner($match, $scoreHome, $scoreAway, $request->input('winner_id'));
+        $loserId = ($winnerId === (int) $match->participant_id_home)
+            ? (int) $match->participant_id_away
+            : (int) $match->participant_id_home;
 
-        DB::transaction(function () use ($competition, $match, $scoreHome, $scoreAway, $winnerId, $request) {
+        DB::transaction(function () use ($competition, $match, $scoreHome, $scoreAway, $winnerId, $loserId, $request) {
             $isDownstreamCompleted = $this->isDownstreamCompleted($match);
 
             if ($match->isCompleted() && $match->winner_id !== $winnerId && $isDownstreamCompleted) {
@@ -135,6 +138,7 @@ class MatchScoreController extends Controller
             }
 
             $this->advanceWinner($match, $winnerId);
+            $this->advanceLoser($match, $loserId);
 
             if ($competition->isLocked()) {
                 $competition->update(['status' => CompetitionStatus::InProgress]);
@@ -167,7 +171,7 @@ class MatchScoreController extends Controller
 
         $nextMatch = $match->nextMatch;
 
-        if ($nextMatch->isBye()) {
+        if (! $nextMatch || $nextMatch->isBye()) {
             return;
         }
 
@@ -182,42 +186,83 @@ class MatchScoreController extends Controller
         }
     }
 
+    private function advanceLoser(CompetitionMatch $match, int $loserId): void
+    {
+        if ($match->loser_next_match_id === null || $match->loser_next_slot === null) {
+            return;
+        }
+
+        $loserNextMatch = $match->loserNextMatch;
+
+        if (! $loserNextMatch || $loserNextMatch->isBye()) {
+            return;
+        }
+
+        if ($match->loser_next_slot === 1) {
+            $loserNextMatch->update(['participant_id_home' => $loserId]);
+        } else {
+            $loserNextMatch->update(['participant_id_away' => $loserId]);
+        }
+
+        if ($loserNextMatch->hasBothParticipants() && $loserNextMatch->isPending()) {
+            $loserNextMatch->update(['status' => CompetitionMatchStatus::Ready]);
+        }
+    }
+
     private function clearDownstreamSlots(CompetitionMatch $match): void
     {
-        if ($match->next_match_id === null || $match->next_slot === null) {
-            return;
+        if ($match->next_match_id !== null && $match->next_slot !== null) {
+            $nextMatch = $match->nextMatch;
+
+            if ($nextMatch && ! $nextMatch->isBye()) {
+                if ($match->next_slot === 1) {
+                    $nextMatch->update(['participant_id_home' => null]);
+                } else {
+                    $nextMatch->update(['participant_id_away' => null]);
+                }
+
+                if ($nextMatch->isReady()) {
+                    $nextMatch->update(['status' => CompetitionMatchStatus::Pending]);
+                }
+            }
         }
 
-        $nextMatch = $match->nextMatch;
+        if ($match->loser_next_match_id !== null && $match->loser_next_slot !== null) {
+            $loserNextMatch = $match->loserNextMatch;
 
-        if ($nextMatch->isBye()) {
-            return;
-        }
+            if ($loserNextMatch && ! $loserNextMatch->isBye()) {
+                if ($match->loser_next_slot === 1) {
+                    $loserNextMatch->update(['participant_id_home' => null]);
+                } else {
+                    $loserNextMatch->update(['participant_id_away' => null]);
+                }
 
-        if ($match->next_slot === 1) {
-            $nextMatch->update(['participant_id_home' => null]);
-        } else {
-            $nextMatch->update(['participant_id_away' => null]);
-        }
-
-        if ($nextMatch->isReady()) {
-            $nextMatch->update(['status' => CompetitionMatchStatus::Pending]);
+                if ($loserNextMatch->isReady()) {
+                    $loserNextMatch->update(['status' => CompetitionMatchStatus::Pending]);
+                }
+            }
         }
     }
 
     private function isDownstreamCompleted(CompetitionMatch $match): bool
     {
-        if ($match->next_match_id === null || $match->next_slot === null) {
-            return false;
+        if ($match->next_match_id !== null && $match->next_slot !== null) {
+            $nextMatch = $match->nextMatch;
+
+            if ($nextMatch && ($nextMatch->isCompleted() || $this->isDownstreamCompleted($nextMatch))) {
+                return true;
+            }
         }
 
-        $nextMatch = $match->nextMatch;
+        if ($match->loser_next_match_id !== null && $match->loser_next_slot !== null) {
+            $loserNextMatch = $match->loserNextMatch;
 
-        if ($nextMatch->isCompleted()) {
-            return true;
+            if ($loserNextMatch && ($loserNextMatch->isCompleted() || $this->isDownstreamCompleted($loserNextMatch))) {
+                return true;
+            }
         }
 
-        return $this->isDownstreamCompleted($nextMatch);
+        return false;
     }
 
     private function updateCompetitionCompletionStatus(Competition $competition): void

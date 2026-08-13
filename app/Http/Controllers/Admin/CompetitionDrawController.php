@@ -36,6 +36,9 @@ class CompetitionDrawController extends Controller
                 'status' => $m->status->value,
                 'next_match_id' => $m->next_match_id,
                 'next_slot' => $m->next_slot,
+                'loser_next_match_id' => $m->loser_next_match_id,
+                'loser_next_slot' => $m->loser_next_slot,
+                'match_type' => $m->match_type,
             ]);
 
         return Inertia('Admin/Competitions/Draw', [
@@ -87,18 +90,31 @@ class CompetitionDrawController extends Controller
                     'status' => $slot->status,
                     'next_match_id' => null,
                     'next_slot' => $slot->nextSlot,
+                    'loser_next_match_id' => null,
+                    'loser_next_slot' => $slot->loserNextSlot,
+                    'match_type' => $slot->matchType,
                 ]));
             }
 
             foreach ($result->slots as $i => $slot) {
-                if ($slot->nextMatchId === null) {
-                    continue;
+                $updatePayload = [];
+
+                if ($slot->nextMatchId !== null) {
+                    $target = $created->firstWhere('sequence', $slot->nextMatchId);
+                    if ($target !== null) {
+                        $updatePayload['next_match_id'] = $target->id;
+                    }
                 }
 
-                $target = $created->firstWhere('sequence', $slot->nextMatchId);
+                if ($slot->loserNextMatchId !== null) {
+                    $loserTarget = $created->firstWhere('sequence', $slot->loserNextMatchId);
+                    if ($loserTarget !== null) {
+                        $updatePayload['loser_next_match_id'] = $loserTarget->id;
+                    }
+                }
 
-                if ($target !== null) {
-                    $created[$i]->update(['next_match_id' => $target->id]);
+                if (! empty($updatePayload)) {
+                    $created[$i]->update($updatePayload);
                 }
             }
 
@@ -158,18 +174,31 @@ class CompetitionDrawController extends Controller
                     'status' => $slot->status,
                     'next_match_id' => null,
                     'next_slot' => $slot->nextSlot,
+                    'loser_next_match_id' => null,
+                    'loser_next_slot' => $slot->loserNextSlot,
+                    'match_type' => $slot->matchType,
                 ]));
             }
 
             foreach ($result->slots as $i => $slot) {
-                if ($slot->nextMatchId === null) {
-                    continue;
+                $updatePayload = [];
+
+                if ($slot->nextMatchId !== null) {
+                    $target = $created->firstWhere('sequence', $slot->nextMatchId);
+                    if ($target !== null) {
+                        $updatePayload['next_match_id'] = $target->id;
+                    }
                 }
 
-                $target = $created->firstWhere('sequence', $slot->nextMatchId);
+                if ($slot->loserNextMatchId !== null) {
+                    $loserTarget = $created->firstWhere('sequence', $slot->loserNextMatchId);
+                    if ($loserTarget !== null) {
+                        $updatePayload['loser_next_match_id'] = $loserTarget->id;
+                    }
+                }
 
-                if ($target !== null) {
-                    $created[$i]->update(['next_match_id' => $target->id]);
+                if (! empty($updatePayload)) {
+                    $created[$i]->update($updatePayload);
                 }
             }
 

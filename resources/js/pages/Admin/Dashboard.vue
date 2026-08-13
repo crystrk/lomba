@@ -76,6 +76,7 @@ const greeting = computed(() => {
 
 const labelFormat: Record<string, string> = {
     knockout: 'Knockout',
+    final_four: 'Final Four',
     full_competition: 'Kompetisi Penuh',
     half_competition: 'Setengah Kompetisi',
 };

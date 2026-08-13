@@ -33,7 +33,8 @@ defineProps<{
 }>();
 
 const formatLabel: Record<string, string> = {
-    knockout: 'Knockout',
+    knockout: 'Knockout (Sistem Gugur)',
+    final_four: 'Final Four (Semifinal, Final & Perebutan Juara 3)',
     full_competition: 'Kompetisi Penuh',
     half_competition: 'Setengah Kompetisi',
 };
@@ -50,12 +51,12 @@ const form = useForm({
     loss_points: '0',
 });
 
-const isKnockout = computed(() => form.format === 'knockout');
+const isKnockout = computed(() => form.format === 'knockout' || form.format === 'final_four');
 
 watch(
     () => form.format,
     (newFormat) => {
-        if (newFormat === 'knockout') {
+        if (newFormat === 'knockout' || newFormat === 'final_four') {
             form.win_points = '';
             form.draw_points = '';
             form.loss_points = '';

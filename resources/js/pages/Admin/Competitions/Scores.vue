@@ -52,6 +52,7 @@ const props = defineProps<{
         winner_id: number | null;
         win_method: string | null;
         status: string;
+        match_type?: string;
         result_version: number;
         home_participant: { id: number; name: string; short_name: string | null } | null;
         away_participant: { id: number; name: string; short_name: string | null } | null;
@@ -87,7 +88,7 @@ const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'sec
     completed: 'outline',
 };
 
-const isKnockout = computed(() => props.competition.format === 'knockout');
+const isKnockout = computed(() => props.competition.format === 'knockout' || props.competition.format === 'final_four');
 
 const sortedRounds = computed(() => {
     return Object.keys(props.matchesByRound)
@@ -324,6 +325,27 @@ function roundLabel(round: number, leg: number): string {
                             {{ match.home_participant?.name ?? '??' }} — Lolos Otomatis (Bye)
                         </div>
                         <div v-else>
+                            <!-- Info Match Puncak: Cari Juara 1 & Cari Juara 3 -->
+                            <div v-if="match.match_type === 'final' || (isKnockout && roundLabel(round, 1) === 'Final' && match.match_type !== 'third_place')" class="mb-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5 flex items-center justify-between">
+                                <div class="flex items-center gap-2 font-bold text-xs text-amber-700 dark:text-amber-300">
+                                    <Trophy class="size-4 text-amber-500 shrink-0" />
+                                    <span>🏆 MATCH FINAL &mdash; Info: Cari Juara 1 (Perebutan Juara 1 & 2)</span>
+                                </div>
+                                <Badge variant="outline" class="border-amber-500/50 bg-amber-500/20 text-amber-800 dark:text-amber-200 text-[10px] font-extrabold">
+                                    Cari Juara 1
+                                </Badge>
+                            </div>
+
+                            <div v-else-if="match.match_type === 'third_place'" class="mb-3 rounded-lg border border-orange-500/40 bg-orange-500/10 p-2.5 flex items-center justify-between">
+                                <div class="flex items-center gap-2 font-bold text-xs text-orange-700 dark:text-orange-300">
+                                    <Medal class="size-4 text-orange-500 shrink-0" />
+                                    <span>🥉 MATCH PEREBUTAN JUARA Ke-3 &mdash; Info: Cari Juara 3 (Perebutan Juara 3 & 4)</span>
+                                </div>
+                                <Badge variant="outline" class="border-orange-500/50 bg-orange-500/20 text-orange-800 dark:text-orange-200 text-[10px] font-extrabold">
+                                    Cari Juara 3
+                                </Badge>
+                            </div>
+
                             <form @submit.prevent="submitScore(match.id)" class="space-y-4">
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b text-xs text-muted-foreground">
                                     <div class="flex items-center gap-2 flex-1">

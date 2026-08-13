@@ -20,7 +20,7 @@ class UpdateCompetitionRequest extends FormRequest
     public function rules(): array
     {
         $formats = array_map(fn (CompetitionFormat $f) => $f->value, CompetitionFormat::cases());
-        $isKnockout = $this->input('format') === 'knockout';
+        $isKnockout = in_array($this->input('format'), ['knockout', 'final_four'], true);
 
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],

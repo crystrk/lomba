@@ -17,6 +17,9 @@ interface MatchItem {
     win_method: string | null;
     next_match_id: number | null;
     next_slot: number | null;
+    loser_next_match_id?: number | null;
+    loser_next_slot?: number | null;
+    match_type?: string;
 }
 
 defineProps<{
@@ -73,7 +76,11 @@ function scrollToBracketRound(round: number) {
                             v-for="match in matchesByRound[round]" 
                             :key="match.id" 
                             class="w-64 rounded-xl border bg-background p-3 shadow-2xs hover:shadow-xs transition-all space-y-2"
-                            :class="match.status === 'completed' ? 'border-border' : 'border-amber-500/30 ring-1 ring-amber-500/20'"
+                            :class="[
+                                match.match_type === 'final' ? 'border-amber-500/80 ring-2 ring-amber-500/30' :
+                                match.match_type === 'third_place' ? 'border-orange-500/80 ring-2 ring-orange-500/30' :
+                                match.status === 'completed' ? 'border-border' : 'border-amber-500/30 ring-1 ring-amber-500/20'
+                            ]"
                         >
                             <!-- Bye match -->
                             <template v-if="match.status === 'bye'">
@@ -92,7 +99,11 @@ function scrollToBracketRound(round: number) {
                             <!-- Regular Bracket Match -->
                             <template v-else>
                                 <div class="flex items-center justify-between text-[10px] text-muted-foreground font-medium border-b border-border/40 pb-1">
-                                    <span>Match #{{ match.sequence }}</span>
+                                    <div class="flex items-center gap-1">
+                                        <span>Match #{{ match.sequence }}</span>
+                                        <span v-if="match.match_type === 'final'" class="font-extrabold text-amber-600 dark:text-amber-400">🏆 FINAL</span>
+                                        <span v-else-if="match.match_type === 'third_place'" class="font-extrabold text-orange-600 dark:text-orange-400">🥉 PEREBUTAN JUARA Ke-3</span>
+                                    </div>
                                     <span v-if="match.win_method" class="text-amber-600 font-semibold">{{ match.win_method }}</span>
                                 </div>
 

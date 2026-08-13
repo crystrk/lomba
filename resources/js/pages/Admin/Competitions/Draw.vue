@@ -72,6 +72,7 @@ const props = defineProps<{
 
 const formatLabel: Record<string, string> = {
     knockout: 'Knockout (Sistem Gugur)',
+    final_four: 'Final Four (Semifinal, Final & Perebutan Juara 3)',
     full_competition: 'Kompetisi Penuh (Double Round-Robin)',
     half_competition: 'Setengah Kompetisi (Single Round-Robin)',
 };
@@ -92,7 +93,7 @@ const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'sec
     completed: 'outline',
 };
 
-const isKnockout = computed(() => props.competition.format === 'knockout');
+const isKnockout = computed(() => props.competition.format === 'knockout' || props.competition.format === 'final_four');
 const canEditDraw = computed(() => props.competition.status === 'draft' || props.competition.status === 'drawn');
 const canLock = computed(() => props.competition.status === 'drawn' && !isDirty.value);
 

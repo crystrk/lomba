@@ -46,6 +46,7 @@ const props = defineProps<{
 
 const formatLabel: Record<string, string> = {
     knockout: 'Knockout (Gugur)',
+    final_four: 'Final Four',
     full_competition: 'Kompetisi Penuh (Liga)',
     half_competition: 'Setengah Kompetisi',
 };

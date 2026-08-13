@@ -77,6 +77,9 @@ class PublicCompetitionController extends Controller
                 'win_method' => $m->win_method,
                 'next_match_id' => $m->next_match_id,
                 'next_slot' => $m->next_slot,
+                'loser_next_match_id' => $m->loser_next_match_id,
+                'loser_next_slot' => $m->loser_next_slot,
+                'match_type' => $m->match_type,
             ])->values())
             ->toArray();
 

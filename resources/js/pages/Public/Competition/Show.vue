@@ -70,11 +70,12 @@ const statusLabel: Record<string, string> = {
 
 const formatLabel: Record<string, string> = {
     knockout: 'Knockout (Gugur)',
+    final_four: 'Final Four',
     full_competition: 'Kompetisi Penuh (Liga)',
     half_competition: 'Setengah Kompetisi',
 };
 
-const isKnockout = computed(() => props.competition.format === 'knockout');
+const isKnockout = computed(() => props.competition.format === 'knockout' || props.competition.format === 'final_four');
 
 const sortedRounds = computed(() => {
     return Object.keys(props.matchesByRound)

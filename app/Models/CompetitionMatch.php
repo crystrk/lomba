@@ -24,6 +24,9 @@ use Illuminate\Support\Carbon;
  * @property CompetitionMatchStatus $status
  * @property int|null $next_match_id
  * @property int|null $next_slot
+ * @property int|null $loser_next_match_id
+ * @property int|null $loser_next_slot
+ * @property string $match_type
  * @property string|null $scheduled_time
  * @property int $result_version
  * @property int|null $result_updated_by
@@ -53,6 +56,9 @@ class CompetitionMatch extends Model
         'status',
         'next_match_id',
         'next_slot',
+        'loser_next_match_id',
+        'loser_next_slot',
+        'match_type',
         'result_version',
         'result_updated_by',
         'result_updated_at',
@@ -95,6 +101,11 @@ class CompetitionMatch extends Model
     public function nextMatch(): BelongsTo
     {
         return $this->belongsTo(self::class, 'next_match_id');
+    }
+
+    public function loserNextMatch(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'loser_next_match_id');
     }
 
     public function resultUpdater(): BelongsTo
