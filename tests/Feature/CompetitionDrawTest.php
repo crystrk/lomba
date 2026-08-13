@@ -329,3 +329,92 @@ it('shuffle after lock is forbidden', function () {
         ->post(route('admin.competitions.shuffle', $competition))
         ->assertStatus(422);
 });
+
+it('admin can reorder participants manually and update matches', function () {
+    $competition = Competition::factory()
+        ->draft()
+        ->create(['format' => CompetitionFormat::Knockout]);
+
+    $p1 = Participant::factory()->create(['competition_id' => $competition->id, 'name' => 'Alpha']);
+    $p2 = Participant::factory()->create(['competition_id' => $competition->id, 'name' => 'Bravo']);
+    $p3 = Participant::factory()->create(['competition_id' => $competition->id, 'name' => 'Charlie']);
+    $p4 = Participant::factory()->create(['competition_id' => $competition->id, 'name' => 'Delta']);
+
+    // Reorder in reverse order: Delta, Charlie, Bravo, Alpha
+    $newOrder = [$p4->id, $p3->id, $p2->id, $p1->id];
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.competitions.reorder', $competition), [
+            'participant_ids' => $newOrder,
+        ])
+        ->assertRedirect(route('admin.competitions.draw.show', $competition));
+
+    $competition->refresh();
+
+    expect($competition->status)->toBe(CompetitionStatus::Drawn)
+        ->and($competition->draw_version)->toBe(1)
+        ->and($p4->fresh()->draw_position)->toBe(1)
+        ->and($p3->fresh()->draw_position)->toBe(2)
+        ->and($p2->fresh()->draw_position)->toBe(3)
+        ->and($p1->fresh()->draw_position)->toBe(4);
+
+    // Verify first match has Delta vs Charlie
+    $firstMatch = $competition->matches()->where('sequence', 1)->first();
+    expect($firstMatch->participant_id_home)->toBe($p4->id)
+        ->and($firstMatch->participant_id_away)->toBe($p3->id);
+});
+
+it('reorder fails with invalid participant count or foreign participants', function () {
+    $competition = Competition::factory()
+        ->draft()
+        ->create();
+
+    $p1 = Participant::factory()->create(['competition_id' => $competition->id]);
+    $p2 = Participant::factory()->create(['competition_id' => $competition->id]);
+    $foreignP = Participant::factory()->create();
+
+    // Invalid count
+    $this->actingAs($this->admin)
+        ->post(route('admin.competitions.reorder', $competition), [
+            'participant_ids' => [$p1->id],
+        ])
+        ->assertSessionHasErrors(['participant_ids']);
+
+    // Foreign participant
+    $this->actingAs($this->admin)
+        ->post(route('admin.competitions.reorder', $competition), [
+            'participant_ids' => [$p1->id, $foreignP->id],
+        ])
+        ->assertStatus(422);
+});
+
+it('reorder fails on locked competition', function () {
+    $competition = Competition::factory()
+        ->locked()
+        ->has(Participant::factory()->count(4))
+        ->create();
+
+    $ids = $competition->participants()->pluck('id')->toArray();
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.competitions.reorder', $competition), [
+            'participant_ids' => $ids,
+        ])
+        ->assertStatus(422);
+});
+
+it('operator cannot reorder', function () {
+    $competition = Competition::factory()
+        ->draft()
+        ->has(Participant::factory()->count(4))
+        ->create();
+
+    $ids = $competition->participants()->pluck('id')->toArray();
+
+    $this->actingAs($this->operator)
+        ->post(route('admin.competitions.reorder', $competition), [
+            'participant_ids' => $ids,
+        ])
+        ->assertForbidden();
+});
+

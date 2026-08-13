@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(functio
 
         Route::get('competitions/{competition}/draw', [CompetitionDrawController::class, 'show'])->name('competitions.draw.show');
         Route::post('competitions/{competition}/shuffle', [CompetitionDrawController::class, 'shuffle'])->name('competitions.shuffle');
+        Route::post('competitions/{competition}/reorder', [CompetitionDrawController::class, 'reorder'])->name('competitions.reorder');
         Route::post('competitions/{competition}/lock', [CompetitionDrawController::class, 'lock'])->name('competitions.lock');
 
         Route::get('competitions/{competition}/scores', [AdminScoreController::class, 'index'])->name('competitions.scores');

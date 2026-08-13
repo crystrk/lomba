@@ -9,6 +9,10 @@ import {
     Users,
     AlertTriangle,
     CheckCircle2,
+    ListOrdered,
+    Save,
+    Sparkles,
+    Eye,
 } from '@lucide/vue';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
@@ -26,8 +30,11 @@ import {
 import {
     show as drawShow,
     shuffle,
+    reorder,
     lock,
 } from '@/routes/admin/competitions';
+import ParticipantSortableList from '@/components/Admin/ParticipantSortableList.vue';
+import { generateClientPreview, type ParticipantItem, type ClientMatchSlot } from '@/lib/drawPreviewGenerator';
 
 defineOptions({
     layout: AppLayout,
@@ -62,9 +69,9 @@ const props = defineProps<{
 }>();
 
 const formatLabel: Record<string, string> = {
-    knockout: 'Knockout',
-    full_competition: 'Kompetisi Penuh',
-    half_competition: 'Setengah Kompetisi',
+    knockout: 'Knockout (Sistem Gugur)',
+    full_competition: 'Kompetisi Penuh (Double Round-Robin)',
+    half_competition: 'Setengah Kompetisi (Single Round-Robin)',
 };
 
 const statusLabel: Record<string, string> = {
@@ -84,10 +91,44 @@ const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'sec
 };
 
 const isKnockout = computed(() => props.competition.format === 'knockout');
+const canEditDraw = computed(() => props.competition.status === 'draft' || props.competition.status === 'drawn');
+const canLock = computed(() => props.competition.status === 'drawn' && !isDirty.value);
+
+// Reactive participants state for manual sorting
+const initialParticipants = computed<ParticipantItem[]>(() => [...props.participants]);
+const orderedParticipants = ref<ParticipantItem[]>([...props.participants]);
+
+watch(
+    () => props.participants,
+    (newVal) => {
+        orderedParticipants.value = [...newVal];
+    },
+    { deep: true, immediate: true }
+);
+
+// Check if client order differs from server order
+const isDirty = computed(() => {
+    if (orderedParticipants.value.length !== props.participants.length) return true;
+    for (let i = 0; i < orderedParticipants.value.length; i++) {
+        if (orderedParticipants.value[i].id !== props.participants[i].id) {
+            return true;
+        }
+    }
+    return false;
+});
+
+// Client-side Instant Live Preview Generator
+const activeMatches = computed<(ClientMatchSlot | typeof props.matches[0])[]>(() => {
+    // If dirty or no server matches exist yet, compute live preview in real-time
+    if (isDirty.value || props.matches.length === 0) {
+        return generateClientPreview(props.competition.format, orderedParticipants.value);
+    }
+    return props.matches;
+});
 
 const groupedMatches = computed(() => {
-    const groups: Record<string, typeof props.matches> = {};
-    for (const m of props.matches) {
+    const groups: Record<string, typeof activeMatches.value> = {};
+    for (const m of activeMatches.value) {
         const key = isKnockout.value
             ? `Ronde ${m.round}`
             : `Ronde ${m.round}${m.leg === 2 ? ' (Leg 2)' : ''}`;
@@ -98,21 +139,32 @@ const groupedMatches = computed(() => {
 });
 
 const scoredMatchCount = computed(
-    () => props.matches.filter((m) => m.status === 'ready' || m.status === 'pending').length,
+    () => activeMatches.value.filter((m) => m.status === 'ready' || m.status === 'pending').length,
 );
 
 const byeMatchCount = computed(
-    () => props.matches.filter((m) => m.status === 'bye').length,
+    () => activeMatches.value.filter((m) => m.status === 'bye').length,
 );
 
-const canDraw = computed(
-    () => props.competition.status === 'draft' || props.competition.status === 'drawn',
-);
-
-const canLock = computed(() => props.competition.status === 'drawn');
-
+// Active Tab / Mode Selection
+const drawMode = ref<'manual' | 'random'>('manual');
 const shuffleDialogOpen = ref(false);
 const lockDialogOpen = ref(false);
+
+const reorderForm = useForm({
+    participant_ids: [] as number[],
+});
+
+function saveReorder() {
+    reorderForm.participant_ids = orderedParticipants.value.map((p) => p.id);
+    reorderForm.post(reorder(props.competition.id).url, {
+        preserveScroll: true,
+    });
+}
+
+function cancelReorder() {
+    orderedParticipants.value = [...props.participants];
+}
 
 const shuffleForm = useForm({});
 
@@ -145,7 +197,7 @@ function executeLock() {
     });
 }
 
-function participantName(match: typeof props.matches[0], side: 'home' | 'away'): string {
+function participantName(match: typeof activeMatches.value[0], side: 'home' | 'away'): string {
     const p = match[side];
     if (!p) return '—';
     return p.short_name || p.name;
@@ -165,7 +217,7 @@ function participantName(match: typeof props.matches[0], side: 'home' | 'away'):
                 <span>{{ competition.name }}</span>
             </Link>
             <div class="flex items-center justify-between mt-1">
-                <h1 class="text-2xl font-bold">Undian & Jadwal Pertandingan</h1>
+                <h1 class="text-2xl font-bold tracking-tight">Undian & Jadwal Pertandingan</h1>
                 <div class="flex items-center gap-3">
                     <Badge :variant="statusVariant[competition.status] || 'secondary'">
                         {{ statusLabel[competition.status] || competition.status }}
@@ -184,7 +236,7 @@ function participantName(match: typeof props.matches[0], side: 'home' | 'away'):
                     <Trophy class="size-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div class="text-xl font-bold">{{ formatLabel[competition.format] }}</div>
+                    <div class="text-xl font-bold">{{ formatLabel[competition.format] || competition.format }}</div>
                 </CardContent>
             </Card>
 
@@ -205,7 +257,7 @@ function participantName(match: typeof props.matches[0], side: 'home' | 'away'):
                 </CardHeader>
                 <CardContent>
                     <div class="text-xl font-bold">
-                        {{ matches.length }} Match
+                        {{ activeMatches.length }} Match
                         <span class="text-xs font-normal text-muted-foreground"
                             >({{ scoredMatchCount }} dihitung skor)</span
                         >
@@ -214,83 +266,170 @@ function participantName(match: typeof props.matches[0], side: 'home' | 'away'):
             </Card>
         </div>
 
-        <div v-if="byeMatchCount > 0" class="flex items-center gap-2 rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
+        <div v-if="byeMatchCount > 0" class="flex items-center gap-2 rounded-lg border bg-amber-500/10 border-amber-500/30 p-3 text-sm text-amber-900 dark:text-amber-200">
             <AlertTriangle class="size-4 text-amber-500 shrink-0" />
             <span>Terdapat <strong>{{ byeMatchCount }}</strong> pertandingan <em>bye</em> (peserta otomatis lolos ke babak berikutnya).</span>
         </div>
 
-        <div class="flex gap-3">
-            <Button
-                v-if="canDraw"
-                @click="shuffleDialogOpen = true"
-                :disabled="shuffleForm.processing"
-            >
-                <Shuffle class="mr-2 size-4" />
-                {{ matches.length > 0 ? 'Acak Ulang Undian' : 'Acak & Buat Undian' }}
-            </Button>
-            <Button
-                v-if="canLock"
-                variant="default"
-                @click="lockDialogOpen = true"
-                :disabled="lockForm.processing"
-            >
-                <Lock class="mr-2 size-4" />
-                Kunci Undian
-            </Button>
+        <!-- Banner Peringatan Perubahan Belum Disimpan -->
+        <div
+            v-if="isDirty"
+            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border border-amber-500/40 bg-amber-500/15 p-4 text-amber-950 dark:text-amber-100"
+        >
+            <div class="flex items-center gap-2 text-sm font-medium">
+                <Sparkles class="size-5 text-amber-600 shrink-0" />
+                <div>
+                    <span class="font-bold">Live Preview Aktif:</span>
+                    Urutan peserta telah diubah. Jadwal di bawah menampilkan pratinjau instan. Klik tombol simpan untuk memperbarui secara permanen.
+                </div>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                <Button variant="outline" size="sm" class="w-full sm:w-auto" :disabled="reorderForm.processing" @click="cancelReorder">
+                    Batal
+                </Button>
+                <Button size="sm" class="w-full sm:w-auto" :disabled="reorderForm.processing" @click="saveReorder">
+                    <Save class="mr-1.5 size-4" />
+                    {{ reorderForm.processing ? 'Menyimpan...' : 'Simpan & Regenerasi Undian' }}
+                </Button>
+            </div>
         </div>
 
-        <Card v-if="matches.length === 0 && participants.length < 2" class="p-8 text-center text-muted-foreground">
+        <!-- Mode Pengundian Navigation & Action Header -->
+        <div v-if="canEditDraw" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
+            <div class="flex items-center rounded-lg bg-muted p-1 gap-1">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    class="h-8 text-xs font-medium"
+                    :class="{ 'bg-background shadow-xs text-foreground': drawMode === 'manual' }"
+                    @click="drawMode = 'manual'"
+                >
+                    <ListOrdered class="mr-1.5 size-3.5" />
+                    Urutkan Manual (Drag & Drop)
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    class="h-8 text-xs font-medium"
+                    :class="{ 'bg-background shadow-xs text-foreground': drawMode === 'random' }"
+                    @click="drawMode = 'random'"
+                >
+                    <Shuffle class="mr-1.5 size-3.5" />
+                    Acak Otomatis (Shuffle)
+                </Button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <Button
+                    v-if="isDirty"
+                    variant="default"
+                    size="sm"
+                    :disabled="reorderForm.processing"
+                    @click="saveReorder"
+                >
+                    <Save class="mr-1.5 size-4" />
+                    {{ reorderForm.processing ? 'Menyimpan...' : 'Simpan Urutan Manual' }}
+                </Button>
+                <Button
+                    v-if="drawMode === 'random' && canEditDraw"
+                    variant="outline"
+                    size="sm"
+                    @click="shuffleDialogOpen = true"
+                    :disabled="shuffleForm.processing"
+                >
+                    <Shuffle class="mr-1.5 size-4" />
+                    {{ matches.length > 0 ? 'Acak Ulang Undian' : 'Acak & Buat Undian' }}
+                </Button>
+                <Button
+                    v-if="canLock"
+                    variant="default"
+                    size="sm"
+                    @click="lockDialogOpen = true"
+                    :disabled="lockForm.processing || isDirty"
+                >
+                    <Lock class="mr-1.5 size-4" />
+                    Kunci Undian
+                </Button>
+            </div>
+        </div>
+
+        <!-- Alert bila peserta kurang dari 2 -->
+        <Card v-if="participants.length < 2" class="p-8 text-center text-muted-foreground">
             Minimal 2 peserta diperlukan untuk membuat undian pertandingan.
         </Card>
 
-        <Card v-if="participants.length > 0">
-            <CardHeader class="border-b py-3 bg-muted/30">
-                <CardTitle class="text-sm font-semibold">Hasil Pengacakan Urutan Peserta</CardTitle>
-            </CardHeader>
-            <CardContent class="p-0">
-                <div class="divide-y">
-                    <div
-                        v-for="(p, i) in participants"
-                        :key="p.id"
-                        class="flex items-center gap-3 px-4 py-2.5 text-sm"
-                    >
-                        <span class="w-6 font-mono text-muted-foreground">{{ i + 1 }}</span>
-                        <span class="font-medium text-foreground">{{ p.name }}</span>
-                        <span v-if="p.short_name" class="text-xs text-muted-foreground">({{ p.short_name }})</span>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+        <!-- Visual Editor Urutan Peserta (Manual Sortable List) -->
+        <div v-if="participants.length >= 2" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 space-y-4">
+                <ParticipantSortableList
+                    v-model="orderedParticipants"
+                    :initial-participants="initialParticipants"
+                    :disabled="!canEditDraw"
+                />
 
-        <div v-if="Object.keys(groupedMatches).length > 0" class="space-y-4">
-            <h2 class="text-lg font-bold">Daftar Pertandingan (Preview)</h2>
-            <template v-for="(roundMatches, roundKey) in groupedMatches" :key="roundKey">
-                <Card>
-                    <CardHeader class="border-b py-3 bg-muted/30">
-                        <CardTitle class="text-sm font-semibold">{{ roundKey }}</CardTitle>
-                    </CardHeader>
-                    <CardContent class="p-0">
-                        <div class="divide-y">
-                            <div
-                                v-for="m in roundMatches"
-                                :key="m.id"
-                                class="flex items-center gap-4 px-4 py-3 text-sm"
-                            >
-                                <span class="w-8 font-mono text-xs text-muted-foreground">#{{ m.sequence }}</span>
-                                <div v-if="m.status === 'bye'" class="flex-1 italic text-muted-foreground">
-                                    Bye
+                <div v-if="canEditDraw && drawMode === 'random'" class="rounded-lg border bg-muted/40 p-4 space-y-2 text-sm text-muted-foreground">
+                    <div class="flex items-center gap-2 font-medium text-foreground">
+                        <Shuffle class="size-4 text-primary" />
+                        <span>Pengacak Acak Otomatis (Shuffle)</span>
+                    </div>
+                    <p class="text-xs">
+                        Klik tombol di bawah ini untuk mengacak urutan posisi undian peserta secara acak dan otomatis.
+                    </p>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        class="w-full mt-2"
+                        :disabled="shuffleForm.processing"
+                        @click="shuffleDialogOpen = true"
+                    >
+                        <Shuffle class="mr-1.5 size-4" />
+                        Acak Urutan Sekarang
+                    </Button>
+                </div>
+            </div>
+
+            <!-- Preview Jadwal Pertandingan (Live Preview) -->
+            <div class="lg:col-span-7 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold flex items-center gap-2">
+                        <Eye class="size-5 text-primary" />
+                        <span>Daftar Pertandingan (Preview)</span>
+                    </h2>
+                    <Badge v-if="isDirty" variant="outline" class="bg-amber-500/10 text-amber-800 border-amber-400 dark:text-amber-300">
+                        Live Preview (Belum Disimpan)
+                    </Badge>
+                </div>
+
+                <template v-for="(roundMatches, roundKey) in groupedMatches" :key="roundKey">
+                    <Card class="border">
+                        <CardHeader class="border-b py-2.5 bg-muted/30">
+                            <CardTitle class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                {{ roundKey }}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent class="p-0">
+                            <div class="divide-y">
+                                <div
+                                    v-for="m in roundMatches"
+                                    :key="m.id"
+                                    class="flex items-center gap-4 px-4 py-3 text-sm"
+                                >
+                                    <span class="w-8 font-mono text-xs text-muted-foreground">#{{ m.sequence }}</span>
+                                    <div v-if="m.status === 'bye'" class="flex-1 italic text-muted-foreground">
+                                        Bye (Otomatis Lolos)
+                                    </div>
+                                    <div v-else class="flex flex-1 items-center justify-between">
+                                        <span class="font-medium text-foreground">{{ participantName(m, 'home') }}</span>
+                                        <span class="mx-3 text-xs font-bold uppercase text-muted-foreground">VS</span>
+                                        <span class="font-medium text-foreground">{{ participantName(m, 'away') }}</span>
+                                    </div>
+                                    <Badge v-if="m.status === 'bye'" variant="outline" class="text-xs">Bye</Badge>
                                 </div>
-                                <div v-else class="flex flex-1 items-center justify-between">
-                                    <span class="font-medium text-foreground">{{ participantName(m, 'home') }}</span>
-                                    <span class="mx-3 text-xs font-bold uppercase text-muted-foreground">VS</span>
-                                    <span class="font-medium text-foreground">{{ participantName(m, 'away') }}</span>
-                                </div>
-                                <Badge v-if="m.status === 'bye'" variant="outline">Bye</Badge>
                             </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </template>
+                        </CardContent>
+                    </Card>
+                </template>
+            </div>
         </div>
 
         <!-- Modal Konfirmasi Shuffle -->
@@ -327,7 +466,7 @@ function participantName(match: typeof props.matches[0], side: 'home' | 'away'):
                             <li>Peserta baru tidak dapat ditambahkan atau dihapus.</li>
                         </ul>
                         <div class="rounded-md border bg-muted/40 p-3 mt-3 text-xs">
-                            <p><strong>Format:</strong> {{ formatLabel[competition.format] }}</p>
+                            <p><strong>Format:</strong> {{ formatLabel[competition.format] || competition.format }}</p>
                             <p><strong>Peserta:</strong> {{ participants.length }} Peserta</p>
                             <p><strong>Pertandingan Bernilai Skor:</strong> {{ scoredMatchCount }} Match</p>
                         </div>
@@ -340,7 +479,7 @@ function participantName(match: typeof props.matches[0], side: 'home' | 'away'):
                     <DialogClose as-child>
                         <Button variant="outline" :disabled="lockForm.processing">Batal</Button>
                     </DialogClose>
-                    <Button variant="default" :disabled="lockForm.processing" @click="executeLock">
+                    <Button variant="default" :disabled="lockForm.processing || isDirty" @click="executeLock">
                         <Lock class="mr-2 size-4" />
                         {{ lockForm.processing ? 'Mengunci...' : 'Kunci Undian Sekarang' }}
                     </Button>
@@ -349,4 +488,3 @@ function participantName(match: typeof props.matches[0], side: 'home' | 'away'):
         </Dialog>
     </div>
 </template>
-

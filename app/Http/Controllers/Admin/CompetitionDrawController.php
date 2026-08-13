@@ -118,6 +118,77 @@ class CompetitionDrawController extends Controller
             ->with('success', 'Undian berhasil dilakukan.');
     }
 
+    public function reorder(Request $request, Competition $competition): RedirectResponse
+    {
+        Gate::authorize('update', $competition);
+
+        abort_unless($competition->isEditable(), 422, 'Competition is not editable.');
+
+        $participantIds = $competition->participants()
+            ->pluck('id')
+            ->toArray();
+
+        $count = count($participantIds);
+        abort_if($count < 2, 422, 'At least two participants are required to draw.');
+
+        $request->validate([
+            'participant_ids' => ['required', 'array', 'size:'.$count],
+            'participant_ids.*' => ['required', 'integer', 'distinct', 'exists:participants,id'],
+        ]);
+
+        $orderedIds = $request->input('participant_ids');
+
+        $diff = array_diff($orderedIds, $participantIds);
+        abort_if(count($diff) > 0, 422, 'Provided participants do not match competition participants.');
+
+        $result = DrawGenerator::generate($competition->format, $orderedIds);
+
+        DB::transaction(function () use ($competition, $result, $orderedIds) {
+            $competition->matches()->delete();
+
+            $created = collect();
+
+            foreach ($result->slots as $slot) {
+                $created->push($competition->matches()->create([
+                    'round' => $slot->round,
+                    'leg' => $slot->leg,
+                    'sequence' => $slot->sequence,
+                    'participant_id_home' => $slot->homeId,
+                    'participant_id_away' => $slot->awayId,
+                    'status' => $slot->status,
+                    'next_match_id' => null,
+                    'next_slot' => $slot->nextSlot,
+                ]));
+            }
+
+            foreach ($result->slots as $i => $slot) {
+                if ($slot->nextMatchId === null) {
+                    continue;
+                }
+
+                $target = $created->firstWhere('sequence', $slot->nextMatchId);
+
+                if ($target !== null) {
+                    $created[$i]->update(['next_match_id' => $target->id]);
+                }
+            }
+
+            foreach ($orderedIds as $position => $participantId) {
+                $competition->participants()
+                    ->where('id', $participantId)
+                    ->update(['draw_position' => $position + 1]);
+            }
+
+            $competition->update([
+                'status' => CompetitionStatus::Drawn,
+                'draw_version' => $competition->draw_version + 1,
+            ]);
+        });
+
+        return redirect()->route('admin.competitions.draw.show', $competition)
+            ->with('success', 'Urutan undian berhasil diperbarui.');
+    }
+
     public function lock(Request $request, Competition $competition): RedirectResponse
     {
         Gate::authorize('update', $competition);
