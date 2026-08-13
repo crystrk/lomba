@@ -143,15 +143,32 @@ function submitSchedule(matchId: number) {
 }
 
 function isTieInKnockout(matchId: number): boolean {
-    if (!isKnockout.value) return false;
     const form = matchForms.value[matchId];
     if (!form) return false;
+    let matchItem: typeof props.matchesByRound[number][0] | null = null;
+    for (const r of sortedRounds.value) {
+        const found = props.matchesByRound[r].find((m) => m.id === matchId);
+        if (found) {
+            matchItem = found;
+            break;
+        }
+    }
+    const isKnockoutMatch = isKnockout.value || (props.competition.format === 'group_final_four' && (matchItem?.match_type === 'final' || matchItem?.match_type === 'third_place'));
+    if (!isKnockoutMatch) return false;
+
     const home = form.score_home;
     const away = form.score_away;
     return home !== '' && away !== '' && Number(home) === Number(away);
 }
 
 function roundLabel(round: number, leg: number): string {
+    if (props.competition.format === 'group_final_four') {
+        const maxRound = sortedRounds.value[sortedRounds.value.length - 1];
+        if (round === maxRound) {
+            return 'Babak Final Placement (Group Final Four)';
+        }
+        return `Penyisihan Grup (Pekan ${round})`;
+    }
     if (isKnockout.value) {
         const labels: Record<number, string> = { 1: 'Final', 2: 'Semifinal', 3: 'Perempat Final' };
         const totalRounds = sortedRounds.value.length;

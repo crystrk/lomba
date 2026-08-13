@@ -12,6 +12,7 @@ import KnockoutRoundsView from '@/components/Public/Competition/KnockoutRoundsVi
 import KnockoutBracketView from '@/components/Public/Competition/KnockoutBracketView.vue';
 import LeagueStandingsTable from '@/components/Public/Competition/LeagueStandingsTable.vue';
 import LeagueMatchesList from '@/components/Public/Competition/LeagueMatchesList.vue';
+import GroupFinalFourStageView from '@/components/Public/Competition/GroupFinalFourStageView.vue';
 
 interface MatchItem {
     id: number;
@@ -60,6 +61,34 @@ const props = defineProps<{
         difference: number;
         points: number;
     }>;
+    groupStandings?: {
+        group_a: Array<{
+            rank: number;
+            participant_id: number;
+            participant_name: string;
+            played: number;
+            won: number;
+            drawn: number;
+            lost: number;
+            score_for: number;
+            score_against: number;
+            difference: number;
+            points: number;
+        }>;
+        group_b: Array<{
+            rank: number;
+            participant_id: number;
+            participant_name: string;
+            played: number;
+            won: number;
+            drawn: number;
+            lost: number;
+            score_for: number;
+            score_against: number;
+            difference: number;
+            points: number;
+        }>;
+    } | null;
 }>();
 
 const statusLabel: Record<string, string> = {
@@ -71,11 +100,14 @@ const statusLabel: Record<string, string> = {
 const formatLabel: Record<string, string> = {
     knockout: 'Knockout (Gugur)',
     final_four: 'Final Four',
+    group_final_four: 'Group Final Four',
+    group_four_final: 'Group Final Four',
     full_competition: 'Kompetisi Penuh (Liga)',
     half_competition: 'Setengah Kompetisi',
 };
 
 const isKnockout = computed(() => props.competition.format === 'knockout' || props.competition.format === 'final_four');
+const isGroupFinalFour = computed(() => props.competition.format === 'group_final_four' || props.competition.format === 'group_four_final');
 
 const sortedRounds = computed(() => {
     return Object.keys(props.matchesByRound)
@@ -89,7 +121,7 @@ const knockoutViewMode = ref<'rounds' | 'bracket'>('rounds');
 const knockoutStatusFilter = ref<'all' | 'completed' | 'ready' | 'bye'>('all');
 
 // League specific state & refs
-const activeTab = ref<'standings' | 'matches'>('matches');
+const activeTab = ref<'standings' | 'bracket' | 'matches'>(props.standings?.length ? 'standings' : 'matches');
 const selectedLeagueRound = ref<number | 'all'>('all');
 const leagueStatusFilter = ref<'all' | 'completed' | 'ready'>('all');
 
@@ -98,12 +130,20 @@ const allMatchesList = computed(() => {
     return Object.values(props.matchesByRound).flat();
 });
 
+const finalMatch = computed(() => {
+    return allMatchesList.value.find(m => m.match_type === 'final');
+});
+
+const thirdPlaceMatch = computed(() => {
+    return allMatchesList.value.find(m => m.match_type === 'third_place');
+});
+
 const completedMatchesCount = computed(() => {
     return allMatchesList.value.filter(m => m.status === 'completed' || m.status === 'bye').length;
 });
 
 const totalScorableMatchesCount = computed(() => {
-    return allMatchesList.value.filter(m => m.status !== 'bye' && (m.home !== null || m.away !== null)).length;
+    return allMatchesList.value.filter(m => m.status !== 'bye').length;
 });
 
 const matchProgressPercentage = computed(() => {
@@ -231,8 +271,8 @@ const filteredLeagueMatches = computed(() => {
 
             <!-- LIGA / ROUND ROBIN FORMAT VIEW -->
             <div v-else class="space-y-6">
-                <!-- Navigation Tabs (Klasemen vs Pertandingan) -->
-                <div class="flex items-center gap-2 border-b border-border pb-3">
+                <!-- Navigation Tabs (Klasemen vs Bagan Final vs Pertandingan) -->
+                <div class="flex flex-wrap items-center gap-2 border-b border-border pb-3">
                     <Button
                         v-if="standings.length > 0"
                         :variant="activeTab === 'standings' ? 'default' : 'outline'"
@@ -241,7 +281,17 @@ const filteredLeagueMatches = computed(() => {
                         class="rounded-xl px-4 font-bold text-xs sm:text-sm"
                     >
                         <Trophy class="mr-1.5 size-4 text-amber-400" />
-                        Klasemen Perolehan Poin
+                        {{ isGroupFinalFour ? 'Klasemen 2 Grup' : 'Klasemen Perolehan Poin' }}
+                    </Button>
+                    <Button
+                        v-if="isGroupFinalFour"
+                        :variant="activeTab === 'bracket' ? 'default' : 'outline'"
+                        size="sm"
+                        @click="activeTab = 'bracket'"
+                        class="rounded-xl px-4 font-bold text-xs sm:text-sm"
+                    >
+                        <Medal class="mr-1.5 size-4 text-emerald-400" />
+                        Bagan & Stage Final Placement (1v2 & 3v4)
                     </Button>
                     <Button
                         :variant="activeTab === 'matches' ? 'default' : 'outline'"
@@ -255,12 +305,33 @@ const filteredLeagueMatches = computed(() => {
                 </div>
 
                 <!-- TAB 1: KLASEMEN -->
-                <LeagueStandingsTable
-                    v-if="activeTab === 'standings' && standings.length > 0"
-                    :standings="standings"
-                />
+                <div v-if="activeTab === 'standings' && standings.length > 0" class="space-y-6">
+                    <LeagueStandingsTable
+                        :standings="standings"
+                        :group-standings="groupStandings"
+                    />
 
-                <!-- TAB 2: PERTANDINGAN -->
+                    <!-- Detail Info Stage Selanjutnya untuk Group Final Four (Final 1v2 & Final 3v4) -->
+                    <GroupFinalFourStageView
+                        v-if="isGroupFinalFour"
+                        :final-match="finalMatch"
+                        :third-place-match="thirdPlaceMatch"
+                        :standings-a="groupStandings?.group_a"
+                        :standings-b="groupStandings?.group_b"
+                    />
+                </div>
+
+                <!-- TAB 2: BAGAN FINAL PLACEMENT (GROUP FINAL FOUR) -->
+                <div v-if="activeTab === 'bracket' && isGroupFinalFour" class="space-y-6">
+                    <GroupFinalFourStageView
+                        :final-match="finalMatch"
+                        :third-place-match="thirdPlaceMatch"
+                        :standings-a="groupStandings?.group_a"
+                        :standings-b="groupStandings?.group_b"
+                    />
+                </div>
+
+                <!-- TAB 3: PERTANDINGAN -->
                 <LeagueMatchesList
                     v-if="activeTab === 'matches'"
                     :sorted-rounds="sortedRounds"

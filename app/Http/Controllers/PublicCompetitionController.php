@@ -51,10 +51,15 @@ class PublicCompetitionController extends Controller
         ]);
     }
 
-    public function show(Request $request, Competition $competition): Response
+    public function show(Request $request, Competition $competition, MatchScoreController $matchScoreController): Response
     {
         if (in_array($competition->status->value, [CompetitionStatus::Draft->value, CompetitionStatus::Drawn->value])) {
             abort(404);
+        }
+
+        if ($competition->isGroupFinalFour()) {
+            $matchScoreController->checkAndPopulateGroupFinalFours($competition);
+            $competition->refresh();
         }
 
         $competition->load(['participants', 'matches.homeParticipant', 'matches.awayParticipant', 'matches.winner']);
@@ -90,25 +95,70 @@ class PublicCompetitionController extends Controller
         ]);
 
         $standings = [];
+        $groupStandings = null;
         if ($competition->usesPoints()) {
             $completedMatches = $competition->matches
                 ->where('status', CompetitionMatchStatus::Completed->value)
                 ->whereNotNull('participant_id_home')
                 ->whereNotNull('participant_id_away');
 
-            $standings = array_map(fn ($e) => [
-                'rank' => $e->rank,
-                'participant_id' => $e->participantId,
-                'participant_name' => $e->participantName,
-                'played' => $e->played,
-                'won' => $e->won,
-                'drawn' => $e->drawn,
-                'lost' => $e->lost,
-                'score_for' => $e->scoreFor,
-                'score_against' => $e->scoreAgainst,
-                'difference' => $e->difference,
-                'points' => $e->points,
-            ], $this->standingsCalculator->calculate($competition, $competition->participants, $completedMatches));
+            if ($competition->isGroupFinalFour()) {
+                $orderedParticipants = $competition->participants()->orderBy('draw_position')->orderBy('id')->get();
+                $halfCount = intdiv($orderedParticipants->count(), 2);
+                $groupAParticipants = $orderedParticipants->take($halfCount);
+                $groupBParticipants = $orderedParticipants->skip($halfCount)->take($halfCount);
+
+                $groupAMatches = $completedMatches->where('match_type', 'group_a');
+                $groupBMatches = $completedMatches->where('match_type', 'group_b');
+
+                $standingsA = array_map(fn ($e) => [
+                    'rank' => $e->rank,
+                    'participant_id' => $e->participantId,
+                    'participant_name' => $e->participantName,
+                    'played' => $e->played,
+                    'won' => $e->won,
+                    'drawn' => $e->drawn,
+                    'lost' => $e->lost,
+                    'score_for' => $e->scoreFor,
+                    'score_against' => $e->scoreAgainst,
+                    'difference' => $e->difference,
+                    'points' => $e->points,
+                ], $this->standingsCalculator->calculate($competition, $groupAParticipants, $groupAMatches));
+
+                $standingsB = array_map(fn ($e) => [
+                    'rank' => $e->rank,
+                    'participant_id' => $e->participantId,
+                    'participant_name' => $e->participantName,
+                    'played' => $e->played,
+                    'won' => $e->won,
+                    'drawn' => $e->drawn,
+                    'lost' => $e->lost,
+                    'score_for' => $e->scoreFor,
+                    'score_against' => $e->scoreAgainst,
+                    'difference' => $e->difference,
+                    'points' => $e->points,
+                ], $this->standingsCalculator->calculate($competition, $groupBParticipants, $groupBMatches));
+
+                $groupStandings = [
+                    'group_a' => $standingsA,
+                    'group_b' => $standingsB,
+                ];
+                $standings = array_merge($standingsA, $standingsB);
+            } else {
+                $standings = array_map(fn ($e) => [
+                    'rank' => $e->rank,
+                    'participant_id' => $e->participantId,
+                    'participant_name' => $e->participantName,
+                    'played' => $e->played,
+                    'won' => $e->won,
+                    'drawn' => $e->drawn,
+                    'lost' => $e->lost,
+                    'score_for' => $e->scoreFor,
+                    'score_against' => $e->scoreAgainst,
+                    'difference' => $e->difference,
+                    'points' => $e->points,
+                ], $this->standingsCalculator->calculate($competition, $competition->participants, $completedMatches));
+            }
         }
 
         return Inertia::render('Public/Competition/Show', [
@@ -126,6 +176,7 @@ class PublicCompetitionController extends Controller
             'participants' => $participants,
             'matchesByRound' => $matches,
             'standings' => $standings,
+            'groupStandings' => $groupStandings,
         ]);
     }
 }

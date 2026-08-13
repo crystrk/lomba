@@ -21,17 +21,150 @@ interface StandingEntry {
 
 defineProps<{
     standings: StandingEntry[];
+    groupStandings?: {
+        group_a: StandingEntry[];
+        group_b: StandingEntry[];
+    } | null;
+    title?: string;
 }>();
 </script>
 
 <template>
-    <div class="space-y-4">
+    <div v-if="groupStandings" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- GRUP A -->
+        <Card class="rounded-2xl overflow-hidden border border-border/80 shadow-xs">
+            <CardHeader class="border-b py-3.5 bg-blue-500/10 dark:bg-blue-950/30">
+                <CardTitle class="text-base font-bold flex items-center justify-between">
+                    <span class="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                        <Trophy class="size-5 text-blue-500" />
+                        Klasemen Grup A
+                    </span>
+                    <Badge variant="outline" class="text-xs font-normal border-blue-300">
+                        {{ groupStandings.group_a.length }} Tim
+                    </Badge>
+                </CardTitle>
+            </CardHeader>
+            <CardContent class="p-0 overflow-x-auto">
+                <Table class="w-full">
+                    <TableHeader class="bg-muted/40">
+                        <TableRow>
+                            <TableHead class="w-12 text-center font-bold">#</TableHead>
+                            <TableHead class="font-bold min-w-[140px]">Tim</TableHead>
+                            <TableHead class="text-center font-bold">M</TableHead>
+                            <TableHead class="text-center font-bold text-emerald-600">W</TableHead>
+                            <TableHead class="text-center font-bold text-amber-600">D</TableHead>
+                            <TableHead class="text-center font-bold text-rose-600">L</TableHead>
+                            <TableHead class="text-center font-bold">SG</TableHead>
+                            <TableHead class="text-center font-extrabold text-foreground">Pts</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow 
+                            v-for="entry in groupStandings.group_a" 
+                            :key="entry.participant_id"
+                            class="hover:bg-accent/40 transition-colors"
+                            :class="entry.rank === 1 ? 'bg-amber-500/10 font-semibold' : entry.rank === 2 ? 'bg-blue-500/5' : ''"
+                        >
+                            <TableCell class="text-center font-bold">
+                                <span v-if="entry.rank === 1" class="inline-flex size-6 items-center justify-center rounded-full bg-amber-500 text-white font-extrabold text-xs">🥇</span>
+                                <span v-else-if="entry.rank === 2" class="inline-flex size-6 items-center justify-center rounded-full bg-slate-300 dark:bg-slate-700 text-foreground font-extrabold text-xs">🥈</span>
+                                <span v-else class="text-muted-foreground text-xs">{{ entry.rank }}</span>
+                            </TableCell>
+
+                            <TableCell class="font-bold text-foreground">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-foreground font-extrabold text-[10px] border">
+                                        {{ getInitials(entry.participant_name) }}
+                                    </div>
+                                    <span class="truncate max-w-[140px] text-xs sm:text-sm">{{ entry.participant_name }}</span>
+                                </div>
+                            </TableCell>
+
+                            <TableCell class="text-center font-medium text-xs">{{ entry.played }}</TableCell>
+                            <TableCell class="text-center text-emerald-600 font-semibold text-xs">{{ entry.won }}</TableCell>
+                            <TableCell class="text-center text-amber-600 text-xs">{{ entry.drawn }}</TableCell>
+                            <TableCell class="text-center text-rose-600 text-xs">{{ entry.lost }}</TableCell>
+                            <TableCell class="text-center font-mono font-bold text-xs" :class="entry.difference > 0 ? 'text-emerald-600' : entry.difference < 0 ? 'text-rose-600' : 'text-muted-foreground'">
+                                {{ entry.difference > 0 ? '+' : '' }}{{ entry.difference }}
+                            </TableCell>
+                            <TableCell class="text-center font-extrabold text-sm text-foreground">{{ entry.points }}</TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+
+        <!-- GRUP B -->
+        <Card class="rounded-2xl overflow-hidden border border-border/80 shadow-xs">
+            <CardHeader class="border-b py-3.5 bg-purple-500/10 dark:bg-purple-950/30">
+                <CardTitle class="text-base font-bold flex items-center justify-between">
+                    <span class="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+                        <Trophy class="size-5 text-purple-500" />
+                        Klasemen Grup B
+                    </span>
+                    <Badge variant="outline" class="text-xs font-normal border-purple-300">
+                        {{ groupStandings.group_b.length }} Tim
+                    </Badge>
+                </CardTitle>
+            </CardHeader>
+            <CardContent class="p-0 overflow-x-auto">
+                <Table class="w-full">
+                    <TableHeader class="bg-muted/40">
+                        <TableRow>
+                            <TableHead class="w-12 text-center font-bold">#</TableHead>
+                            <TableHead class="font-bold min-w-[140px]">Tim</TableHead>
+                            <TableHead class="text-center font-bold">M</TableHead>
+                            <TableHead class="text-center font-bold text-emerald-600">W</TableHead>
+                            <TableHead class="text-center font-bold text-amber-600">D</TableHead>
+                            <TableHead class="text-center font-bold text-rose-600">L</TableHead>
+                            <TableHead class="text-center font-bold">SG</TableHead>
+                            <TableHead class="text-center font-extrabold text-foreground">Pts</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow 
+                            v-for="entry in groupStandings.group_b" 
+                            :key="entry.participant_id"
+                            class="hover:bg-accent/40 transition-colors"
+                            :class="entry.rank === 1 ? 'bg-amber-500/10 font-semibold' : entry.rank === 2 ? 'bg-purple-500/5' : ''"
+                        >
+                            <TableCell class="text-center font-bold">
+                                <span v-if="entry.rank === 1" class="inline-flex size-6 items-center justify-center rounded-full bg-amber-500 text-white font-extrabold text-xs">🥇</span>
+                                <span v-else-if="entry.rank === 2" class="inline-flex size-6 items-center justify-center rounded-full bg-slate-300 dark:bg-slate-700 text-foreground font-extrabold text-xs">🥈</span>
+                                <span v-else class="text-muted-foreground text-xs">{{ entry.rank }}</span>
+                            </TableCell>
+
+                            <TableCell class="font-bold text-foreground">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-foreground font-extrabold text-[10px] border">
+                                        {{ getInitials(entry.participant_name) }}
+                                    </div>
+                                    <span class="truncate max-w-[140px] text-xs sm:text-sm">{{ entry.participant_name }}</span>
+                                </div>
+                            </TableCell>
+
+                            <TableCell class="text-center font-medium text-xs">{{ entry.played }}</TableCell>
+                            <TableCell class="text-center text-emerald-600 font-semibold text-xs">{{ entry.won }}</TableCell>
+                            <TableCell class="text-center text-amber-600 text-xs">{{ entry.drawn }}</TableCell>
+                            <TableCell class="text-center text-rose-600 text-xs">{{ entry.lost }}</TableCell>
+                            <TableCell class="text-center font-mono font-bold text-xs" :class="entry.difference > 0 ? 'text-emerald-600' : entry.difference < 0 ? 'text-rose-600' : 'text-muted-foreground'">
+                                {{ entry.difference > 0 ? '+' : '' }}{{ entry.difference }}
+                            </TableCell>
+                            <TableCell class="text-center font-extrabold text-sm text-foreground">{{ entry.points }}</TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    </div>
+
+    <div v-else class="space-y-4">
         <Card class="rounded-2xl overflow-hidden border border-border/80 shadow-xs">
             <CardHeader class="border-b py-4 bg-muted/20">
                 <CardTitle class="text-base font-bold flex items-center justify-between">
                     <span class="flex items-center gap-2">
                         <Trophy class="size-5 text-amber-500" />
-                        Klasemen Terbaru
+                        {{ title || 'Klasemen Terbaru' }}
                     </span>
                     <Badge variant="outline" class="text-xs font-normal">
                         {{ standings.length }} Tim

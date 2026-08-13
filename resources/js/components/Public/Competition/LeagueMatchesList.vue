@@ -33,6 +33,26 @@ defineEmits<{
     (e: 'update:selectedRound', value: number | 'all'): void;
     (e: 'update:statusFilter', value: 'all' | 'completed' | 'ready'): void;
 }>();
+
+function teamName(match: MatchItem, side: 'home' | 'away'): string {
+    const team = match[side];
+    if (team) return team.name;
+    if (match.match_type === 'final') {
+        return side === 'home' ? 'Juara Grup A' : 'Juara Grup B';
+    }
+    if (match.match_type === 'third_place') {
+        return side === 'home' ? 'Runner-up Grup A' : 'Runner-up Grup B';
+    }
+    return '??';
+}
+
+function matchHeaderLabel(match: MatchItem): string {
+    if (match.match_type === 'final') return '🏆 FINAL 1 v 2 (GRAND FINAL)';
+    if (match.match_type === 'third_place') return '🥉 FINAL 3 v 4 (PEREBUTAN JUARA 3)';
+    if (match.match_type === 'group_a') return `Penyisihan Grup A (Ronde ${match.round})`;
+    if (match.match_type === 'group_b') return `Penyisihan Grup B (Ronde ${match.round})`;
+    return '';
+}
 </script>
 
 <template>
@@ -100,9 +120,9 @@ defineEmits<{
             >
                 <!-- Match Header -->
                 <div class="flex items-center justify-between text-xs text-muted-foreground border-b border-border/50 pb-2">
-                    <span class="font-bold flex items-center gap-1.5">
+                    <span class="font-bold flex items-center gap-1.5" :class="match.match_type === 'final' ? 'text-amber-600 dark:text-amber-400' : match.match_type === 'third_place' ? 'text-orange-600 dark:text-orange-400' : ''">
                         <Swords class="size-3.5 text-amber-500" />
-                        {{ roundLabel(match.round, match.leg) }} &bull; Match #{{ match.sequence }}
+                        {{ matchHeaderLabel(match) || roundLabel(match.round, match.leg) }} &bull; Match #{{ match.sequence }}
                     </span>
 
                     <div class="flex items-center gap-2">
@@ -128,13 +148,13 @@ defineEmits<{
                             class="text-xs sm:text-sm font-semibold truncate"
                             :class="match.winner_id === match.home?.id ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : 'text-foreground'"
                         >
-                            {{ match.home?.name || '??' }}
+                            {{ teamName(match, 'home') }}
                         </span>
                         <div 
                             class="flex size-8 shrink-0 items-center justify-center rounded-lg font-bold text-xs shadow-2xs border"
                             :class="match.winner_id === match.home?.id ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-muted text-foreground border-border'"
                         >
-                            {{ getInitials(match.home?.name) }}
+                            {{ getInitials(teamName(match, 'home')) }}
                         </div>
                     </div>
 
@@ -167,13 +187,13 @@ defineEmits<{
                             class="flex size-8 shrink-0 items-center justify-center rounded-lg font-bold text-xs shadow-2xs border"
                             :class="match.winner_id === match.away?.id ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-muted text-foreground border-border'"
                         >
-                            {{ getInitials(match.away?.name) }}
+                            {{ getInitials(teamName(match, 'away')) }}
                         </div>
                         <span 
                             class="text-xs sm:text-sm font-semibold truncate"
                             :class="match.winner_id === match.away?.id ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : 'text-foreground'"
                         >
-                            {{ match.away?.name || '??' }}
+                            {{ teamName(match, 'away') }}
                         </span>
                     </div>
                 </div>

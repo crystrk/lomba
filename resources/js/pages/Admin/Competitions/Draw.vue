@@ -73,6 +73,7 @@ const props = defineProps<{
 const formatLabel: Record<string, string> = {
     knockout: 'Knockout (Sistem Gugur)',
     final_four: 'Final Four (Semifinal, Final & Perebutan Juara 3)',
+    group_final_four: 'Group Final Four (2 Grup Penyisihan & Final 1-4)',
     full_competition: 'Kompetisi Penuh (Double Round-Robin)',
     half_competition: 'Setengah Kompetisi (Single Round-Robin)',
 };
@@ -94,8 +95,10 @@ const statusVariant: Record<string, 'default' | 'outline' | 'destructive' | 'sec
 };
 
 const isKnockout = computed(() => props.competition.format === 'knockout' || props.competition.format === 'final_four');
+const isGroupFinalFour = computed(() => props.competition.format === 'group_final_four');
+const isValidGroupFinalFour = computed(() => !isGroupFinalFour.value || (orderedParticipants.value.length > 4 && orderedParticipants.value.length % 2 === 0));
 const canEditDraw = computed(() => props.competition.status === 'draft' || props.competition.status === 'drawn');
-const canLock = computed(() => props.competition.status === 'drawn' && !isDirty.value);
+const canLock = computed(() => props.competition.status === 'drawn' && !isDirty.value && isValidGroupFinalFour.value);
 
 // Reactive participants state for manual sorting
 const initialParticipants = computed<ParticipantItem[]>(() => [...props.participants]);
@@ -274,6 +277,21 @@ function participantName(match: typeof activeMatches.value[0], side: 'home' | 'a
             <span>Terdapat <strong>{{ byeMatchCount }}</strong> pertandingan <em>bye</em> (peserta otomatis lolos ke babak berikutnya).</span>
         </div>
 
+        <!-- Banner Warning Format Group Final Four Tidak Memenuhi Syarat -->
+        <div
+            v-if="isGroupFinalFour && !isValidGroupFinalFour"
+            class="flex flex-col gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
+        >
+            <div class="flex items-center gap-2 font-bold text-base">
+                <AlertTriangle class="size-5 shrink-0" />
+                <span>Format Group Final Four Tidak Memenuhi Syarat</span>
+            </div>
+            <p>
+                Format <strong>Group Final Four</strong> membutuhkan MINIMAL <strong>6 TIM</strong> dan jumlah tim HARUS <strong>GENAP</strong> (6, 8, 10, dst.).
+                Saat ini terdaftar <strong>{{ participants.length }} Peserta</strong>. Silakan tambahkan atau sesuaikan jumlah tim terlebih dahulu sebelum membuat undian dan jadwal.
+            </p>
+        </div>
+
         <!-- Banner Peringatan Perubahan Belum Disimpan -->
         <div
             v-if="isDirty"
@@ -327,7 +345,7 @@ function participantName(match: typeof activeMatches.value[0], side: 'home' | 'a
                     v-if="isDirty"
                     variant="default"
                     size="sm"
-                    :disabled="reorderForm.processing"
+                    :disabled="reorderForm.processing || !isValidGroupFinalFour"
                     @click="saveReorder"
                 >
                     <Save class="mr-1.5 size-4" />
@@ -338,7 +356,7 @@ function participantName(match: typeof activeMatches.value[0], side: 'home' | 'a
                     variant="outline"
                     size="sm"
                     @click="shuffleDialogOpen = true"
-                    :disabled="shuffleForm.processing"
+                    :disabled="shuffleForm.processing || !isValidGroupFinalFour"
                 >
                     <Shuffle class="mr-1.5 size-4" />
                     {{ matches.length > 0 ? 'Acak Ulang Undian' : 'Acak & Buat Undian' }}
@@ -348,7 +366,7 @@ function participantName(match: typeof activeMatches.value[0], side: 'home' | 'a
                     variant="default"
                     size="sm"
                     @click="lockDialogOpen = true"
-                    :disabled="lockForm.processing || isDirty"
+                    :disabled="lockForm.processing || isDirty || !isValidGroupFinalFour"
                 >
                     <Lock class="mr-1.5 size-4" />
                     Kunci Undian

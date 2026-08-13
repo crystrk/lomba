@@ -45,6 +45,8 @@ export function generateClientPreview(
         return generateKnockout(participants);
     } else if (format === 'final_four') {
         return generateFinalFour(participants);
+    } else if (format === 'group_final_four') {
+        return generateGroupFinalFour(participants);
     }
 
     return [];
@@ -311,4 +313,74 @@ function generateFinalFour(participants: ParticipantItem[]): ClientMatchSlot[] {
     });
 
     return resultSlots;
+}
+
+function generateGroupFinalFour(participants: ParticipantItem[]): ClientMatchSlot[] {
+    const n = participants.length;
+    if (n <= 4 || n % 2 !== 0) return [];
+
+    const halfCount = Math.floor(n / 2);
+    const groupA = participants.slice(0, halfCount);
+    const groupB = participants.slice(halfCount, halfCount * 2);
+
+    const matchesA = generateHalfCompetition(groupA);
+    const matchesB = generateHalfCompetition(groupB);
+
+    const slots: ClientMatchSlot[] = [];
+    let sequence = 0;
+    let maxRound = 0;
+
+    for (const slot of matchesA) {
+        sequence++;
+        maxRound = Math.max(maxRound, slot.round);
+        slots.push({
+            ...slot,
+            id: -sequence,
+            sequence,
+            match_type: 'group_a',
+        });
+    }
+
+    for (const slot of matchesB) {
+        sequence++;
+        maxRound = Math.max(maxRound, slot.round);
+        slots.push({
+            ...slot,
+            id: -sequence,
+            sequence,
+            match_type: 'group_b',
+        });
+    }
+
+    const finalRound = maxRound + 1;
+
+    sequence++;
+    slots.push({
+        id: -sequence,
+        round: finalRound,
+        leg: 1,
+        sequence,
+        home: null,
+        away: null,
+        status: 'pending',
+        next_match_id: null,
+        next_slot: null,
+        match_type: 'third_place',
+    });
+
+    sequence++;
+    slots.push({
+        id: -sequence,
+        round: finalRound,
+        leg: 1,
+        sequence,
+        home: null,
+        away: null,
+        status: 'pending',
+        next_match_id: null,
+        next_slot: null,
+        match_type: 'final',
+    });
+
+    return slots;
 }

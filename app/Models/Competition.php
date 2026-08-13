@@ -141,6 +141,11 @@ class Competition extends Model
         return $this->format === CompetitionFormat::FinalFour;
     }
 
+    public function isGroupFinalFour(): bool
+    {
+        return $this->format === CompetitionFormat::GroupFinalFour || $this->format->value === 'group_four_final';
+    }
+
     public function usesPoints(): bool
     {
         return ! $this->isKnockout();

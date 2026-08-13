@@ -49,6 +49,7 @@ const props = defineProps<{
 const formatLabel: Record<string, string> = {
     knockout: 'Knockout (Sistem Gugur)',
     final_four: 'Final Four (Semifinal, Final & Perebutan Juara 3)',
+    group_final_four: 'Group Final Four (2 Grup Penyisihan & Final 1-4)',
     full_competition: 'Kompetisi Penuh',
     half_competition: 'Setengah Kompetisi',
 };

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\CompetitionStatus;
 use App\Generators\DrawGenerator;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\MatchScoreController;
 use App\Models\Competition;
 use App\Models\CompetitionMatch;
 use Illuminate\Http\RedirectResponse;
@@ -61,6 +62,10 @@ class CompetitionDrawController extends Controller
             ->toArray();
 
         abort_if(count($participantIds) < 2, 422, 'At least two participants are required to draw.');
+
+        if ($competition->isGroupFinalFour()) {
+            abort_if(count($participantIds) <= 4 || count($participantIds) % 2 !== 0, 422, 'Format Group Final Four memerlukan minimal 6 tim dan jumlah tim harus genap (6, 8, 10, dst.).');
+        }
 
         $shuffled = $participantIds;
         if (count($shuffled) > 2) {
@@ -147,6 +152,10 @@ class CompetitionDrawController extends Controller
         $count = count($participantIds);
         abort_if($count < 2, 422, 'At least two participants are required to draw.');
 
+        if ($competition->isGroupFinalFour()) {
+            abort_if($count <= 4 || $count % 2 !== 0, 422, 'Format Group Final Four memerlukan minimal 6 tim dan jumlah tim harus genap (6, 8, 10, dst.).');
+        }
+
         $request->validate([
             'participant_ids' => ['required', 'array', 'size:'.$count],
             'participant_ids.*' => ['required', 'integer', 'distinct', 'exists:participants,id'],
@@ -224,6 +233,11 @@ class CompetitionDrawController extends Controller
 
         abort_unless($competition->isDrawn(), 422, 'Competition must be in drawn status to lock.');
 
+        if ($competition->isGroupFinalFour()) {
+            $participantCount = $competition->participants()->count();
+            abort_if($participantCount <= 4 || $participantCount % 2 !== 0, 422, 'Format Group Final Four memerlukan minimal 6 tim dan jumlah tim harus genap (6, 8, 10, dst.).');
+        }
+
         $matchCount = $competition->matches()->count();
         abort_if($matchCount === 0, 422, 'Cannot lock a competition with no matches.');
 
@@ -239,5 +253,32 @@ class CompetitionDrawController extends Controller
 
         return redirect()->route('admin.competitions.draw.show', $competition)
             ->with('success', 'Undian berhasil dikunci.');
+    }
+
+    public function adjustGroupRank(Request $request, Competition $competition, MatchScoreController $matchScoreController): RedirectResponse
+    {
+        Gate::authorize('update', $competition);
+
+        $request->validate([
+            'participant_id_1' => ['required', 'integer', 'exists:participants,id'],
+            'participant_id_2' => ['required', 'integer', 'exists:participants,id'],
+        ]);
+
+        $p1 = $competition->participants()->findOrFail($request->input('participant_id_1'));
+        $p2 = $competition->participants()->findOrFail($request->input('participant_id_2'));
+
+        $pos1 = $p1->draw_position;
+        $pos2 = $p2->draw_position;
+
+        DB::transaction(function () use ($p1, $p2, $pos1, $pos2, $competition, $matchScoreController) {
+            $p1->updateQuietly(['draw_position' => $pos2]);
+            $p2->updateQuietly(['draw_position' => $pos1]);
+
+            if ($competition->isGroupFinalFour()) {
+                $matchScoreController->checkAndPopulateGroupFinalFours($competition);
+            }
+        });
+
+        return redirect()->back()->with('success', 'Urutan peringkat manual berhasil diperbarui.');
     }
 }

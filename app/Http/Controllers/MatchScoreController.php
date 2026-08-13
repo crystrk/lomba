@@ -25,11 +25,17 @@ class MatchScoreController extends Controller
         $scoreHome = (int) $data['score_home'];
         $scoreAway = (int) $data['score_away'];
 
-        if ($competition->isKnockout()) {
+        if ($competition->isKnockout() || ($competition->isGroupFinalFour() && in_array($match->match_type, ['final', 'third_place'], true))) {
             return $this->updateKnockout($request, $competition, $match, $scoreHome, $scoreAway);
         }
 
-        return $this->updateCompetition($request, $competition, $match, $scoreHome, $scoreAway);
+        $response = $this->updateCompetition($request, $competition, $match, $scoreHome, $scoreAway);
+
+        if ($competition->isGroupFinalFour()) {
+            $this->checkAndPopulateGroupFinalFours($competition);
+        }
+
+        return $response;
     }
 
     private function updateCompetition(
@@ -267,6 +273,21 @@ class MatchScoreController extends Controller
 
     private function updateCompetitionCompletionStatus(Competition $competition): void
     {
+        if ($competition->isGroupFinalFour()) {
+            $totalCount = $competition->matches()->count();
+            $completedCount = $competition->matches()
+                ->where('status', CompetitionMatchStatus::Completed)
+                ->count();
+
+            if ($totalCount > 0 && $completedCount >= $totalCount) {
+                $competition->update(['status' => CompetitionStatus::Completed]);
+            } else {
+                $competition->update(['status' => CompetitionStatus::InProgress]);
+            }
+
+            return;
+        }
+
         $scorableMatchCount = $competition->matches()
             ->whereIn('status', [CompetitionMatchStatus::Pending, CompetitionMatchStatus::Ready, CompetitionMatchStatus::Completed])
             ->where(function ($q) {
@@ -305,5 +326,76 @@ class MatchScoreController extends Controller
         if ($nonByeMatches > 0 && $completedNonBye >= $nonByeMatches) {
             $competition->update(['status' => CompetitionStatus::Completed]);
         }
+    }
+
+    public function checkAndPopulateGroupFinalFours(Competition $competition): void
+    {
+        if (! $competition->isGroupFinalFour()) {
+            return;
+        }
+
+        $groupMatches = $competition->matches()
+            ->whereIn('match_type', ['group_a', 'group_b'])
+            ->get();
+
+        $totalGroupMatches = $groupMatches->count();
+        $completedGroupMatches = $groupMatches->where('status', CompetitionMatchStatus::Completed)->count();
+
+        $thirdPlaceMatch = $competition->matches()->where('match_type', 'third_place')->first();
+        $finalMatch = $competition->matches()->where('match_type', 'final')->first();
+
+        if ($totalGroupMatches > 0 && $completedGroupMatches === $totalGroupMatches) {
+            $participants = $competition->participants()->orderBy('draw_position')->orderBy('id')->get();
+            $halfCount = intdiv($participants->count(), 2);
+            $groupAParticipants = $participants->take($halfCount);
+            $groupBParticipants = $participants->skip($halfCount)->take($halfCount);
+
+            $groupAMatches = $groupMatches->where('match_type', 'group_a');
+            $groupBMatches = $groupMatches->where('match_type', 'group_b');
+
+            $standingsA = $this->standingsCalculator->calculate($competition, $groupAParticipants, $groupAMatches);
+            $standingsB = $this->standingsCalculator->calculate($competition, $groupBParticipants, $groupBMatches);
+
+            if (count($standingsA) >= 2 && count($standingsB) >= 2) {
+                $juaraA = $standingsA[0]->participantId;
+                $runnerUpA = $standingsA[1]->participantId;
+                $juaraB = $standingsB[0]->participantId;
+                $runnerUpB = $standingsB[1]->participantId;
+
+                if ($thirdPlaceMatch && ! $thirdPlaceMatch->isCompleted()) {
+                    $thirdPlaceMatch->update([
+                        'participant_id_home' => $runnerUpA,
+                        'participant_id_away' => $runnerUpB,
+                        'status' => CompetitionMatchStatus::Ready,
+                    ]);
+                }
+
+                if ($finalMatch && ! $finalMatch->isCompleted()) {
+                    $finalMatch->update([
+                        'participant_id_home' => $juaraA,
+                        'participant_id_away' => $juaraB,
+                        'status' => CompetitionMatchStatus::Ready,
+                    ]);
+                }
+            }
+        } else {
+            if ($thirdPlaceMatch && ! $thirdPlaceMatch->isCompleted()) {
+                $thirdPlaceMatch->update([
+                    'participant_id_home' => null,
+                    'participant_id_away' => null,
+                    'status' => CompetitionMatchStatus::Pending,
+                ]);
+            }
+
+            if ($finalMatch && ! $finalMatch->isCompleted()) {
+                $finalMatch->update([
+                    'participant_id_home' => null,
+                    'participant_id_away' => null,
+                    'status' => CompetitionMatchStatus::Pending,
+                ]);
+            }
+        }
+
+        $this->updateCompetitionCompletionStatus($competition);
     }
 }

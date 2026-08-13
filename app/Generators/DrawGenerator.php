@@ -15,6 +15,8 @@ class DrawGenerator
 
     private static ?FinalFourGenerator $finalFour = null;
 
+    private static ?GroupFinalFourGenerator $groupFinalFour = null;
+
     public static function forFormat(CompetitionFormat $format): MatchGenerator
     {
         return match ($format) {
@@ -22,6 +24,7 @@ class DrawGenerator
             CompetitionFormat::FullCompetition => self::$full ??= new FullCompetitionGenerator,
             CompetitionFormat::Knockout => self::$knockout ??= new KnockoutGenerator,
             CompetitionFormat::FinalFour => self::$finalFour ??= new FinalFourGenerator,
+            CompetitionFormat::GroupFinalFour => self::$groupFinalFour ??= new GroupFinalFourGenerator,
         };
     }
 
