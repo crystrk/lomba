@@ -79,12 +79,11 @@ class ParticipantController extends Controller
         $count = 0;
 
         foreach ($lines as $line) {
-            $name = trim($line);
+            [$name, $shortName] = $this->parseBulkParticipantLine($line);
+
             if ($name === '') {
                 continue;
             }
-
-            $shortName = $this->generateShortName($name);
 
             $competition->participants()->create([
                 'name' => $name,
@@ -100,6 +99,22 @@ class ParticipantController extends Controller
 
         return redirect()->route('admin.competitions.participants.index', $competition)
             ->with('success', "Berhasil menambahkan {$count} peserta.");
+    }
+
+    /**
+     * @return array{0: string, 1: string|null}
+     */
+    private function parseBulkParticipantLine(string $line): array
+    {
+        [$name, $shortName] = array_pad(explode('|', $line, 2), 2, null);
+
+        $name = trim($name);
+        $shortName = $shortName !== null ? trim($shortName) : null;
+
+        return [
+            $name,
+            $shortName !== '' && $shortName !== null ? mb_substr($shortName, 0, 10) : $this->generateShortName($name),
+        ];
     }
 
     private function generateShortName(string $name): ?string

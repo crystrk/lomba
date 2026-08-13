@@ -158,3 +158,18 @@ it('admin can bulk store participants per line', function () {
     expect(Participant::where('name', 'FC Garuda Jakarta')->exists())->toBeTrue();
     expect(Participant::where('name', 'Elang United Bandung')->exists())->toBeTrue();
 });
+
+it('admin can bulk store participants with explicit short names', function () {
+    $this->actingAs($this->admin);
+
+    $raw = "Nama Tim A | TIMA\nNama Tim B | TIMB\nNama Tim C";
+
+    $this->post(route('admin.competitions.participants.bulk-store', $this->competition), [
+        'raw_names' => $raw,
+    ])->assertRedirect(route('admin.competitions.participants.index', $this->competition));
+
+    expect($this->competition->participants()->count())->toBe(3);
+    expect(Participant::where('name', 'Nama Tim A')->first()->short_name)->toBe('TIMA');
+    expect(Participant::where('name', 'Nama Tim B')->first()->short_name)->toBe('TIMB');
+    expect(Participant::where('name', 'Nama Tim C')->first()->short_name)->toBe('NTC');
+});

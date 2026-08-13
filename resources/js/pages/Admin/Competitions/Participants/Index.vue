@@ -205,7 +205,7 @@ return;
                         Tambah Peserta Sekaligus
                     </DialogTitle>
                     <DialogDescription>
-                        Masukkan nama peserta/tim satu per baris. Baris kosong akan diabaikan secara otomatis.
+                        Masukkan nama peserta/tim satu per baris. Gunakan format <strong>Nama Tim | KODE</strong> jika ingin menentukan nama pendek.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -216,10 +216,13 @@ return;
                             id="raw_names"
                             v-model="bulkForm.raw_names"
                             rows="8"
-                            placeholder="Contoh:&#10;FC Garuda Jakarta&#10;Elang United Bandung&#10;Harimau FC Surabaya&#10;Badak Hitam FC Medan"
+                            placeholder="Contoh:&#10;FC Garuda Jakarta | GAR&#10;Elang United Bandung | ELG&#10;Harimau FC Surabaya | HRM&#10;Badak Hitam FC Medan | BDK"
                             class="font-mono text-sm"
                             :disabled="bulkForm.processing"
                         />
+                        <p class="text-xs text-muted-foreground">
+                            Jika kode tidak diisi, sistem tetap membuat nama pendek otomatis dari nama peserta.
+                        </p>
                         <div v-if="bulkForm.errors.raw_names" class="text-sm font-medium text-rose-600">
                             {{ bulkForm.errors.raw_names }}
                         </div>
@@ -238,4 +241,3 @@ return;
         </Dialog>
     </div>
 </template>
-
