@@ -13,6 +13,7 @@ import {
     Save,
     Sparkles,
     Eye,
+    Clock,
 } from '@lucide/vue';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
@@ -60,6 +61,7 @@ const props = defineProps<{
         round: number;
         leg: number;
         sequence: number;
+        scheduled_time?: string | null;
         home: { id: number; name: string; short_name: string | null } | null;
         away: { id: number; name: string; short_name: string | null } | null;
         status: string;
@@ -418,9 +420,15 @@ function participantName(match: typeof activeMatches.value[0], side: 'home' | 'a
                                     <div v-if="m.status === 'bye'" class="flex-1 italic text-muted-foreground">
                                         Bye (Otomatis Lolos)
                                     </div>
-                                    <div v-else class="flex flex-1 items-center justify-between">
+                                    <div v-else class="flex flex-1 items-center justify-between gap-2">
                                         <span class="font-medium text-foreground">{{ participantName(m, 'home') }}</span>
-                                        <span class="mx-3 text-xs font-bold uppercase text-muted-foreground">VS</span>
+                                        <div class="flex items-center gap-2">
+                                            <Badge v-if="m.scheduled_time" variant="outline" class="text-xs font-normal text-muted-foreground flex items-center gap-1">
+                                                <Clock class="size-3" />
+                                                {{ m.scheduled_time }}
+                                            </Badge>
+                                            <span class="text-xs font-bold uppercase text-muted-foreground">VS</span>
+                                        </div>
                                         <span class="font-medium text-foreground">{{ participantName(m, 'away') }}</span>
                                     </div>
                                     <Badge v-if="m.status === 'bye'" variant="outline" class="text-xs">Bye</Badge>

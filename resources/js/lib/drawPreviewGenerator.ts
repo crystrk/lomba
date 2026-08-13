@@ -10,6 +10,7 @@ export interface ClientMatchSlot {
     round: number;
     leg: number;
     sequence: number;
+    scheduled_time?: string | null;
     home: ParticipantItem | null;
     away: ParticipantItem | null;
     status: 'ready' | 'pending' | 'bye';

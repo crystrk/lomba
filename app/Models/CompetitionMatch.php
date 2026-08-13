@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property CompetitionMatchStatus $status
  * @property int|null $next_match_id
  * @property int|null $next_slot
+ * @property string|null $scheduled_time
  * @property int $result_version
  * @property int|null $result_updated_by
  * @property Carbon|null $result_updated_at
@@ -42,6 +43,7 @@ class CompetitionMatch extends Model
         'round',
         'leg',
         'sequence',
+        'scheduled_time',
         'participant_id_home',
         'participant_id_away',
         'score_home',

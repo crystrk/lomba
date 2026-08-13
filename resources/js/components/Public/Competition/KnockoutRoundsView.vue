@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
-import { Medal, ListFilter, Trophy } from '@lucide/vue';
+import { Medal, ListFilter, Trophy, Clock } from '@lucide/vue';
 import { getInitials } from '@/composables/useInitials';
 
 interface MatchItem {
@@ -12,6 +12,7 @@ interface MatchItem {
     away: { id: number; name: string } | null;
     score_home: number | null;
     score_away: number | null;
+    scheduled_time?: string | null;
     winner_id: number | null;
     status: string;
     win_method: string | null;
@@ -130,13 +131,19 @@ defineEmits<{
                         Match #{{ match.sequence }}
                     </span>
 
-                    <Badge 
-                        :variant="match.status === 'completed' ? 'outline' : match.status === 'bye' ? 'secondary' : 'default'"
-                        class="text-[10px] font-semibold"
-                        :class="match.status === 'ready' ? 'bg-amber-500 text-white' : ''"
-                    >
-                        {{ match.status === 'completed' ? 'Selesai' : match.status === 'bye' ? 'Bye (Lolos Direct)' : 'Ready' }}
-                    </Badge>
+                    <div class="flex items-center gap-2">
+                        <span v-if="match.scheduled_time" class="font-medium text-xs text-primary flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded-md">
+                            <Clock class="size-3" />
+                            {{ match.scheduled_time }}
+                        </span>
+                        <Badge 
+                            :variant="match.status === 'completed' ? 'outline' : match.status === 'bye' ? 'secondary' : 'default'"
+                            class="text-[10px] font-semibold"
+                            :class="match.status === 'ready' ? 'bg-amber-500 text-white' : ''"
+                        >
+                            {{ match.status === 'completed' ? 'Selesai' : match.status === 'bye' ? 'Bye (Lolos Direct)' : 'Ready' }}
+                        </Badge>
+                    </div>
                 </div>
 
                 <!-- Bye Match Display -->

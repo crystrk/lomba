@@ -32,6 +32,7 @@ class MatchScoreRequest extends FormRequest
             'score_away' => ['required', 'integer', 'min:0'],
             'winner_id' => ['nullable', 'integer', 'exists:participants,id'],
             'win_method' => ['nullable', 'string', 'max:255'],
+            'scheduled_time' => ['nullable', 'string', 'max:100'],
             'result_version' => ['required', 'integer', 'min:0'],
         ];
     }

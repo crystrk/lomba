@@ -71,6 +71,7 @@ class PublicCompetitionController extends Controller
                 'away' => $m->awayParticipant ? ['id' => $m->awayParticipant->id, 'name' => $m->awayParticipant->name] : null,
                 'score_home' => $m->score_home,
                 'score_away' => $m->score_away,
+                'scheduled_time' => $m->scheduled_time,
                 'winner_id' => $m->winner_id,
                 'status' => $m->status->value,
                 'win_method' => $m->win_method,

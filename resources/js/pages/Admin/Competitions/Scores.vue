@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, shallowRef, watch } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Save, Trophy, Medal, AlertCircle, Filter, Lock, Unlock } from '@lucide/vue';
+import { ArrowLeft, Save, Trophy, Medal, AlertCircle, Filter, Lock, Unlock, Clock } from '@lucide/vue';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { update as updateScore } from '@/routes/admin/matches/score';
+import { update as updateSchedule } from '@/routes/admin/matches/schedule';
 import { show, lockResults } from '@/routes/admin/competitions';
 
 defineOptions({
@@ -47,6 +48,7 @@ const props = defineProps<{
         participant_id_away: number | null;
         score_home: number | null;
         score_away: number | null;
+        scheduled_time: string | null;
         winner_id: number | null;
         win_method: string | null;
         status: string;
@@ -109,9 +111,11 @@ function isMatchVisible(match: typeof props.matchesByRound[number][0]): boolean 
 }
 
 const matchForms = shallowRef<Record<number, ReturnType<typeof useForm>>>({});
+const scheduleForms = shallowRef<Record<number, ReturnType<typeof useForm>>>({});
 
 watch(sortedRounds, () => {
     const forms = { ...matchForms.value };
+    const sForms = { ...scheduleForms.value };
     for (const round of sortedRounds.value) {
         for (const match of props.matchesByRound[round]) {
             if (match.status === 'bye') continue;
@@ -121,12 +125,19 @@ watch(sortedRounds, () => {
                     score_away: match.score_away ?? '',
                     winner_id: match.winner_id ? String(match.winner_id) : '',
                     win_method: match.win_method ?? '',
+                    scheduled_time: match.scheduled_time ?? '',
                     result_version: match.result_version,
+                });
+            }
+            if (!sForms[match.id]) {
+                sForms[match.id] = useForm({
+                    scheduled_time: match.scheduled_time ?? '',
                 });
             }
         }
     }
     matchForms.value = forms;
+    scheduleForms.value = sForms;
 }, { immediate: true });
 
 const lockResultsForm = useForm({});
@@ -144,6 +155,13 @@ function executeToggleResultsLock() {
 function submitScore(matchId: number) {
     const form = matchForms.value[matchId];
     form.post(updateScore.url({ competition: props.competition.id, match: matchId }), {
+        preserveScroll: true,
+    });
+}
+
+function submitSchedule(matchId: number) {
+    const form = scheduleForms.value[matchId];
+    form.post(updateSchedule.url({ competition: props.competition.id, match: matchId }), {
         preserveScroll: true,
     });
 }
@@ -307,6 +325,32 @@ function roundLabel(round: number, leg: number): string {
                         </div>
                         <div v-else>
                             <form @submit.prevent="submitScore(match.id)" class="space-y-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b text-xs text-muted-foreground">
+                                    <div class="flex items-center gap-2 flex-1">
+                                        <Clock class="size-3.5 text-primary shrink-0" />
+                                        <span class="font-medium shrink-0">Jam / Waktu:</span>
+                                        <Input
+                                            v-model="matchForms[match.id].scheduled_time"
+                                            placeholder="Contoh: 09:00 WIB"
+                                            class="h-7 text-xs max-w-[200px] bg-background"
+                                            :disabled="competition.is_results_locked"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            class="h-7 text-xs text-muted-foreground hover:text-foreground"
+                                            :disabled="competition.is_results_locked"
+                                            @click="scheduleForms[match.id].scheduled_time = matchForms[match.id].scheduled_time; submitSchedule(match.id)"
+                                        >
+                                            Simpan Jam
+                                        </Button>
+                                    </div>
+                                    <Badge v-if="match.scheduled_time" variant="outline" class="text-xs shrink-0">
+                                        {{ match.scheduled_time }}
+                                    </Badge>
+                                </div>
+
                                 <div class="flex items-center justify-center gap-4 sm:gap-6">
                                     <span class="flex-1 text-right font-semibold text-base sm:text-lg">
                                         {{ match.home_participant?.name ?? 'TBD' }}

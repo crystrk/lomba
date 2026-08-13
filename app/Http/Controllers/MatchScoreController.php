@@ -8,7 +8,9 @@ use App\Enums\CompetitionStatus;
 use App\Http\Requests\MatchScoreRequest;
 use App\Models\Competition;
 use App\Models\CompetitionMatch;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class MatchScoreController extends Controller
 {
@@ -42,7 +44,7 @@ class MatchScoreController extends Controller
             : ($scoreHome < $scoreAway ? $match->participant_id_away : null);
 
         DB::transaction(function () use ($competition, $match, $scoreHome, $scoreAway, $winnerId, $request) {
-            $match->update([
+            $updateData = [
                 'score_home' => $scoreHome,
                 'score_away' => $scoreAway,
                 'winner_id' => $winnerId,
@@ -50,7 +52,13 @@ class MatchScoreController extends Controller
                 'result_version' => $match->result_version + 1,
                 'result_updated_by' => $request->user()->id,
                 'result_updated_at' => now(),
-            ]);
+            ];
+
+            if ($request->has('scheduled_time')) {
+                $updateData['scheduled_time'] = $request->input('scheduled_time');
+            }
+
+            $match->update($updateData);
 
             if ($competition->isLocked()) {
                 $competition->update(['status' => CompetitionStatus::InProgress]);
@@ -66,6 +74,24 @@ class MatchScoreController extends Controller
         );
 
         return redirect()->back()->with('success', 'Score updated.')->with('standings', $standings);
+    }
+
+    public function updateSchedule(Request $request, Competition $competition, CompetitionMatch $match)
+    {
+        Gate::authorize('updateScore', $competition);
+
+        abort_if($match->competition_id !== $competition->id, 422, 'Match does not belong to this competition.');
+        abort_if($competition->isResultsLocked(), 422, 'Hasil pertandingan telah dikunci final.');
+
+        $request->validate([
+            'scheduled_time' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $match->update([
+            'scheduled_time' => $request->input('scheduled_time'),
+        ]);
+
+        return redirect()->back()->with('success', 'Jam pertandingan berhasil diperbarui.');
     }
 
     private function updateKnockout(
@@ -87,7 +113,7 @@ class MatchScoreController extends Controller
             $wasAlreadyCompleted = $match->isCompleted();
             $previousWinnerId = $match->winner_id;
 
-            $match->update([
+            $updateData = [
                 'score_home' => $scoreHome,
                 'score_away' => $scoreAway,
                 'winner_id' => $winnerId,
@@ -96,7 +122,13 @@ class MatchScoreController extends Controller
                 'result_version' => $match->result_version + 1,
                 'result_updated_by' => $request->user()->id,
                 'result_updated_at' => now(),
-            ]);
+            ];
+
+            if ($request->has('scheduled_time')) {
+                $updateData['scheduled_time'] = $request->input('scheduled_time');
+            }
+
+            $match->update($updateData);
 
             if ($wasAlreadyCompleted && $previousWinnerId !== $winnerId) {
                 $this->clearDownstreamSlots($match);

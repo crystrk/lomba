@@ -417,4 +417,3 @@ it('operator cannot reorder', function () {
         ])
         ->assertForbidden();
 });
-

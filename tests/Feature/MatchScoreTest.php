@@ -709,3 +709,56 @@ it('score update is rejected when results are locked', function () {
         ])
         ->assertSessionHasErrors('competition');
 });
+
+it('admin and assigned operator can update match scheduled_time independently', function () {
+    $competition = createLockedCompetition();
+    $match = createMatchWithParticipants($competition);
+    attachOperator($competition, $this->operator);
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.matches.schedule.update', [$competition, $match]), [
+            'scheduled_time' => '09:00 WIB',
+        ])
+        ->assertRedirect();
+
+    $match->refresh();
+    expect($match->scheduled_time)->toBe('09:00 WIB');
+
+    $this->actingAs($this->operator)
+        ->post(route('operator.matches.schedule.update', [$competition, $match]), [
+            'scheduled_time' => 'Lapangan 1 - 10:30',
+        ])
+        ->assertRedirect();
+
+    $match->refresh();
+    expect($match->scheduled_time)->toBe('Lapangan 1 - 10:30');
+});
+
+it('admin can update scheduled_time along with score', function () {
+    $competition = createLockedCompetition();
+    $match = createMatchWithParticipants($competition);
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.matches.score.update', [$competition, $match]), [
+            'score_home' => 1,
+            'score_away' => 0,
+            'scheduled_time' => '15:00 WIB',
+            'result_version' => 0,
+        ])
+        ->assertRedirect();
+
+    $match->refresh();
+    expect($match->score_home)->toBe(1)
+        ->and($match->scheduled_time)->toBe('15:00 WIB');
+});
+
+it('unassigned operator cannot update match schedule', function () {
+    $competition = createLockedCompetition();
+    $match = createMatchWithParticipants($competition);
+
+    $this->actingAs($this->unassignedOperator)
+        ->post(route('operator.matches.schedule.update', [$competition, $match]), [
+            'scheduled_time' => '09:00 WIB',
+        ])
+        ->assertForbidden();
+});
