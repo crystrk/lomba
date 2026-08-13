@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import LeagueStandingsTable from '@/components/Public/Competition/LeagueStandingsTable.vue';
 import {
     Dialog,
     DialogClose,
@@ -70,6 +71,34 @@ const props = defineProps<{
         difference: number;
         points: number;
     }>;
+    groupStandings?: {
+        group_a: Array<{
+            rank: number;
+            participant_id: number;
+            participant_name: string;
+            played: number;
+            won: number;
+            drawn: number;
+            lost: number;
+            score_for: number;
+            score_against: number;
+            difference: number;
+            points: number;
+        }>;
+        group_b: Array<{
+            rank: number;
+            participant_id: number;
+            participant_name: string;
+            played: number;
+            won: number;
+            drawn: number;
+            lost: number;
+            score_for: number;
+            score_against: number;
+            difference: number;
+            points: number;
+        }>;
+    } | null;
 }>();
 
 const statusLabel: Record<string, string> = {
@@ -250,52 +279,12 @@ function roundLabel(round: number, leg: number): string {
             </div>
         </div>
 
-        <div v-if="!isKnockout && standings.length > 0" class="space-y-4">
-            <Card>
-                <CardHeader class="flex flex-row items-center justify-between pb-2">
-                    <CardTitle class="text-lg font-semibold flex items-center gap-2">
-                        <Trophy class="size-5 text-amber-500" />
-                        Klasemen Sementara
-                    </CardTitle>
-                </CardHeader>
-                <CardContent class="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead class="w-12 text-center">#</TableHead>
-                                <TableHead>Tim</TableHead>
-                                <TableHead class="text-center">Main</TableHead>
-                                <TableHead class="text-center">Menang</TableHead>
-                                <TableHead class="text-center">Seri</TableHead>
-                                <TableHead class="text-center">Kalah</TableHead>
-                                <TableHead class="text-center">GM</TableHead>
-                                <TableHead class="text-center">GK</TableHead>
-                                <TableHead class="text-center">Selisih</TableHead>
-                                <TableHead class="text-center font-bold">Poin</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow v-for="entry in standings" :key="entry.participant_id">
-                                <TableCell class="font-medium text-center">
-                                    <Badge v-if="entry.rank === 1" class="bg-amber-500 hover:bg-amber-600">1</Badge>
-                                    <span v-else>{{ entry.rank }}</span>
-                                </TableCell>
-                                <TableCell class="font-semibold">{{ entry.participant_name }}</TableCell>
-                                <TableCell class="text-center">{{ entry.played }}</TableCell>
-                                <TableCell class="text-center text-emerald-600 font-medium">{{ entry.won }}</TableCell>
-                                <TableCell class="text-center text-amber-600">{{ entry.drawn }}</TableCell>
-                                <TableCell class="text-center text-rose-600">{{ entry.lost }}</TableCell>
-                                <TableCell class="text-center">{{ entry.score_for }}</TableCell>
-                                <TableCell class="text-center">{{ entry.score_against }}</TableCell>
-                                <TableCell class="text-center font-mono" :class="entry.difference >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                                    {{ entry.difference >= 0 ? '+' : '' }}{{ entry.difference }}
-                                </TableCell>
-                                <TableCell class="text-center font-bold text-base">{{ entry.points }}</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+        <div v-if="!isKnockout && standings.length > 0">
+            <LeagueStandingsTable
+                :standings="standings"
+                :group-standings="groupStandings"
+                title="Klasemen Sementara"
+            />
         </div>
 
         <div v-if="sortedRounds.length > 0" class="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-muted/20 p-3">
