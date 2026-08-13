@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import {
     GripVertical,
     ArrowUp,
@@ -10,8 +9,9 @@ import {
     RotateCcw,
     Sparkles,
 } from '@lucide/vue';
-import { Button } from '@/components/ui/button';
+import { ref, watch } from 'vue';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ParticipantItem } from '@/lib/drawPreviewGenerator';
@@ -44,7 +44,10 @@ function updateList(newList: ParticipantItem[]) {
 }
 
 function moveUp(index: number) {
-    if (index <= 0 || props.disabled) return;
+    if (index <= 0 || props.disabled) {
+return;
+}
+
     const copy = [...items.value];
     const [moved] = copy.splice(index, 1);
     copy.splice(index - 1, 0, moved);
@@ -52,7 +55,10 @@ function moveUp(index: number) {
 }
 
 function moveDown(index: number) {
-    if (index >= items.value.length - 1 || props.disabled) return;
+    if (index >= items.value.length - 1 || props.disabled) {
+return;
+}
+
     const copy = [...items.value];
     const [moved] = copy.splice(index, 1);
     copy.splice(index + 1, 0, moved);
@@ -60,7 +66,10 @@ function moveDown(index: number) {
 }
 
 function moveTop(index: number) {
-    if (index <= 0 || props.disabled) return;
+    if (index <= 0 || props.disabled) {
+return;
+}
+
     const copy = [...items.value];
     const [moved] = copy.splice(index, 1);
     copy.unshift(moved);
@@ -68,7 +77,10 @@ function moveTop(index: number) {
 }
 
 function moveBottom(index: number) {
-    if (index >= items.value.length - 1 || props.disabled) return;
+    if (index >= items.value.length - 1 || props.disabled) {
+return;
+}
+
     const copy = [...items.value];
     const [moved] = copy.splice(index, 1);
     copy.push(moved);
@@ -76,20 +88,30 @@ function moveBottom(index: number) {
 }
 
 function sortAlphabetically() {
-    if (props.disabled) return;
+    if (props.disabled) {
+return;
+}
+
     const copy = [...items.value].sort((a, b) => a.name.localeCompare(b.name, 'id'));
     updateList(copy);
 }
 
 function resetOrder() {
-    if (props.disabled) return;
+    if (props.disabled) {
+return;
+}
+
     updateList([...props.initialParticipants]);
 }
 
 // Drag & Drop handlers
 function onDragStart(index: number, e: DragEvent) {
-    if (props.disabled) return;
+    if (props.disabled) {
+return;
+}
+
     draggedIndex.value = index;
+
     if (e.dataTransfer) {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', index.toString());
@@ -97,13 +119,19 @@ function onDragStart(index: number, e: DragEvent) {
 }
 
 function onDragOver(index: number, e: DragEvent) {
-    if (props.disabled || draggedIndex.value === null) return;
+    if (props.disabled || draggedIndex.value === null) {
+return;
+}
+
     e.preventDefault();
     dragOverIndex.value = index;
 }
 
 function onDrop(index: number, e: DragEvent) {
-    if (props.disabled || draggedIndex.value === null) return;
+    if (props.disabled || draggedIndex.value === null) {
+return;
+}
+
     e.preventDefault();
 
     const fromIndex = draggedIndex.value;

@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Save } from '@lucide/vue';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import InputError from '@/components/InputError.vue';
-import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
+import { computed, watch } from 'vue';
 import {
-    competitionSports,
-    type CompetitionSport,
+    competitionSports
+    
 } from '@/components/competitions/competitionSport';
+import type {CompetitionSport} from '@/components/competitions/competitionSport';
+import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -21,6 +20,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { index, update } from '@/routes/admin/competitions';
 
 defineOptions({

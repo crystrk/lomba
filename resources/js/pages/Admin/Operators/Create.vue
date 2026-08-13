@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { useForm } from '@inertiajs/vue3';
+import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/InputError.vue';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { store } from '@/routes/admin/operators';
 
 defineOptions({

@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, LayoutGrid, Medal, Trophy, CheckCircle2 } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import { index as homeLanding } from '@/actions/App/Http/Controllers/PublicCompetitionController';
-import PublicLayout from '@/layouts/PublicLayout.vue';
+import CompetitionOverviewCard from '@/components/Public/Competition/CompetitionOverviewCard.vue';
+import GroupFinalFourStageView from '@/components/Public/Competition/GroupFinalFourStageView.vue';
+import KnockoutBracketView from '@/components/Public/Competition/KnockoutBracketView.vue';
+import KnockoutRoundsView from '@/components/Public/Competition/KnockoutRoundsView.vue';
+import LeagueMatchesList from '@/components/Public/Competition/LeagueMatchesList.vue';
+import LeagueStandingsTable from '@/components/Public/Competition/LeagueStandingsTable.vue';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
-import CompetitionOverviewCard from '@/components/Public/Competition/CompetitionOverviewCard.vue';
-import KnockoutRoundsView from '@/components/Public/Competition/KnockoutRoundsView.vue';
-import KnockoutBracketView from '@/components/Public/Competition/KnockoutBracketView.vue';
-import LeagueStandingsTable from '@/components/Public/Competition/LeagueStandingsTable.vue';
-import LeagueMatchesList from '@/components/Public/Competition/LeagueMatchesList.vue';
-import GroupFinalFourStageView from '@/components/Public/Competition/GroupFinalFourStageView.vue';
+import PublicLayout from '@/layouts/PublicLayout.vue';
 
 interface MatchItem {
     id: number;
@@ -147,7 +147,10 @@ const totalScorableMatchesCount = computed(() => {
 });
 
 const matchProgressPercentage = computed(() => {
-    if (totalScorableMatchesCount.value === 0) return 0;
+    if (totalScorableMatchesCount.value === 0) {
+return 0;
+}
+
     return Math.min(100, Math.round((completedMatchesCount.value / totalScorableMatchesCount.value) * 100));
 });
 
@@ -156,17 +159,32 @@ function roundLabel(round: number, leg: number = 1): string {
         const total = sortedRounds.value.length;
         const mapping: Record<number, string> = { 1: 'Final', 2: 'Semifinal', 3: 'Perempat Final' };
         const fromEnd = total - round + 1;
+
         return mapping[fromEnd] || `Babak ${round}`;
     }
+
     return leg > 1 ? `Pekan ${round} - Leg ${leg}` : `Pekan ${round}`;
 }
 
 const filteredKnockoutMatches = computed(() => {
     const roundMatches = props.matchesByRound[selectedKnockoutRound.value] || [];
-    if (knockoutStatusFilter.value === 'all') return roundMatches;
-    if (knockoutStatusFilter.value === 'completed') return roundMatches.filter(m => m.status === 'completed');
-    if (knockoutStatusFilter.value === 'ready') return roundMatches.filter(m => m.status === 'ready' || m.status === 'in_progress');
-    if (knockoutStatusFilter.value === 'bye') return roundMatches.filter(m => m.status === 'bye');
+
+    if (knockoutStatusFilter.value === 'all') {
+return roundMatches;
+}
+
+    if (knockoutStatusFilter.value === 'completed') {
+return roundMatches.filter(m => m.status === 'completed');
+}
+
+    if (knockoutStatusFilter.value === 'ready') {
+return roundMatches.filter(m => m.status === 'ready' || m.status === 'in_progress');
+}
+
+    if (knockoutStatusFilter.value === 'bye') {
+return roundMatches.filter(m => m.status === 'bye');
+}
+
     return roundMatches;
 });
 

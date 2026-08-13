@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Trophy, Calendar, Users, ArrowRight, Activity, CheckCircle2, ShieldAlert } from '@lucide/vue';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
+import { computed } from 'vue';
+import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { scores } from '@/routes/operator/competitions';
 
 defineOptions({

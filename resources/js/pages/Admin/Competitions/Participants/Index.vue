@@ -1,20 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Plus, Pencil, Trash2, FileText } from '@lucide/vue';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
+import { ref, computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -24,6 +13,17 @@ import {
     DialogFooter,
     DialogClose,
 } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { show } from '@/routes/admin/competitions';
 import { create, edit, destroy, bulkStore } from '@/routes/admin/competitions/participants';
 
@@ -74,7 +74,10 @@ function confirmDelete(p: { id: number; name: string }) {
 }
 
 function handleDelete() {
-    if (!selectedParticipant.value) return;
+    if (!selectedParticipant.value) {
+return;
+}
+
     isDeleting.value = true;
     router.delete(destroy([props.competition.id, selectedParticipant.value.id]).url, {
         onFinish: () => {

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Save } from '@lucide/vue';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
+import { ref } from 'vue';
+import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import InputError from '@/components/InputError.vue';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { index, store } from '@/routes/admin/competitions/participants';
 
 defineOptions({
@@ -35,6 +35,7 @@ function submit() {
 
 function onLogoChange(event: Event) {
     const target = event.target as HTMLInputElement;
+
     if (target.files?.[0]) {
         const file = target.files[0];
         form.logo = file;

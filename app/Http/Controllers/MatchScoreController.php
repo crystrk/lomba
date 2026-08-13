@@ -8,6 +8,7 @@ use App\Enums\CompetitionStatus;
 use App\Http\Requests\MatchScoreRequest;
 use App\Models\Competition;
 use App\Models\CompetitionMatch;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -55,6 +56,7 @@ class MatchScoreController extends Controller
                 'score_away' => $scoreAway,
                 'winner_id' => $winnerId,
                 'status' => CompetitionMatchStatus::Completed,
+                'is_ongoing' => false,
                 'result_version' => $match->result_version + 1,
                 'result_updated_by' => $request->user()->id,
                 'result_updated_at' => now(),
@@ -128,6 +130,7 @@ class MatchScoreController extends Controller
                 'winner_id' => $winnerId,
                 'win_method' => $request->input('win_method'),
                 'status' => CompetitionMatchStatus::Completed,
+                'is_ongoing' => false,
                 'result_version' => $match->result_version + 1,
                 'result_updated_by' => $request->user()->id,
                 'result_updated_at' => now(),
@@ -397,5 +400,36 @@ class MatchScoreController extends Controller
         }
 
         $this->updateCompetitionCompletionStatus($competition);
+    }
+
+    public function toggleOngoing(Request $request, Competition $competition, CompetitionMatch $match): RedirectResponse
+    {
+        Gate::authorize('updateScore', $competition);
+
+        if ($match->competition_id !== $competition->id) {
+            return redirect()->back()->withErrors([
+                'match' => 'Match does not belong to this competition.',
+            ]);
+        }
+
+        if (! $match->hasBothParticipants() || $match->isBye() || $match->isPending()) {
+            return redirect()->back()->withErrors([
+                'match' => 'Status Live hanya dapat diaktifkan pada pertandingan yang sudah memiliki lawan bertanding.',
+            ]);
+        }
+
+        if ($competition->is_results_locked) {
+            return redirect()->back()->withErrors([
+                'match' => 'Hasil pertandingan terkunci final. Status Live tidak dapat diubah.',
+            ]);
+        }
+
+        $match->update([
+            'is_ongoing' => ! $match->is_ongoing,
+        ]);
+
+        $status = $match->is_ongoing ? 'diaktifkan (LIVE)' : 'dinonaktifkan';
+
+        return redirect()->back()->with('success', "Status Live pertandingan berhasil {$status}.");
     }
 }

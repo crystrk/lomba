@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Badge } from '@/components/ui/badge';
 import { Medal, ListFilter, Trophy, Clock } from '@lucide/vue';
+import { Badge } from '@/components/ui/badge';
 import { getInitials } from '@/composables/useInitials';
 
 interface MatchItem {

@@ -16,7 +16,9 @@ export function useFlashToast(): void {
     watch(
         () => ({ ...(page.props.flash as FlashData) }),
         (flash) => {
-            if (!flash) return;
+            if (!flash) {
+return;
+}
 
             if (flash.toast?.message) {
                 const type = flash.toast.type || 'success';

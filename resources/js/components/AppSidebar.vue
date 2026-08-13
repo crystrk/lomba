@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 import { BookOpen, FolderGit2, LayoutGrid, Trophy, Users } from '@lucide/vue';
+import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -16,8 +18,6 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
-import { usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user as { role?: string } | null);

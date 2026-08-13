@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CompetitionMatchStatus;
 use Database\Factories\CompetitionMatchFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -59,6 +60,7 @@ class CompetitionMatch extends Model
         'loser_next_match_id',
         'loser_next_slot',
         'match_type',
+        'is_ongoing',
         'result_version',
         'result_updated_by',
         'result_updated_at',
@@ -72,6 +74,7 @@ class CompetitionMatch extends Model
             'sequence' => 'integer',
             'score_home' => 'integer',
             'score_away' => 'integer',
+            'is_ongoing' => 'boolean',
             'result_version' => 'integer',
             'status' => CompetitionMatchStatus::class,
             'result_updated_at' => 'datetime',
@@ -141,5 +144,16 @@ class CompetitionMatch extends Model
     public function hasScore(): bool
     {
         return $this->score_home !== null && $this->score_away !== null;
+    }
+
+    /**
+     * @param  Builder<CompetitionMatch>  $query
+     * @return Builder<CompetitionMatch>
+     */
+    public function scopeOngoing(Builder $query): Builder
+    {
+        return $query
+            ->where('is_ongoing', true)
+            ->where('status', '!=', CompetitionMatchStatus::Completed->value);
     }
 }

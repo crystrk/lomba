@@ -6,6 +6,7 @@ use App\Calculators\StandingsCalculator;
 use App\Enums\CompetitionMatchStatus;
 use App\Enums\CompetitionStatus;
 use App\Models\Competition;
+use App\Models\CompetitionMatch;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -46,8 +47,30 @@ class PublicCompetitionController extends Controller
                 'total_matches' => $c->total_scorable_matches,
             ]);
 
+        $ongoingMatches = CompetitionMatch::query()
+            ->ongoing()
+            ->whereHas('competition', fn ($q) => $q->whereIn('status', [CompetitionStatus::Locked, CompetitionStatus::InProgress]))
+            ->with(['competition', 'homeParticipant', 'awayParticipant'])
+            ->get()
+            ->map(fn (CompetitionMatch $m) => [
+                'id' => $m->id,
+                'round' => $m->round,
+                'scheduled_time' => $m->scheduled_time,
+                'match_type' => $m->match_type,
+                'competition' => [
+                    'id' => $m->competition->id,
+                    'name' => $m->competition->name,
+                    'slug' => $m->competition->slug,
+                    'sport' => $m->competition->sport?->value,
+                    'format' => $m->competition->format->value,
+                ],
+                'home' => $m->homeParticipant ? ['id' => $m->homeParticipant->id, 'name' => $m->homeParticipant->name] : null,
+                'away' => $m->awayParticipant ? ['id' => $m->awayParticipant->id, 'name' => $m->awayParticipant->name] : null,
+            ]);
+
         return Inertia::render('Welcome', [
             'competitions' => $competitions,
+            'ongoingMatches' => $ongoingMatches,
         ]);
     }
 

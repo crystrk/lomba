@@ -13,11 +13,11 @@ import {
     Info,
     ChevronRight,
 } from '@lucide/vue';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { index, edit, scores, operators } from '@/routes/admin/competitions';
 import draw from '@/routes/admin/competitions/draw';
 import participants from '@/routes/admin/competitions/participants';

@@ -2,9 +2,10 @@
 import { computed } from 'vue';
 import {
     competitionSports,
-    trophyIcon,
-    type CompetitionSport,
+    trophyIcon
+    
 } from '@/components/competitions/competitionSport';
+import type {CompetitionSport} from '@/components/competitions/competitionSport';
 
 const props = withDefaults(
     defineProps<{

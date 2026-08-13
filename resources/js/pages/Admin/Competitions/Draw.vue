@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import {
     ArrowLeft,
@@ -15,9 +14,10 @@ import {
     Eye,
     Clock,
 } from '@lucide/vue';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
+import { ref, computed, watch } from 'vue';
+import ParticipantSortableList from '@/components/Admin/ParticipantSortableList.vue';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
@@ -28,14 +28,15 @@ import {
     DialogFooter,
     DialogClose,
 } from '@/components/ui/dialog';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
+import { generateClientPreview   } from '@/lib/drawPreviewGenerator';
+import type {ParticipantItem, ClientMatchSlot} from '@/lib/drawPreviewGenerator';
 import {
     show as drawShow,
     shuffle,
     reorder,
     lock,
 } from '@/routes/admin/competitions';
-import ParticipantSortableList from '@/components/Admin/ParticipantSortableList.vue';
-import { generateClientPreview, type ParticipantItem, type ClientMatchSlot } from '@/lib/drawPreviewGenerator';
 
 defineOptions({
     layout: AppLayout,
@@ -114,12 +115,16 @@ watch(
 
 // Check if client order differs from server order
 const isDirty = computed(() => {
-    if (orderedParticipants.value.length !== props.participants.length) return true;
+    if (orderedParticipants.value.length !== props.participants.length) {
+return true;
+}
+
     for (let i = 0; i < orderedParticipants.value.length; i++) {
         if (orderedParticipants.value[i].id !== props.participants[i].id) {
             return true;
         }
     }
+
     return false;
 });
 
@@ -129,18 +134,25 @@ const activeMatches = computed<(ClientMatchSlot | typeof props.matches[0])[]>(()
     if (isDirty.value || props.matches.length === 0) {
         return generateClientPreview(props.competition.format, orderedParticipants.value);
     }
+
     return props.matches;
 });
 
 const groupedMatches = computed(() => {
     const groups: Record<string, typeof activeMatches.value> = {};
+
     for (const m of activeMatches.value) {
         const key = isKnockout.value
             ? `Ronde ${m.round}`
             : `Ronde ${m.round}${m.leg === 2 ? ' (Leg 2)' : ''}`;
-        if (!groups[key]) groups[key] = [];
+
+        if (!groups[key]) {
+groups[key] = [];
+}
+
         groups[key].push(m);
     }
+
     return groups;
 });
 
@@ -205,7 +217,11 @@ function executeLock() {
 
 function participantName(match: typeof activeMatches.value[0], side: 'home' | 'away'): string {
     const p = match[side];
-    if (!p) return '—';
+
+    if (!p) {
+return '—';
+}
+
     return p.short_name || p.name;
 }
 </script>

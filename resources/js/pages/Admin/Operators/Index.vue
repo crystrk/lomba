@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
+import { Trophy } from '@lucide/vue';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Table,
     TableBody,
@@ -11,7 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Trophy } from '@lucide/vue';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { create, edit } from '@/routes/admin/operators';
 
 defineOptions({

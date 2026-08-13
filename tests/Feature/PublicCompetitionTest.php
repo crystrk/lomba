@@ -47,6 +47,38 @@ it('landing includes competition sport and safely returns null for legacy compet
         ->and($competitions['Legacy']['sport'])->toBeNull();
 });
 
+it('landing includes only active ongoing matches', function () {
+    $competition = Competition::factory()->locked()->create(['name' => 'Liga Live', 'slug' => 'liga-live']);
+    $home = Participant::factory()->for($competition)->create(['name' => 'Tim Merah']);
+    $away = Participant::factory()->for($competition)->create(['name' => 'Tim Biru']);
+
+    CompetitionMatch::factory()->create([
+        'competition_id' => $competition->id,
+        'participant_id_home' => $home->id,
+        'participant_id_away' => $away->id,
+        'scheduled_time' => '15:00 WITA',
+        'status' => CompetitionMatchStatus::Ready,
+        'is_ongoing' => true,
+    ]);
+
+    CompetitionMatch::factory()->create([
+        'competition_id' => $competition->id,
+        'sequence' => 2,
+        'participant_id_home' => $home->id,
+        'participant_id_away' => $away->id,
+        'status' => CompetitionMatchStatus::Completed,
+        'is_ongoing' => true,
+    ]);
+
+    $ongoingMatches = $this->get(route('home'))->inertiaProps()['ongoingMatches'];
+
+    expect($ongoingMatches)->toHaveCount(1)
+        ->and($ongoingMatches[0]['competition']['name'])->toBe('Liga Live')
+        ->and($ongoingMatches[0]['home']['name'])->toBe('Tim Merah')
+        ->and($ongoingMatches[0]['away']['name'])->toBe('Tim Biru')
+        ->and($ongoingMatches[0]['scheduled_time'])->toBe('15:00 WITA');
+});
+
 it('completed competition appears on landing and is accessible via slug', function () {
     $competition = Competition::factory()->create([
         'name' => 'Past Event',

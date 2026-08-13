@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import {
     Trophy,
@@ -19,10 +18,11 @@ import {
     Activity,
     ChevronRight,
 } from '@lucide/vue';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
+import { computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { index as competitionsIndex, create as createCompetition, show as showCompetition } from '@/routes/admin/competitions';
 import { index as operatorsIndex } from '@/routes/admin/operators';
 
@@ -62,15 +62,26 @@ const props = defineProps<{
 const page = usePage();
 const userName = computed(() => {
     const user = page.props.auth?.user as { name?: string } | undefined;
+
     return user?.name || 'Admin';
 });
 
 // Dynamic Greeting based on time of day
 const greeting = computed(() => {
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 11) return 'Selamat Pagi';
-    if (hour >= 11 && hour < 15) return 'Selamat Siang';
-    if (hour >= 15 && hour < 18) return 'Selamat Sore';
+
+    if (hour >= 5 && hour < 11) {
+return 'Selamat Pagi';
+}
+
+    if (hour >= 11 && hour < 15) {
+return 'Selamat Siang';
+}
+
+    if (hour >= 15 && hour < 18) {
+return 'Selamat Sore';
+}
+
     return 'Selamat Malam';
 });
 
@@ -107,7 +118,10 @@ const pctInProgress = computed(() => Math.round((props.stats.in_progress / total
 const pctCompleted = computed(() => Math.round((props.stats.completed / totalStats.value) * 100));
 
 function calculateMatchPercentage(completed = 0, total = 0) {
-    if (!total || total === 0) return 0;
+    if (!total || total === 0) {
+return 0;
+}
+
     return Math.min(100, Math.round((completed / total) * 100));
 }
 </script>

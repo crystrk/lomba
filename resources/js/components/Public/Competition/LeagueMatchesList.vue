@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Badge } from '@/components/ui/badge';
 import { Swords, Clock } from '@lucide/vue';
+import { Badge } from '@/components/ui/badge';
 import { getInitials } from '@/composables/useInitials';
 
 interface MatchItem {
@@ -36,21 +36,39 @@ defineEmits<{
 
 function teamName(match: MatchItem, side: 'home' | 'away'): string {
     const team = match[side];
-    if (team) return team.name;
+
+    if (team) {
+return team.name;
+}
+
     if (match.match_type === 'final') {
         return side === 'home' ? 'Juara Grup A' : 'Juara Grup B';
     }
+
     if (match.match_type === 'third_place') {
         return side === 'home' ? 'Runner-up Grup A' : 'Runner-up Grup B';
     }
+
     return '??';
 }
 
 function matchHeaderLabel(match: MatchItem): string {
-    if (match.match_type === 'final') return '🏆 FINAL 1 v 2 (GRAND FINAL)';
-    if (match.match_type === 'third_place') return '🥉 FINAL 3 v 4 (PEREBUTAN JUARA 3)';
-    if (match.match_type === 'group_a') return `Penyisihan Grup A (Ronde ${match.round})`;
-    if (match.match_type === 'group_b') return `Penyisihan Grup B (Ronde ${match.round})`;
+    if (match.match_type === 'final') {
+return '🏆 FINAL 1 v 2 (GRAND FINAL)';
+}
+
+    if (match.match_type === 'third_place') {
+return '🥉 FINAL 3 v 4 (PEREBUTAN JUARA 3)';
+}
+
+    if (match.match_type === 'group_a') {
+return `Penyisihan Grup A (Ronde ${match.round})`;
+}
+
+    if (match.match_type === 'group_b') {
+return `Penyisihan Grup B (Ronde ${match.round})`;
+}
+
     return '';
 }
 </script>

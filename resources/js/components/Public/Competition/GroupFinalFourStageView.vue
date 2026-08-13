@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { Trophy, Medal, Clock, ArrowRight, ShieldAlert, CheckCircle2, Sparkles } from '@lucide/vue';
+import { computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getInitials } from '@/composables/useInitials';
@@ -43,26 +43,50 @@ const props = defineProps<{
 }>();
 
 const juaraA = computed(() => {
-    if (props.finalMatch?.home) return props.finalMatch.home.name;
-    if (props.standingsA && props.standingsA[0]) return props.standingsA[0].participant_name;
+    if (props.finalMatch?.home) {
+return props.finalMatch.home.name;
+}
+
+    if (props.standingsA && props.standingsA[0]) {
+return props.standingsA[0].participant_name;
+}
+
     return null;
 });
 
 const juaraB = computed(() => {
-    if (props.finalMatch?.away) return props.finalMatch.away.name;
-    if (props.standingsB && props.standingsB[0]) return props.standingsB[0].participant_name;
+    if (props.finalMatch?.away) {
+return props.finalMatch.away.name;
+}
+
+    if (props.standingsB && props.standingsB[0]) {
+return props.standingsB[0].participant_name;
+}
+
     return null;
 });
 
 const runnerUpA = computed(() => {
-    if (props.thirdPlaceMatch?.home) return props.thirdPlaceMatch.home.name;
-    if (props.standingsA && props.standingsA[1]) return props.standingsA[1].participant_name;
+    if (props.thirdPlaceMatch?.home) {
+return props.thirdPlaceMatch.home.name;
+}
+
+    if (props.standingsA && props.standingsA[1]) {
+return props.standingsA[1].participant_name;
+}
+
     return null;
 });
 
 const runnerUpB = computed(() => {
-    if (props.thirdPlaceMatch?.away) return props.thirdPlaceMatch.away.name;
-    if (props.standingsB && props.standingsB[1]) return props.standingsB[1].participant_name;
+    if (props.thirdPlaceMatch?.away) {
+return props.thirdPlaceMatch.away.name;
+}
+
+    if (props.standingsB && props.standingsB[1]) {
+return props.standingsB[1].participant_name;
+}
+
     return null;
 });
 </script>

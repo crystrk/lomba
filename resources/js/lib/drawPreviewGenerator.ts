@@ -22,11 +22,16 @@ export interface ClientMatchSlot {
 }
 
 function nextPowerOfTwo(n: number): number {
-    if (n < 2) return 2;
+    if (n < 2) {
+return 2;
+}
+
     let power = 1;
+
     while (power < n) {
         power <<= 1;
     }
+
     return power;
 }
 
@@ -35,7 +40,10 @@ export function generateClientPreview(
     participants: ParticipantItem[]
 ): ClientMatchSlot[] {
     const n = participants.length;
-    if (n < 2) return [];
+
+    if (n < 2) {
+return [];
+}
 
     if (format === 'half_competition') {
         return generateHalfCompetition(participants);
@@ -99,6 +107,7 @@ function generateHalfCompetition(participants: ParticipantItem[]): ClientMatchSl
 function generateFullCompetition(participants: ParticipantItem[]): ClientMatchSlot[] {
     const leg1 = generateHalfCompetition(participants);
     let maxRound = 0;
+
     for (const slot of leg1) {
         maxRound = Math.max(maxRound, slot.round);
     }
@@ -136,6 +145,7 @@ function generateKnockout(participants: ParticipantItem[]): ClientMatchSlot[] {
     const prevAdvValues: (ParticipantItem | null)[] = [];
 
     const r1Matches: MatchNode[] = [];
+
     for (let k = 0; k < bracketSize / 2; k++) {
         if (k < readyMatchesR1) {
             const home = participants[k * 2];
@@ -149,6 +159,7 @@ function generateKnockout(participants: ParticipantItem[]): ClientMatchSlot[] {
             prevAdvValues.push(home);
         }
     }
+
     rounds.push(r1Matches);
 
     let currentAdvValues = prevAdvValues;
@@ -200,6 +211,7 @@ function generateKnockout(participants: ParticipantItem[]): ClientMatchSlot[] {
 
     for (let r = 0; r < rounds.length; r++) {
         idMap[r] = [];
+
         for (let pos = 0; pos < rounds[r].length; pos++) {
             seq++;
             idMap[r][pos] = seq;
@@ -210,6 +222,7 @@ function generateKnockout(participants: ParticipantItem[]): ClientMatchSlot[] {
 
     for (let r = 0; r < rounds.length; r++) {
         const roundNumber = r + 1;
+
         for (let pos = 0; pos < rounds[r].length; pos++) {
             const match = rounds[r][pos];
             const sequence = idMap[r][pos];
@@ -242,18 +255,25 @@ function generateKnockout(participants: ParticipantItem[]): ClientMatchSlot[] {
 
 function generateFinalFour(participants: ParticipantItem[]): ClientMatchSlot[] {
     const baseSlots = generateKnockout(participants);
-    if (baseSlots.length === 0) return [];
+
+    if (baseSlots.length === 0) {
+return [];
+}
 
     let totalRounds = 0;
+
     for (const slot of baseSlots) {
         if (slot.round > totalRounds) {
             totalRounds = slot.round;
         }
     }
 
-    if (totalRounds < 2) return baseSlots;
+    if (totalRounds < 2) {
+return baseSlots;
+}
 
     let finalSequence = 0;
+
     for (const slot of baseSlots) {
         if (slot.round === totalRounds) {
             finalSequence = slot.sequence;
@@ -267,6 +287,7 @@ function generateFinalFour(participants: ParticipantItem[]): ClientMatchSlot[] {
 
     for (const slot of baseSlots) {
         let matchType = 'standard';
+
         if (slot.round === totalRounds) {
             matchType = 'final';
         } else if (slot.round === totalRounds - 1) {
@@ -317,7 +338,10 @@ function generateFinalFour(participants: ParticipantItem[]): ClientMatchSlot[] {
 
 function generateGroupFinalFour(participants: ParticipantItem[]): ClientMatchSlot[] {
     const n = participants.length;
-    if (n <= 4 || n % 2 !== 0) return [];
+
+    if (n <= 4 || n % 2 !== 0) {
+return [];
+}
 
     const halfCount = Math.floor(n / 2);
     const groupA = participants.slice(0, halfCount);

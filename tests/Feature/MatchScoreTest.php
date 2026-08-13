@@ -78,6 +78,73 @@ it('admin can update match score', function () {
     expect($match->result_updated_by)->toBe($this->admin->id);
 });
 
+it('admin can toggle a ready match as ongoing', function () {
+    $competition = createLockedCompetition();
+    $match = createMatchWithParticipants($competition);
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.matches.toggle-ongoing', [$competition, $match]))
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    expect($match->refresh()->is_ongoing)->toBeTrue();
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.matches.toggle-ongoing', [$competition, $match]))
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    expect($match->refresh()->is_ongoing)->toBeFalse();
+});
+
+it('assigned operator can toggle a ready match as ongoing', function () {
+    $competition = createLockedCompetition();
+    $match = createMatchWithParticipants($competition);
+    attachOperator($competition, $this->operator);
+
+    $this->actingAs($this->operator)
+        ->post(route('operator.matches.toggle-ongoing', [$competition, $match]))
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    expect($match->refresh()->is_ongoing)->toBeTrue();
+});
+
+it('cannot toggle ongoing for pending or incomplete participant match', function () {
+    $competition = createLockedCompetition();
+    $participant = Participant::factory()->for($competition)->create();
+    $match = CompetitionMatch::factory()->create([
+        'competition_id' => $competition->id,
+        'participant_id_home' => $participant->id,
+        'participant_id_away' => null,
+        'status' => CompetitionMatchStatus::Pending,
+    ]);
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.matches.toggle-ongoing', [$competition, $match]))
+        ->assertSessionHasErrors('match');
+
+    expect($match->refresh()->is_ongoing)->toBeFalse();
+});
+
+it('score submission clears ongoing flag', function () {
+    $competition = createLockedCompetition();
+    $match = createMatchWithParticipants($competition);
+    $match->update(['is_ongoing' => true]);
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.matches.score.update', [$competition, $match]), [
+            'score_home' => 3,
+            'score_away' => 1,
+            'result_version' => 0,
+        ])
+        ->assertRedirect();
+
+    $match->refresh();
+    expect($match->status)->toBe(CompetitionMatchStatus::Completed)
+        ->and($match->is_ongoing)->toBeFalse();
+});
+
 it('assigned active operator can update match score', function () {
     $competition = createLockedCompetition();
     $match = createMatchWithParticipants($competition);

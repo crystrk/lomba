@@ -1,18 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Plus, Eye, Pencil, Trash2 } from '@lucide/vue';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
+import { ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -22,6 +13,15 @@ import {
     DialogFooter,
     DialogClose,
 } from '@/components/ui/dialog';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { create, edit, show as competitionShow, destroy } from '@/routes/admin/competitions';
 
 defineOptions({
@@ -75,7 +75,10 @@ function confirmDelete(c: { id: number; name: string }) {
 }
 
 function handleDelete() {
-    if (!selectedCompetition.value) return;
+    if (!selectedCompetition.value) {
+return;
+}
+
     isDeleting.value = true;
     router.delete(destroy(selectedCompetition.value.id).url, {
         onFinish: () => {

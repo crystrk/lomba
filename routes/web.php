@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(functio
         Route::post('competitions/{competition}/lock-results', [AdminScoreController::class, 'toggleLockResults'])->name('competitions.lock-results');
         Route::post('competitions/{competition}/matches/{match}/score', [MatchScoreController::class, 'update'])->name('matches.score.update');
         Route::post('competitions/{competition}/matches/{match}/schedule', [MatchScoreController::class, 'updateSchedule'])->name('matches.schedule.update');
+        Route::post('competitions/{competition}/matches/{match}/toggle-ongoing', [MatchScoreController::class, 'toggleOngoing'])->name('matches.toggle-ongoing');
 
         Route::get('operators', [OperatorController::class, 'index'])->name('operators.index');
         Route::get('operators/create', [OperatorController::class, 'create'])->name('operators.create');
@@ -67,6 +68,7 @@ Route::middleware(['auth', 'verified', CheckUserIsActive::class])->group(functio
         Route::get('competitions/{competition}/scores', [OperatorScoreController::class, 'index'])->name('competitions.scores');
         Route::post('competitions/{competition}/matches/{match}/score', [MatchScoreController::class, 'update'])->name('matches.score.update');
         Route::post('competitions/{competition}/matches/{match}/schedule', [MatchScoreController::class, 'updateSchedule'])->name('matches.schedule.update');
+        Route::post('competitions/{competition}/matches/{match}/toggle-ongoing', [MatchScoreController::class, 'toggleOngoing'])->name('matches.toggle-ongoing');
     });
 });
 

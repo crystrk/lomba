@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Badge } from '@/components/ui/badge';
 import { Medal } from '@lucide/vue';
+import { Badge } from '@/components/ui/badge';
 import { getInitials } from '@/composables/useInitials';
 
 interface MatchItem {
@@ -30,6 +30,7 @@ defineProps<{
 
 function scrollToBracketRound(round: number) {
     const el = document.getElementById(`bracket-round-${round}`);
+
     if (el) {
         el.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
     }

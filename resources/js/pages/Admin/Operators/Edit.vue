@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { watch } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { useForm } from '@inertiajs/vue3';
+import { ArrowLeft, Save, Trophy, UserCog } from '@lucide/vue';
+import { watch } from 'vue';
+import { toast } from 'vue-sonner';
+import InputError from '@/components/InputError.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import InputError from '@/components/InputError.vue';
-import { ArrowLeft, Save, Trophy, UserCog } from '@lucide/vue';
-import { toast } from 'vue-sonner';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { update, toggleActive, syncCompetitions } from '@/routes/admin/operators';
 import { index as operatorsIndex } from '@/routes/admin/operators';
 
@@ -76,6 +76,7 @@ function toggleActiveFn() {
 function toggleCompetition(id: number, checked: boolean | 'indeterminate') {
     const numericId = Number(id);
     const isChecked = checked === true;
+
     if (isChecked) {
         if (!competitionForm.competition_ids.includes(numericId)) {
             competitionForm.competition_ids = [...competitionForm.competition_ids, numericId];

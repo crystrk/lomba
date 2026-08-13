@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Badge } from '@/components/ui/badge';
 import { Users, Calendar, Shield, Layers } from '@lucide/vue';
 import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
+import { Badge } from '@/components/ui/badge';
 
 defineProps<{
     competition: {

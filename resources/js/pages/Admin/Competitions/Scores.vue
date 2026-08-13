@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, shallowRef, watch } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Save, Trophy, Medal, AlertCircle, Filter, Lock, Unlock, Clock } from '@lucide/vue';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ArrowLeft, Save, Trophy, Medal, AlertCircle, Filter, Lock, Unlock, Clock, Radio } from '@lucide/vue';
+import { ref, computed, shallowRef, watch } from 'vue';
 import LeagueStandingsTable from '@/components/Public/Competition/LeagueStandingsTable.vue';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
     Dialog,
     DialogClose,
@@ -19,9 +15,13 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { update as updateScore } from '@/routes/admin/matches/score';
-import { update as updateSchedule } from '@/routes/admin/matches/schedule';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { show, lockResults } from '@/routes/admin/competitions';
+import { toggleOngoing as toggleOngoingRoute } from '@/routes/admin/matches';
+import { update as updateSchedule } from '@/routes/admin/matches/schedule';
+import { update as updateScore } from '@/routes/admin/matches/score';
 
 defineOptions({
     layout: AppLayout,
@@ -54,6 +54,7 @@ const props = defineProps<{
         win_method: string | null;
         status: string;
         match_type?: string;
+        is_ongoing: boolean;
         result_version: number;
         home_participant: { id: number; name: string; short_name: string | null } | null;
         away_participant: { id: number; name: string; short_name: string | null } | null;
@@ -129,14 +130,30 @@ const selectedRound = ref<string>('all');
 const selectedStatus = ref<string>('all');
 
 const filteredRounds = computed(() => {
-    if (selectedRound.value === 'all') return sortedRounds.value;
+    if (selectedRound.value === 'all') {
+return sortedRounds.value;
+}
+
     return sortedRounds.value.filter((r) => String(r) === selectedRound.value);
 });
 
 function isMatchVisible(match: typeof props.matchesByRound[number][0]): boolean {
-    if (selectedStatus.value === 'all') return true;
-    if (selectedStatus.value === 'completed') return match.status === 'completed';
-    if (selectedStatus.value === 'pending') return match.status === 'ready' || match.status === 'pending';
+    if (selectedStatus.value === 'all') {
+return true;
+}
+
+    if (selectedStatus.value === 'ongoing') {
+return match.is_ongoing;
+}
+
+    if (selectedStatus.value === 'completed') {
+return match.status === 'completed';
+}
+
+    if (selectedStatus.value === 'pending') {
+return match.status === 'ready' || match.status === 'pending';
+}
+
     return true;
 }
 
@@ -146,9 +163,13 @@ const scheduleForms = shallowRef<Record<number, ReturnType<typeof useForm>>>({})
 watch(sortedRounds, () => {
     const forms = { ...matchForms.value };
     const sForms = { ...scheduleForms.value };
+
     for (const round of sortedRounds.value) {
         for (const match of props.matchesByRound[round]) {
-            if (match.status === 'bye') continue;
+            if (match.status === 'bye') {
+continue;
+}
+
             if (!forms[match.id]) {
                 forms[match.id] = useForm({
                     score_home: match.score_home ?? '',
@@ -159,6 +180,7 @@ watch(sortedRounds, () => {
                     result_version: match.result_version,
                 });
             }
+
             if (!sForms[match.id]) {
                 sForms[match.id] = useForm({
                     scheduled_time: match.scheduled_time ?? '',
@@ -166,6 +188,7 @@ watch(sortedRounds, () => {
             }
         }
     }
+
     matchForms.value = forms;
     scheduleForms.value = sForms;
 }, { immediate: true });
@@ -196,40 +219,75 @@ function submitSchedule(matchId: number) {
     });
 }
 
+const toggleOngoingProcessing = ref<Record<number, boolean>>({});
+
+function submitToggleOngoing(matchId: number) {
+    if (toggleOngoingProcessing.value[matchId]) {
+return;
+}
+
+    toggleOngoingProcessing.value[matchId] = true;
+    useForm({}).post(toggleOngoingRoute.url({ competition: props.competition.id, match: matchId }), {
+        preserveScroll: true,
+        onFinish: () => {
+            toggleOngoingProcessing.value[matchId] = false;
+        },
+    });
+}
+
 function isTieInKnockout(matchId: number): boolean {
     const form = matchForms.value[matchId];
-    if (!form) return false;
+
+    if (!form) {
+return false;
+}
+
     let matchItem: typeof props.matchesByRound[number][0] | null = null;
+
     for (const r of sortedRounds.value) {
         const found = props.matchesByRound[r].find((m) => m.id === matchId);
+
         if (found) {
             matchItem = found;
             break;
         }
     }
+
     const isKnockoutMatch = isKnockout.value || (props.competition.format === 'group_final_four' && (matchItem?.match_type === 'final' || matchItem?.match_type === 'third_place'));
-    if (!isKnockoutMatch) return false;
+
+    if (!isKnockoutMatch) {
+return false;
+}
 
     const home = form.score_home;
     const away = form.score_away;
+
     return home !== '' && away !== '' && Number(home) === Number(away);
 }
 
 function roundLabel(round: number, leg: number): string {
     if (props.competition.format === 'group_final_four') {
         const maxRound = sortedRounds.value[sortedRounds.value.length - 1];
+
         if (round === maxRound) {
             return 'Babak Final Placement (Group Final Four)';
         }
+
         return `Penyisihan Grup (Pekan ${round})`;
     }
+
     if (isKnockout.value) {
         const labels: Record<number, string> = { 1: 'Final', 2: 'Semifinal', 3: 'Perempat Final' };
         const totalRounds = sortedRounds.value.length;
         const fromEnd = totalRounds - round + 1;
+
         return labels[fromEnd] || `Babak ${round}`;
     }
-    if (leg > 1) return `Pekan ${round} - Leg ${leg}`;
+
+    if (leg > 1) {
+return `Pekan ${round} - Leg ${leg}`;
+}
+
     return `Pekan ${round}`;
 }
 </script>
@@ -309,11 +367,12 @@ function roundLabel(round: number, leg: number): string {
                     <SelectTrigger class="w-[160px] bg-background">
                         <SelectValue placeholder="Status Match" />
                     </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Semua Status</SelectItem>
-                        <SelectItem value="pending">Belum Dimainkan</SelectItem>
-                        <SelectItem value="completed">Selesai</SelectItem>
-                    </SelectContent>
+                        <SelectContent>
+                            <SelectItem value="all">Semua Status</SelectItem>
+                            <SelectItem value="ongoing">Live / Berlangsung</SelectItem>
+                            <SelectItem value="pending">Belum Dimainkan</SelectItem>
+                            <SelectItem value="completed">Selesai</SelectItem>
+                        </SelectContent>
                 </Select>
             </div>
         </div>
@@ -376,6 +435,10 @@ function roundLabel(round: number, leg: number): string {
                                     </div>
                                     <Badge v-if="match.scheduled_time" variant="outline" class="text-xs shrink-0">
                                         {{ match.scheduled_time }}
+                                    </Badge>
+                                    <Badge v-if="match.is_ongoing" class="border-rose-500 bg-rose-500 text-white text-[10px] font-extrabold shadow-sm animate-pulse">
+                                        <span class="mr-1 inline-block size-1.5 rounded-full bg-white"></span>
+                                        LIVE
                                     </Badge>
                                 </div>
 
@@ -453,10 +516,28 @@ function roundLabel(round: number, leg: number): string {
                                         <span class="text-xs font-mono text-muted-foreground">v{{ match.result_version }}</span>
                                     </div>
 
-                                    <Button type="submit" size="sm" :disabled="matchForms[match.id].processing || competition.is_results_locked">
-                                        <Save class="mr-1.5 size-3.5" />
-                                        {{ matchForms[match.id].processing ? 'Menyimpan...' : 'Simpan Skor' }}
-                                    </Button>
+                                    <div class="flex items-center gap-2">
+                                        <Button
+                                            v-if="match.status !== 'completed' && match.participant_id_home && match.participant_id_away"
+                                            type="button"
+                                            size="sm"
+                                            :disabled="toggleOngoingProcessing[match.id] || competition.is_results_locked"
+                                            :class="match.is_ongoing
+                                                ? 'bg-rose-500 hover:bg-rose-600 text-white border-rose-500 shadow-rose-200 dark:shadow-rose-900'
+                                                : 'border-rose-400 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950'"
+                                            :variant="match.is_ongoing ? 'default' : 'outline'"
+                                            @click.prevent="submitToggleOngoing(match.id)"
+                                        >
+                                            <span v-if="match.is_ongoing" class="mr-1.5 inline-block size-2 rounded-full bg-white animate-pulse"></span>
+                                            <Radio v-else class="mr-1.5 size-3.5 text-rose-500" />
+                                            Live
+                                        </Button>
+
+                                        <Button type="submit" size="sm" :disabled="matchForms[match.id].processing || competition.is_results_locked">
+                                            <Save class="mr-1.5 size-3.5" />
+                                            {{ matchForms[match.id].processing ? 'Menyimpan...' : 'Simpan Skor' }}
+                                        </Button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -510,4 +591,3 @@ function roundLabel(round: number, leg: number): string {
         </Dialog>
     </div>
 </template>
-

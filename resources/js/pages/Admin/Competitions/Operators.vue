@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { watch } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Save, UserCheck } from '@lucide/vue';
+import { watch } from 'vue';
 import { toast } from 'vue-sonner';
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { show } from '@/routes/admin/competitions';
 import { sync } from '@/routes/admin/competitions/operators';
 
@@ -49,6 +49,7 @@ watch(
 function toggleOperator(id: number, checked: boolean | 'indeterminate') {
     const numericId = Number(id);
     const isChecked = checked === true;
+
     if (isChecked) {
         if (!form.operator_ids.includes(numericId)) {
             form.operator_ids = [...form.operator_ids, numericId];

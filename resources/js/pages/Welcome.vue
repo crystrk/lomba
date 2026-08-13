@@ -12,6 +12,9 @@ import {
     Layers,
     Circle,
     Lock,
+    Radio,
+    Swords,
+    Clock,
 } from '@lucide/vue';
 import { ref, computed } from 'vue';
 import { competitionSports } from '@/components/competitions/competitionSport';
@@ -41,6 +44,21 @@ const props = defineProps<{
         participants_count: number;
         completed_matches: number;
         total_matches: number;
+    }>;
+    ongoingMatches: Array<{
+        id: number;
+        round: number;
+        scheduled_time: string | null;
+        match_type: string | null;
+        competition: {
+            id: number;
+            name: string;
+            slug: string;
+            sport: string | null;
+            format: string;
+        };
+        home: { id: number; name: string } | null;
+        away: { id: number; name: string } | null;
     }>;
 }>();
 
@@ -221,6 +239,71 @@ function resetFilters(): void {
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- 🔴 SECTION: PERTANDINGAN SEDANG BERLANGSUNG -->
+        <section
+            v-if="ongoingMatches.length > 0"
+            class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-12 lg:px-8"
+        >
+            <div class="mb-4 flex items-center gap-3">
+                <div class="relative flex size-8 items-center justify-center">
+                    <span class="absolute inline-flex size-8 animate-ping rounded-full bg-rose-500 opacity-40"></span>
+                    <Radio class="relative size-4 text-rose-500" />
+                </div>
+                <h2 class="text-lg font-extrabold tracking-tight text-foreground sm:text-xl">
+                    Pertandingan Sedang Berlangsung
+                </h2>
+                <Badge class="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 animate-pulse">
+                    {{ ongoingMatches.length }} LIVE
+                </Badge>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <Link
+                    v-for="match in ongoingMatches"
+                    :key="match.id"
+                    :href="show(match.competition.slug)"
+                    class="group block"
+                >
+                    <div class="relative overflow-hidden rounded-2xl border-2 border-rose-500/40 bg-card shadow-xs transition-all duration-200 group-hover:border-rose-500 group-hover:shadow-md">
+                        <!-- Animating live stripe top -->
+                        <div class="h-1 w-full bg-linear-to-r from-rose-500 via-orange-500 to-rose-500 bg-[length:200%_100%] animate-[shimmer_2s_linear_infinite]"></div>
+
+                        <div class="p-3.5 sm:p-4">
+                            <!-- Header: Sport icon + competition name + LIVE badge -->
+                            <div class="flex items-start justify-between gap-2 mb-2.5">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/10 text-rose-500">
+                                        <CompetitionSportIcon :sport="match.competition.sport" class="size-4" />
+                                    </div>
+                                    <span class="text-xs font-semibold text-muted-foreground truncate">{{ match.competition.name }}</span>
+                                </div>
+                                <div class="shrink-0 flex items-center gap-1 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-extrabold text-white">
+                                    <span class="size-1.5 rounded-full bg-white animate-pulse inline-block"></span>
+                                    LIVE
+                                </div>
+                            </div>
+
+                            <!-- VS Section -->
+                            <div class="flex items-center justify-between gap-1 rounded-xl bg-muted/60 px-3 py-2.5">
+                                <span class="flex-1 text-center text-xs font-bold text-foreground truncate">{{ match.home?.name ?? '?' }}</span>
+                                <div class="flex flex-col items-center shrink-0 px-2">
+                                    <Swords class="size-3.5 text-rose-500" />
+                                    <span class="text-[9px] text-muted-foreground font-bold mt-0.5">VS</span>
+                                </div>
+                                <span class="flex-1 text-center text-xs font-bold text-foreground truncate">{{ match.away?.name ?? '?' }}</span>
+                            </div>
+
+                            <!-- Time -->
+                            <div v-if="match.scheduled_time" class="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                <Clock class="size-3 shrink-0" />
+                                <span>{{ match.scheduled_time }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </Link>
             </div>
         </section>
 

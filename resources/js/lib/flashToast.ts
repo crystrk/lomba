@@ -21,6 +21,7 @@ export function initializeFlashToast(): void {
 
         if (flash.toast?.message) {
             const type = flash.toast.type || 'success';
+
             if (typeof (toast as any)[type] === 'function') {
                 (toast as any)[type](flash.toast.message);
             }
