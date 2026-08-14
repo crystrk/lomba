@@ -68,9 +68,47 @@ class PublicCompetitionController extends Controller
                 'away' => $m->awayParticipant ? ['id' => $m->awayParticipant->id, 'name' => $m->awayParticipant->name] : null,
             ]);
 
+        $recentResults = CompetitionMatch::query()
+            ->where('status', CompetitionMatchStatus::Completed)
+            ->whereNotNull('score_home')
+            ->whereNotNull('score_away')
+            ->whereHas('competition', fn ($q) => $q->whereIn('status', [CompetitionStatus::Locked, CompetitionStatus::InProgress, CompetitionStatus::Completed]))
+            ->with(['competition', 'homeParticipant', 'awayParticipant', 'winner'])
+            ->orderByDesc('result_updated_at')
+            ->orderByDesc('updated_at')
+            ->limit(5)
+            ->get()
+            ->map(fn (CompetitionMatch $m) => [
+                'id' => $m->id,
+                'round' => $m->round,
+                'score_home' => $m->score_home,
+                'score_away' => $m->score_away,
+                'winner_id' => $m->winner_id,
+                'win_method' => $m->win_method,
+                'match_type' => $m->match_type,
+                'competition' => [
+                    'id' => $m->competition->id,
+                    'name' => $m->competition->name,
+                    'slug' => $m->competition->slug,
+                    'sport' => $m->competition->sport?->value,
+                    'format' => $m->competition->format->value,
+                ],
+                'home' => $m->homeParticipant ? [
+                    'id' => $m->homeParticipant->id,
+                    'name' => $m->homeParticipant->name,
+                    'short_name' => $m->homeParticipant->short_name,
+                ] : null,
+                'away' => $m->awayParticipant ? [
+                    'id' => $m->awayParticipant->id,
+                    'name' => $m->awayParticipant->name,
+                    'short_name' => $m->awayParticipant->short_name,
+                ] : null,
+            ]);
+
         return Inertia::render('Welcome', [
             'competitions' => $competitions,
             'ongoingMatches' => $ongoingMatches,
+            'recentResults' => $recentResults,
         ]);
     }
 

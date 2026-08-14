@@ -20,6 +20,8 @@ import { ref, computed } from 'vue';
 import { competitionSports } from '@/components/competitions/competitionSport';
 import type { CompetitionSport } from '@/components/competitions/competitionSport';
 import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
+import RecentResultsMarquee from '@/components/Public/RecentResultsMarquee.vue';
+import type { RecentResultItem } from '@/components/Public/RecentResultsMarquee.vue';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -60,6 +62,7 @@ const props = defineProps<{
         home: { id: number; name: string } | null;
         away: { id: number; name: string } | null;
     }>;
+    recentResults?: RecentResultItem[];
 }>();
 
 const formatLabel: Record<string, string> = {
@@ -305,6 +308,11 @@ function resetFilters(): void {
                     </div>
                 </Link>
             </div>
+        </section>
+
+        <!-- 🏆 SECTION: NEWSTICKER MARQUEE 5 HASIL PERTANDINGAN TERAKHIR -->
+        <section v-if="recentResults && recentResults.length > 0" class="pt-4 sm:pt-6">
+            <RecentResultsMarquee :results="recentResults" />
         </section>
 
         <!-- Search & Filter Controls + Competition List -->

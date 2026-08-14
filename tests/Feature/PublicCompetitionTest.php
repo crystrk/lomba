@@ -79,6 +79,32 @@ it('landing includes only active ongoing matches', function () {
         ->and($ongoingMatches[0]['scheduled_time'])->toBe('15:00 WITA');
 });
 
+it('landing includes 5 latest completed matches with scores for recent results marquee', function () {
+    $competition = Competition::factory()->locked()->create(['name' => 'Turnamen Utama', 'slug' => 'turnamen-utama']);
+    $teams = Participant::factory()->count(6)->for($competition)->create();
+
+    // Buat 6 match selesai
+    for ($i = 0; $i < 6; $i++) {
+        CompetitionMatch::factory()->create([
+            'competition_id' => $competition->id,
+            'sequence' => $i + 1,
+            'participant_id_home' => $teams[0]->id,
+            'participant_id_away' => $teams[1]->id,
+            'score_home' => $i + 1,
+            'score_away' => $i,
+            'status' => CompetitionMatchStatus::Completed,
+            'result_updated_at' => now()->addMinutes($i * 10),
+        ]);
+    }
+
+    $recentResults = $this->get(route('home'))->inertiaProps()['recentResults'];
+
+    expect($recentResults)->toHaveCount(5)
+        ->and($recentResults[0]['score_home'])->toBe(6)
+        ->and($recentResults[0]['score_away'])->toBe(5)
+        ->and($recentResults[0]['competition']['name'])->toBe('Turnamen Utama');
+});
+
 it('completed competition appears on landing and is accessible via slug', function () {
     $competition = Competition::factory()->create([
         'name' => 'Past Event',
