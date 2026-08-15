@@ -179,64 +179,64 @@ function resetFilters(): void {
                         genggaman.
                     </p>
 
-                    <!-- Quick Stats Badges -->
+                    <!-- Quick Stats Badges (Mobile Compact Grid & Desktop Flex) -->
                     <div
-                        class="flex flex-wrap items-center gap-4 pt-2 text-xs font-medium sm:text-sm"
+                        class="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-4 pt-2 text-xs font-medium sm:text-sm"
                     >
                         <div
-                            class="flex items-center gap-2 rounded-xl border border-border/80 bg-card px-3.5 py-2 shadow-xs"
+                            class="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-2 rounded-xl border border-border/80 bg-card p-2 sm:px-3.5 sm:py-2 text-center sm:text-left shadow-xs"
                         >
                             <div
-                                class="flex size-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500"
+                                class="flex size-6 sm:size-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500"
                             >
-                                <Trophy class="size-4" aria-hidden="true" />
+                                <Trophy class="size-3.5 sm:size-4" aria-hidden="true" />
                             </div>
                             <div>
                                 <span
-                                    class="block text-xs text-muted-foreground"
-                                    >Total Lomba Aktif</span
+                                    class="block text-[10px] sm:text-xs text-muted-foreground"
+                                    >Total Lomba</span
                                 >
-                                <span class="text-sm font-bold text-foreground"
-                                    >{{ competitions.length }} Lomba</span
+                                <span class="text-xs sm:text-sm font-bold text-foreground"
+                                    >{{ competitions.length }} <span class="hidden sm:inline">Lomba</span></span
                                 >
                             </div>
                         </div>
 
                         <div
-                            class="flex items-center gap-2 rounded-xl border border-border/80 bg-card px-3.5 py-2 shadow-xs"
+                            class="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-2 rounded-xl border border-border/80 bg-card p-2 sm:px-3.5 sm:py-2 text-center sm:text-left shadow-xs"
                         >
                             <div
-                                class="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+                                class="flex size-6 sm:size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
                             >
-                                <Flame class="size-4" aria-hidden="true" />
+                                <Flame class="size-3.5 sm:size-4" aria-hidden="true" />
                             </div>
                             <div>
                                 <span
-                                    class="block text-xs text-muted-foreground"
-                                    >Sedang Berlangsung</span
+                                    class="block text-[10px] sm:text-xs text-muted-foreground"
+                                    >Berlangsung</span
                                 >
                                 <span
-                                    class="text-sm font-bold text-emerald-600 dark:text-emerald-400"
-                                    >{{ inProgressCount }} Lomba</span
+                                    class="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400"
+                                    >{{ inProgressCount }} <span class="hidden sm:inline">Lomba</span></span
                                 >
                             </div>
                         </div>
 
                         <div
-                            class="flex items-center gap-2 rounded-xl border border-border/80 bg-card px-3.5 py-2 shadow-xs"
+                            class="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-2 rounded-xl border border-border/80 bg-card p-2 sm:px-3.5 sm:py-2 text-center sm:text-left shadow-xs"
                         >
                             <div
-                                class="flex size-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500"
+                                class="flex size-6 sm:size-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500"
                             >
-                                <Users class="size-4" aria-hidden="true" />
+                                <Users class="size-3.5 sm:size-4" aria-hidden="true" />
                             </div>
                             <div>
                                 <span
-                                    class="block text-xs text-muted-foreground"
-                                    >Total Peserta</span
+                                    class="block text-[10px] sm:text-xs text-muted-foreground"
+                                    >Total Tim</span
                                 >
-                                <span class="text-sm font-bold text-foreground"
-                                    >{{ totalParticipants }} Peserta</span
+                                <span class="text-xs sm:text-sm font-bold text-foreground"
+                                    >{{ totalParticipants }} <span class="hidden sm:inline">Peserta</span></span
                                 >
                             </div>
                         </div>

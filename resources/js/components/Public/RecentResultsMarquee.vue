@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { Trophy, CheckCircle2, Swords } from '@lucide/vue';
-import { computed } from 'vue';
+import { Trophy, Check, Swords } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import CompetitionSportIcon from '@/components/competitions/CompetitionSportIcon.vue';
 import { Badge } from '@/components/ui/badge';
 import { show } from '@/routes/public/competitions';
@@ -37,6 +37,8 @@ const props = defineProps<{
     results: RecentResultItem[];
 }>();
 
+const isPaused = ref(false);
+
 // Duplikasikan list hasil pertandingan agar looping marquee berjalan mulus tanpa celah (seamless infinite scroll)
 const repeatedResults = computed(() => {
     if (!props.results || props.results.length === 0) {
@@ -54,77 +56,77 @@ const repeatedResults = computed(() => {
 </script>
 
 <template>
-    <div v-if="results && results.length > 0" class="w-full overflow-hidden border-y border-border/70 bg-card/60 backdrop-blur-xs py-2.5 shadow-2xs">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-3">
-                <!-- Static Label Badge -->
-                <div class="shrink-0 flex items-center gap-1.5 rounded-lg bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 text-xs font-black text-amber-700 dark:text-amber-300 shadow-2xs select-none">
-                    <Trophy class="size-3.5 text-amber-500" />
-                    <span class="tracking-wider uppercase text-[11px]">Hasil Terbaru</span>
+    <div v-if="results && results.length > 0" class="w-full overflow-hidden border-y border-border/70 bg-card/70 backdrop-blur-xs py-2 sm:py-2.5 shadow-2xs">
+        <div class="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Static Label Badge (Responsive for Mobile & Desktop) -->
+                <div class="shrink-0 flex items-center gap-1 sm:gap-1.5 rounded-lg bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 px-2 sm:px-2.5 py-1 text-xs font-black text-amber-700 dark:text-amber-300 shadow-2xs select-none">
+                    <Trophy class="size-3.5 text-amber-500 shrink-0" />
+                    <span class="hidden sm:inline tracking-wider uppercase text-[11px]">Hasil Terbaru</span>
+                    <span class="sm:hidden tracking-wider uppercase text-[10px]">Hasil</span>
                 </div>
 
                 <!-- Marquee Container -->
                 <div class="relative flex-1 overflow-hidden mask-gradient">
-                    <!-- Infinite Scrolling Marquee Track -->
-                    <div class="marquee-track flex items-center gap-3 w-max hover:[animation-play-state:paused] active:[animation-play-state:paused] focus-within:[animation-play-state:paused]">
+                    <!-- Infinite Scrolling Marquee Track with Touch & Hover Pause -->
+                    <div
+                        class="marquee-track flex items-center gap-2 sm:gap-3 w-max hover:[animation-play-state:paused] active:[animation-play-state:paused] focus-within:[animation-play-state:paused]"
+                        :class="{ 'paused': isPaused }"
+                        @touchstart="isPaused = true"
+                        @touchend="isPaused = false"
+                        @touchcancel="isPaused = false"
+                    >
                         <Link
                             v-for="(result, index) in repeatedResults"
                             :key="`${result.id}-${index}`"
                             :href="show(result.competition.slug)"
-                            class="group shrink-0 inline-flex items-center gap-2.5 rounded-xl border border-border/80 bg-background/90 hover:bg-muted/60 hover:border-amber-500/50 px-3 py-1.5 text-xs transition-all shadow-2xs"
+                            class="group shrink-0 inline-flex items-center gap-1.5 sm:gap-2.5 rounded-xl border border-border/80 bg-background/90 hover:bg-muted/60 hover:border-amber-500/50 px-2.5 sm:px-3 py-1.5 text-xs transition-all shadow-2xs"
                         >
                             <!-- Sport icon & competition name -->
-                            <div class="flex items-center gap-1.5 text-muted-foreground group-hover:text-foreground">
+                            <div class="flex items-center gap-1 sm:gap-1.5 text-muted-foreground group-hover:text-foreground">
                                 <CompetitionSportIcon :sport="result.competition.sport" class="size-3.5 text-primary shrink-0" />
-                                <span class="font-semibold text-[11px] max-w-[110px] truncate">{{ result.competition.name }}</span>
+                                <span class="font-semibold text-[10px] sm:text-[11px] max-w-[80px] sm:max-w-[120px] truncate">
+                                    {{ result.competition.name }}
+                                </span>
                             </div>
 
-                            <span class="text-border">|</span>
+                            <span class="text-border text-[10px]">|</span>
 
                             <!-- Home Team vs Away Team with Scores -->
-                            <div class="flex items-center gap-1.5 font-bold">
-                                <!-- Home Team -->
+                            <div class="flex items-center gap-1 sm:gap-1.5 font-bold text-[11px] sm:text-xs">
+                                <!-- Home Team (Uses short_name or truncated full name) -->
                                 <span
-                                    class="truncate max-w-[100px] sm:max-w-[130px]"
+                                    class="truncate max-w-[70px] sm:max-w-[120px]"
                                     :class="{
                                         'text-emerald-600 dark:text-emerald-400 font-black': result.winner_id && result.home && result.winner_id === result.home.id,
                                         'text-foreground': !result.winner_id || (result.home && result.winner_id !== result.home.id),
                                     }"
+                                    :title="result.home?.name"
                                 >
-                                    {{ result.home?.name ?? 'TBD' }}
+                                    {{ result.home?.short_name || result.home?.name || 'TBD' }}
                                 </span>
 
-                                <!-- Score Home -->
-                                <span
-                                    class="px-1.5 py-0.5 rounded-md font-black text-xs"
-                                    :class="result.winner_id && result.home && result.winner_id === result.home.id
-                                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-extrabold'
-                                        : 'bg-muted text-foreground'"
-                                >
-                                    {{ result.score_home ?? 0 }}
-                                </span>
+                                <!-- Score Pill -->
+                                <div class="inline-flex items-center gap-0.5 rounded-md bg-muted/90 px-1.5 py-0.5 font-mono text-[11px] font-black text-foreground border border-border/60">
+                                    <span :class="{ 'text-emerald-600 dark:text-emerald-400': result.winner_id && result.home && result.winner_id === result.home.id }">
+                                        {{ result.score_home ?? 0 }}
+                                    </span>
+                                    <span class="text-muted-foreground text-[9px] mx-0.5">-</span>
+                                    <span :class="{ 'text-emerald-600 dark:text-emerald-400': result.winner_id && result.away && result.winner_id === result.away.id }">
+                                        {{ result.score_away ?? 0 }}
+                                    </span>
+                                </div>
 
-                                <span class="text-muted-foreground text-[10px] font-bold mx-0.5">-</span>
-
-                                <!-- Score Away -->
+                                <!-- Away Team (Uses short_name or truncated full name) -->
                                 <span
-                                    class="px-1.5 py-0.5 rounded-md font-black text-xs"
-                                    :class="result.winner_id && result.away && result.winner_id === result.away.id
-                                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-extrabold'
-                                        : 'bg-muted text-foreground'"
-                                >
-                                    {{ result.score_away ?? 0 }}
-                                </span>
-
-                                <!-- Away Team -->
-                                <span
-                                    class="truncate max-w-[100px] sm:max-w-[130px]"
+                                    class="truncate max-w-[70px] sm:max-w-[120px]"
                                     :class="{
                                         'text-emerald-600 dark:text-emerald-400 font-black': result.winner_id && result.away && result.winner_id === result.away.id,
                                         'text-foreground': !result.winner_id || (result.away && result.winner_id !== result.away.id),
                                     }"
+                                    :title="result.away?.name"
                                 >
-                                    {{ result.away?.name ?? 'TBD' }}
+                                    {{ result.away?.short_name || result.away?.name || 'TBD' }}
                                 </span>
                             </div>
 
@@ -132,7 +134,7 @@ const repeatedResults = computed(() => {
                             <Badge
                                 v-if="result.win_method"
                                 variant="outline"
-                                class="text-[9px] px-1.5 py-0 h-4 border-amber-500/40 text-amber-700 dark:text-amber-300 bg-amber-500/10 font-bold"
+                                class="text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0 h-4 border-amber-500/40 text-amber-700 dark:text-amber-300 bg-amber-500/10 font-bold shrink-0"
                             >
                                 {{ result.win_method }}
                             </Badge>
@@ -155,8 +157,18 @@ const repeatedResults = computed(() => {
 }
 
 .marquee-track {
-    animation: marquee-scroll 26s linear infinite;
+    animation: marquee-scroll 28s linear infinite;
     will-change: transform;
+}
+
+.marquee-track.paused {
+    animation-play-state: paused;
+}
+
+@media (max-width: 640px) {
+    .marquee-track {
+        animation-duration: 34s; /* slightly slower and smoother on mobile */
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -168,7 +180,7 @@ const repeatedResults = computed(() => {
 
 /* Gradient fade mask on edges for seamless look */
 .mask-gradient {
-    mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 1.5%, black 98.5%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 1.5%, black 98.5%, transparent);
 }
 </style>
